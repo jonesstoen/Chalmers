@@ -1,0 +1,41 @@
+# DHIS2 Platform
+node_modules
+.d2
+src/locales
+build
+
+# --- Environment & local secrets ---
+.env
+.env.*
+!.env.example         # Keep a safe example file for reference
+!.env.local.sample
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+Icon?
+ehthumbs.db
+
+# --- Editors & IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# --- Testing ---
+/jest-html-reporters-*.html
+/coverage/
+*.lcov
+
+# --- Logs ---
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
