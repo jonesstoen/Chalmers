@@ -1,4 +1,4 @@
-# Welcome to inspector Chalmers
+# Welcome to inspector Chalmers - A DHIS2 Platform App
 
 This project was bootstrapped with [DHIS2 Application Platform](https://github.com/dhis2/app-platform).
 
