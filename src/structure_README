@@ -1,0 +1,41 @@
+src/
+├── components/
+│   ├── dashboard/
+│   │   ├── SchoolOverview/
+│   │   ├── InspectionMetrics/
+│   │   ├── RecentInspections/
+│   │   └── StandardsCompliance/
+│   ├── inspection/
+│   │   ├── InspectionForm/
+│   │   ├── SchoolSelector/
+│   │   ├── ResourceCounter/
+│   │   └── InspectionReport/
+│   └── common/
+│       ├── DataTable/
+│       ├── Chart/
+│       └── OfflineIndicator/
+├── services/
+│   ├── api/
+│   │   ├── schoolApi.js      # School data
+│   │   ├── inspectionApi.js  # Inspection events
+│   │   ├── analyticsApi.js   # Dashboard analytics
+│   │   └── offlineApi.js     # Offline sync
+│   └── cache/
+│       ├── schoolCache.js
+│       └── inspectionCache.js
+├── data/
+│   ├── models/
+│   │   ├── School.js
+│   │   ├── Inspection.js
+│   │   └── Resource.js
+│   └── constants/
+│       ├── edutopiaStandards.js
+│       └── inspectionTypes.js
+├── utils/
+│   ├── calculations.js       # Ratio calculations
+│   ├── formatters.js         # Data formatting
+│   └── validators.js         # Form validation
+└── hooks/
+    ├── useSchoolData.js
+    ├── useInspectionData.js
+    └── useOfflineSync.js
