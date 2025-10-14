@@ -3,12 +3,18 @@ import { useDataQuery } from '@dhis2/app-runtime'
 
 // Bp3y61WbHwn Kanfiig id
 // RlPlK44dtoo Banjul id
-//
-function fetchAnalytics(/*Params TODO*/){
+// GET /api/analytics/dataValueSet.json?dataSet=YOUR_DATASET_UID&period=202401&orgUnit=YOUR_ORGUNIT_UID
+function fetchAnalytics(data_id,date,org_id){
 
     const query = {
-    // TODO
-}
+        // TODO
+        data : {
+            resource: 'analytics/dataValueSet.json',
+            params: {
+                dimension: [],
+            }
+        }
+    }
 
 return useDataQuery(query)
 }
