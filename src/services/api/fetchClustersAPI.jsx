@@ -3,7 +3,7 @@ import { useDataQuery } from '@dhis2/app-runtime'
 // Bp3y61WbHwn Kanfiig id
 // RlPlK44dtoo Banjul id
 // Hardcoded both for now
-function fetchOrganisations(){
+function fetchClusters(){
 
     const query = {
         Kanifing : {
@@ -25,4 +25,4 @@ function fetchOrganisations(){
 }
 
 
-export default fetchOrganisations
+export default fetchClusters
