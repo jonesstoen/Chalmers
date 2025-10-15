@@ -5,7 +5,7 @@ import { useDataQuery } from '@dhis2/app-runtime'
 // RlPlK44dtoo Banjul id
 // school ids are children of the clusters
 // Example GET /api/analytics/dataValueSet.json?dataSet=YOUR_DATASET_UID&period=202401&orgUnit=YOUR_ORGUNIT_UID
-function fetchAnalytics(data_id,date,org_id){
+function useFetchAnalytics(data_id,date,org_id){
 
     const query = {
         // TODO
@@ -20,4 +20,4 @@ function fetchAnalytics(data_id,date,org_id){
 return useDataQuery(query)
 }
 
-export default fetchAnalytics
+export default useFetchAnalytics

@@ -4,7 +4,7 @@ import { useDataQuery } from '@dhis2/app-runtime'
 // RlPlK44dtoo Banjul id
 // Hardcoded both for now 
 // They are under organisationunits in the GET <baseurl>:/api/me 
-function fetchClusters(){
+function useGetClusters(){
 
     const query = {
         Kanifing : {
@@ -26,4 +26,4 @@ function fetchClusters(){
 }
 
 
-export default fetchClusters
+export default useGetClusters

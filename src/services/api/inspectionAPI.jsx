@@ -1,6 +1,6 @@
 import { useDataQuery } from '@dhis2/app-runtime'
 
-function fetchInspection(/*Params*/){
+function useFetchInspection(/*Params*/){
 const query = {
     // TODO
 }
@@ -8,4 +8,4 @@ const query = {
 return useDataQuery(query)
 }
 
-export default fetchInspection
+export default useFetchInspection
