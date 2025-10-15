@@ -14,12 +14,12 @@ function usePostEvent(){
         data: ({program_id, programStage, period = today, orgUnit_id, status = 'COMPLETED', dataValueObjectArray}) => ({
             events: [
             {
-                program: program_id,
-                eventDate: period,
-                orgUnit: orgUnit_id,
-                programStage: programStage,
+                program: program_id, // School inspector program ID is: UxK2o06ScIe
+                eventDate: period, // When its recorded
+                orgUnit: orgUnit_id, // Where the data is connected to Gambia / region / school etc
+                programStage: programStage, // Stage of the given program the data is related to 
                 status: status,
-                dataValues: dataValueObjectArray
+                dataValues: dataValueObjectArray // array with id and value objects {UID:"", value:xyz}
             }
             ]
         })
