@@ -37,8 +37,6 @@ function useFetchAnalytics(program_id, {startDate, endDate} = {}, filter = [], o
     }
 
     return useDataQuery(query)
-
-return useDataQuery(query)
 }
 
 export default useFetchAnalytics
