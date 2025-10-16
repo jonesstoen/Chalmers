@@ -1,21 +1,42 @@
 import { useDataQuery } from '@dhis2/app-runtime'
 
 
-// Bp3y61WbHwn Kanfiig id
-// RlPlK44dtoo Banjul id
-// school ids are children of the clusters
-// Example GET /api/analytics/dataValueSet.json?dataSet=YOUR_DATASET_UID&period=202401&orgUnit=YOUR_ORGUNIT_UID
-function useFetchAnalytics(data_id,date,org_id){
+
+// https://docs.dhis2.org/archive/en/2.25/developer/html/webapi_event_analytics.html
+// Template GET /api/analytics/events/query/<program-id>?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd&dimension=ou:<ou-id>;<ou-id>&dimension=<item-id>&dimension=<item-id>:<operator>:<filter>
+// Example using the school inspection program and Banjul:
+// GET /api/analytics/events/query/UxK2o06ScIe?dimension=ou:RlPlK44dtoo
+
+
+
+// filter should be an array of objects in the form {itemid, operator, filter}.
+// Example: [{ itemid: 'deID1', operator: 'GT', filter: '10' }]
+function useFetchAnalytics(program_id, {startDate, endDate} = {}, filter = [], org_id_array = []){ 
+
+    // Build dimension parameters
+    const dimensions = []
+
+    if (org_id_array.length > 0) {
+        dimensions.push(`ou:${org_id_array.join(';')}`)
+    }
+
+    filter.forEach(({ itemid, operator, filter: filterValue }) => {
+        dimensions.push(`${itemid}:${operator}:${filterValue}`)
+    })
+
+    const params = {
+        ...(dimensions.length > 0 && { dimension: dimensions }),
+        ...(startDate && endDate && { startDate, endDate }),
+    }
 
     const query = {
-        // TODO
-        data : {
-            resource: 'analytics/dataValueSet.json',
-            params: {
-                dimension: [/*PARAMS*/],
-            }
-        }
+        analytics: {
+            resource: `api/analytics/events/query/${program_id}`,
+            params,
+        },
     }
+
+    return useDataQuery(query)
 
 return useDataQuery(query)
 }
