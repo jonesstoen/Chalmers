@@ -1,31 +1,47 @@
 import { useState, useCallback } from 'react'
 
-/**
- *
- * @param {Object} options
- * @param {string[]} options.rootIds - Root organisation unit IDs (required)
- * @param {boolean} [options.singleSelection=false] - Allow only one node selected
- * @returns {Object} { roots, selected, initiallyExpanded, handleChange }
- */
 export function useOrgUnitTree({ rootIds = [], singleSelection = false }) {
     const [selected, setSelected] = useState([])
-    const [initiallyExpanded, setInitiallyExpanded] = useState(rootIds)
+    const [initiallyExpanded] = useState(rootIds.map(id => `/${id}`)) // paths not raw IDs
 
-    // Handles selection logic when user clicks a node
-    const handleChange = useCallback(
-        (newSelected) => {
-            if (singleSelection) { // This is if a user wants to aggregate and choose which data to analyse, dont know if we will need this?
-                // Only one can be selected at a time
-                const id = Object.keys(newSelected)[0]
-                setSelected(id ? [id] : [])
-            } else {
-                // Multiple selection allowed
-                const selectedIds = Object.keys(newSelected)
-                setSelected(selectedIds)
-            }
-        },
-        [singleSelection]
-    )
+   const handleChange = useCallback(
+    (newSelected) => {
+        if (!newSelected) return
+
+        let ids = []
+
+        // CASE 1: user selected node map (old DHIS2 format)
+        if (typeof newSelected === 'object' && !Array.isArray(newSelected)) {
+            const paths = Object.keys(newSelected)
+            ids = paths.map((path) => path.replace('/', '')).filter(Boolean)
+        }
+
+        // CASE 2: user clicked node object (newer format)
+        if (Array.isArray(newSelected)) {
+            ids = newSelected
+                .map((node) => (node?.id ? node.id : null))
+                .filter(Boolean)
+        }
+
+        // CASE 3: user clicked a single node directly
+        if (newSelected.id) {
+            ids = [newSelected.id]
+        }
+
+        if (singleSelection) {
+            setSelected(ids.length ? [ids[0]] : [])
+        } else {
+            setSelected(ids)
+        }
+
+        console.log('✅ Selected org unit IDs:', ids)
+    },
+    [singleSelection]
+    
+)
+
+
+
     return {
         roots: rootIds,
         selected,
@@ -33,21 +49,12 @@ export function useOrgUnitTree({ rootIds = [], singleSelection = false }) {
         handleChange,
     }
 }
-// import { useDataValueQuery } from '@dhis2/app-service-datavalue'
-//              aggregering av underliggende noder
-// export function useOrgUnitTreeWithData({ rootIds, dataSet }) {
-//     const tree = useOrgUnitTree({ rootIds, singleSelection: true })
-//     const selectedOrgUnit = tree.selected[0]
 
-//     const { data, loading, error } = useDataValueQuery(
-//         selectedOrgUnit
-//             ? {
-//                   orgUnit: selectedOrgUnit,
-//                   dataSet,
-//                   period: '202401', // or dynamic period
-//               }
-//             : null
-//     )
 
-//     return { ...tree, data, loading, error }
-// }
+// const handleChange = useCallback(
+//     (newSelected) => {
+//         const ids = Object.keys(newSelected || {}).filter(k => k && k !== 'displayName')
+//         setSelected(ids.length ? [ids[0]] : [])
+//     },
+//     []
+// )
