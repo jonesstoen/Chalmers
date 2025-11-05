@@ -3,12 +3,12 @@ import usePostEvent from '../api/postDataAPI'
 
 
 
-
-function useEvent(/* PARAMS TODO */){
+// type = POST,PUT or DELETE
+function useEvent(type){
     const { isConnected, isDisconnected, lastConnected } =
         useDhis2ConnectionStatus()
-    const online = usePostEvent(/* PARAMS TODO */)
-    const offline = useOfflinePostEvent(/* PARAMS TODO */)
+    const online = usePostEvent(type)
+    const offline = useOfflinePostEvent(type)
 
 
 
