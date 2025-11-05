@@ -13,30 +13,35 @@ import { useDataQuery } from '@dhis2/app-runtime'
 // Example: [{ itemid: 'deID1', operator: 'GT', filter: '10' }]
 function useFetchAnalytics(program_id, {startDate, endDate} = {}, filter = [], org_id_array = []){ 
 
-    // Build dimension parameters
-    const dimensions = []
-
-    if (org_id_array.length > 0) {
-        dimensions.push(`ou:${org_id_array.join(';')}`)
-    }
-
-    filter.forEach(({ itemid, operator, filter: filterValue }) => {
-        dimensions.push(`${itemid}:${operator}:${filterValue}`)
-    })
-
-    const params = {
-        ...(dimensions.length > 0 && { dimension: dimensions }),
-        ...(startDate && endDate && { startDate, endDate }),
-    }
+    // Listening to changes to these variables
+    const variables = {startDate, endDate, filter, org_id_array}
 
     const query = {
         analytics: {
             resource: `api/analytics/events/query/${program_id}`,
-            params,
+            params: ({startDate, endDate, filter, org_id_array}) => {
+                // Build dimension parameters
+                const dimensions = []
+
+                if (org_id_array.length > 0) {
+                    dimensions.push(`ou:${org_id_array.join(';')}`)
+                }
+
+                filter.forEach(({ itemid, operator, filter: filterValue }) => {
+                    dimensions.push(`${itemid}:${operator}:${filterValue}`)
+                })
+
+                const params = {
+                    ...(dimensions.length > 0 && { dimension: dimensions }),
+                    ...(startDate && endDate && { startDate, endDate }),
+                }
+                return params
+            }
         },
     }
 
-    return useDataQuery(query)
+
+    return useDataQuery(query,{ variables })
 }
 
 export default useFetchAnalytics
