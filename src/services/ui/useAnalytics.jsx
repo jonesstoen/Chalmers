@@ -8,8 +8,8 @@ function useAnalytics(program_id, {startDate, endDate} = {}, filter = [], org_id
 
     //  json response format {loading, error, data}
 
-    const online = useFetchAnalytics(program_id, {startDate, endDate} = {}, filter = [], org_id_array = [])
-    const offline = useOfflineFetchAnalytics(program_id, {startDate, endDate} = {}, filter = [], org_id_array = [])
+    const online = useFetchAnalytics(program_id, {startDate, endDate}, filter, org_id_array)
+    const offline = useOfflineFetchAnalytics(program_id, {startDate, endDate}, filter, org_id_array)
     if (isDisconnected){
 
         return offline
