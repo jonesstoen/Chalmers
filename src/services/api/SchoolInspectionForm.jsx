@@ -33,10 +33,18 @@ export default function SchoolInspectionForm({ orgUnitId }) {
     }
 
     const handleSubmit = async () => {
-        const dataValues = Object.keys(formState).map((id) => ({
-            dataElement: id,
-            value: formState[id],
-        }))
+        const dataValues = schoolInspectionFields.map(({ id, type }) => {
+            let value = formState[id]
+            if (type === 'BOOLEAN') {
+                value = value === undefined || value === '' ? false : value
+            } else {
+                value = value === undefined || value === '' ? 0 : value
+            }
+            return {
+                dataElement: id,
+                value,
+            }
+        })
 
         await submitInspection({ orgUnit_id: orgUnitId, dataValues })
         alert('Event submitted!')

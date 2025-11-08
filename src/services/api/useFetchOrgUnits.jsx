@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useDataQuery } from '@dhis2/app-runtime'
-
+import {useCacheableQuery} from '../cache/cacheableQuery'
 // One static query. We substitute {id} at fetch time.
 const BASE_QUERY = {
     ou: {
@@ -39,32 +39,3 @@ export default function useFetchOrgUnits(orgIds) {
 
     return { data, loading, error, selectedId }
 }
-// import { useMemo } from 'react'
-// import { useDataQuery } from '@dhis2/app-runtime'
-
-// export function useFetchMetadata({ type, id }) {
-//     const query = useMemo(() => {
-//         if (!type || !id) return {}
-
-//         const endpoint =
-//             type === 'orgUnit'
-//                 ? `organisationUnits/${id}`
-//                 : type === 'program'
-//                 ? `programs/${id}`
-//                 : null
-
-//         const fields =
-//             type === 'orgUnit'
-//                 ? 'id,name,displayName,programs[id,name,displayName]'
-//                 : 'id,name,displayName,programStages[id,name,displayName]'
-
-//         return {
-//             metadata: {
-//                 resource: endpoint,
-//                 params: { fields },
-//             },
-//         }
-//     }, [type, id])
-
-//     return useDataQuery(query)
-// }
