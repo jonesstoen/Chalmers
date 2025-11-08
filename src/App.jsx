@@ -7,10 +7,8 @@ import SeatToLearnerList from './components/SeatToLearnerList'
 import AnalyticsTable from './components/AnalyticsTable'
 import useFetchOrgUnits from './services/api/useFetchOrgUnits'
 import useFetchAnalytics from './services/api/analyticsAPI'
-import { useStudentCount } from './services/api/useStudentCount'
-import { useSeatToLearnerRatios } from './services/api/useSeatToLearnerRatio'
-import { SCHOOL_LEVELS } from './services/api/schoolLevels'
-import SchoolInspectionForm from './services/api/SchoolInspectionForm'
+import SchoolInspectionForm from "./services/api/SchoolInspectionForm";
+import AnalyticsSection from './components/AnalyticsSection'
 
 export default function App() {
     const ROOTS = useMemo(() => [
@@ -38,24 +36,21 @@ export default function App() {
     const { data, loading, error, selectedId } = useFetchOrgUnits(selected)
 
     const orgUnitId = data?.ou?.id
-    const hasEnrollmentStage = data?.ou?.programs?.some(p =>
-        p.programStages?.some(s => s.id === 'Ni2qsy2WJn4')
-    )
 
-    const { count: studentCount, loading: studentCountLoading, error: studentCountError } =
-        useStudentCount(orgUnitId && hasEnrollmentStage ? orgUnitId : null)
 
-    const { ratios, loading: seatLoading, error: seatError } =
-        useSeatToLearnerRatios(orgUnitId, '2024', SCHOOL_LEVELS)
+
+
 
     const isAggregate = (data?.ou?.level ?? Infinity) < 5
 
     // when activeProgram is null, the hook will not fetch
     const { data: analyticsData, loading: analyticsLoading, error: analyticsError } =
-        useFetchAnalytics(activeProgram, { stage: activeStage }, [], selected, isAggregate)
+        useFetchAnalytics(activeProgram, { stage: activeStage }, [], selected, { descendants: isAggregate })
 
     return (
+
         <div className={classes.container}>
+            <AnalyticsSection />   {/* test-widgeten */}
             <OrgTreePanel
                 roots={ROOTS}
                 initialRootId={ROOTS[0].id}
@@ -69,20 +64,10 @@ export default function App() {
 
                 {selectedId && data?.ou && (
                     <>
-                        <SchoolInfoCard
-                            ou={data.ou}
-                            hasEnrollmentStage={!!hasEnrollmentStage}
-                            studentCount={studentCount}
-                            studentCountLoading={studentCountLoading}
-                            studentCountError={studentCountError}
-                            onPickStage={(p, s) => { setActiveProgram(p); setActiveStage(s) }}
-                        />
 
                         <SchoolInspectionForm orgUnitId={orgUnitId} />
 
-                        {!seatLoading && !seatError && <SeatToLearnerList ratios={ratios} />}
-                        {seatLoading && <p>Loading seat data...</p>}
-                        {seatError && <p>Error loading seat data.</p>}
+
 
                         {activeStage && (
                             <div style={{ marginTop: '1.5rem', background: '#eef6ff', padding: '1rem', borderRadius: 8, border: '1px solid #cfe2ff' }}>

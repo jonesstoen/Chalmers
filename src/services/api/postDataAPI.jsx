@@ -1,35 +1,83 @@
+// src/D2App/services/api/postDataAPI.jsx
 import { useDataMutation } from '@dhis2/app-runtime'
+import { useMemo } from 'react'
+
+export default function usePostEvent(type = 'POST') {
+    const today = new Date().toISOString().split('T')[0]
+
+    const formatDataValues = (dataValueObjectArray) =>
+    dataValueObjectArray
+        .filter(({ dataElement, value }) => dataElement && value !== '' && value !== null && value !== 0 && value !== false)
+        .map(({ dataElement, value }) => ({
+            dataElement,
+            value: String(value),
+        }))
 
 
-// Usage const [mutate, { loading, error }] = postEvent()
-// Not tested and WiP
-function usePostEvent(){
-
-    // Takes the datatime from today TODO
-    const today = new Date().toISOString().split('T')[0];  // e.g., '2025-10-15'
-
-    const dataMutationQuery = {
-        resource: 'tracker/events',
+    const createQuery = {
+        
+        resource: 'tracker',
+        
         type: 'create',
-        data: ({program_id, programStage, period = today, orgUnit_id, status = 'COMPLETED', dataValueObjectArray}) => ({
+        params: {
+            async: false,
+        },
+        data: ({
+            program_id,
+            programStage,
+            orgUnit_id,
+            dataValueObjectArray,
+            period = today,
+            status = 'COMPLETED',
+        }) => ({
             events: [
-            {
-                program: program_id, // School inspector program ID is: UxK2o06ScIe
-                eventDate: period, // When its recorded
-                orgUnit: orgUnit_id, // Where the data is connected to Gambia / region / school etc
-                programStage: programStage, // Stage of the given program the data is related to 
-                status: status,
-                dataValues: dataValueObjectArray // array with id and value objects {UID:"", value:xyz}
-            }
-            ]
-        })
+                {
+                    program: program_id,
+                    programStage,
+                    orgUnit: orgUnit_id,
+                    occurredAt: `${period}T00:00:00.000`,
+                    status,
+                    dataValues: formatDataValues(dataValueObjectArray),
+                },
+            ],
+        }),
+        
     }
 
+    const updateQuery = {
+        resource: 'events',
+        type: 'update',
+        partial: true,
+        data: ({ eventId, dataValueObjectArray }) => ({
+            events: [
+                {
+                    event: eventId,
+                    dataValues: formatDataValues(dataValueObjectArray),
+                },
+            ],
+        }),
+    }
 
-    return useDataMutation(dataMutationQuery) 
+    const deleteQuery = {
+        resource: 'events',
+        type: 'delete',
+        data: ({ eventId }) => ({ events: [{ event: eventId }] }),
+    }
 
+    const selectedQuery = useMemo(() => {
+        switch (type) {
+            case 'POST':
+                return createQuery
+            case 'PUT':
+                return updateQuery
+            case 'DELETE':
+                return deleteQuery
+            default:
+                throw new Error(`Invalid mutation type '${type}'`)
+        }
+    }, [type])
+console.log("Using tracker mutation ✅")
+
+    return useDataMutation(selectedQuery)
 }
-
-
-
-export default usePostEvent
+// 
