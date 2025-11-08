@@ -1,42 +1,61 @@
+// services/api/analyticsAPI.jsx
+import { useMemo } from 'react'
 import { useDataQuery } from '@dhis2/app-runtime'
 
+/**
+ * useFetchAnalytics
+ * - Lager et STABILT query-objekt (useMemo)
+ * - Bruker variables for programId + params
+ * - Kaller ikke API før programId finnes (lazy)
+ *
+ * filter: [{ itemid, operator, filter }]
+ * orgIds: string[] (ou ids)
+ */
+export default function useFetchAnalytics(
+    programId,
+    { startDate, endDate, stage } = {},
+    filter = [],
+    orgIds = [],
+    /* isAggregate not used in params, men behold hvis du vil utvide */ _isAggregate
+) {
+    // Bygg dimensions én gang pr. endring i inputs
+    const dims = useMemo(() => {
+        const d = []
+        if (orgIds?.length) d.push(`ou:${orgIds.join(';')}`)
+        if (stage) d.push(`stage:${stage}`)
+        for (const f of filter) {
+            if (f?.itemid && f?.operator && f?.filter != null) {
+                d.push(`${f.itemid}:${f.operator}:${f.filter}`)
+            }
+        }
+        return d
+    }, [orgIds, stage, JSON.stringify(filter)])
 
+    // Stabile query  i got an error that every render was creating a new query object
+    const query = useMemo(
+        () => ({
+            analytics: {
+                resource: 'analytics/events/query',
+                // programId som "id" del av pathen
+                id: ({ program }) => program,
+                // params kan også bruke variables
+                params: ({ dims, startDate, endDate }) => ({
+                    ...(dims?.length ? { dimension: dims } : {}),
+                    ...(startDate && endDate ? { startDate, endDate } : {}),
+                }),
+            },
+        }),
+        []
+    )
 
-// https://docs.dhis2.org/archive/en/2.25/developer/html/webapi_event_analytics.html
-// Template GET /api/analytics/events/query/<program-id>?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd&dimension=ou:<ou-id>;<ou-id>&dimension=<item-id>&dimension=<item-id>:<operator>:<filter>
-// Example using the school inspection program and Banjul:
-// GET /api/analytics/events/query/UxK2o06ScIe?dimension=ou:RlPlK44dtoo
-
-
-
-// filter should be an array of objects in the form {itemid, operator, filter}.
-// Example: [{ itemid: 'deID1', operator: 'GT', filter: '10' }]
-function useFetchAnalytics(program_id, {startDate, endDate} = {}, filter = [], org_id_array = []){ 
-
-    // Build dimension parameters
-    const dimensions = []
-
-    if (org_id_array.length > 0) {
-        dimensions.push(`ou:${org_id_array.join(';')}`)
-    }
-
-    filter.forEach(({ itemid, operator, filter: filterValue }) => {
-        dimensions.push(`${itemid}:${operator}:${filterValue}`)
-    })
-
-    const params = {
-        ...(dimensions.length > 0 && { dimension: dimensions }),
-        ...(startDate && endDate && { startDate, endDate }),
-    }
-
-    const query = {
-        analytics: {
-            resource: `api/analytics/events/query/${program_id}`,
-            params,
+    // Kjør kun når programId finnes
+    return useDataQuery(query, {
+        lazy: !programId,
+        variables: {
+            program: programId,
+            dims,
+            startDate,
+            endDate,
         },
-    }
-
-    return useDataQuery(query)
+    })
 }
-
-export default useFetchAnalytics
