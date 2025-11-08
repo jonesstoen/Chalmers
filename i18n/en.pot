@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-08T15:44:43.358Z\n"
-"PO-Revision-Date: 2025-11-08T15:44:43.358Z\n"
+"POT-Creation-Date: 2025-11-08T18:51:33.606Z\n"
+"PO-Revision-Date: 2025-11-08T18:51:33.607Z\n"
 
 msgid "Select a school"
 msgstr "Select a school"
@@ -19,3 +19,6 @@ msgstr "Analytics"
 
 msgid "Organisation units"
 msgstr "Organisation units"
+
+msgid "No roots available"
+msgstr "No roots available"

@@ -1,5 +1,5 @@
 import React from 'react'
-import useFetchAnalytics from '../services/api/analyticsAPI'
+import useFetchAnalytics from '../api/analyticsAPI'
 
 export default function AnalyticsSection() {
     // Request the Learners element (DO0LBJfXY00)

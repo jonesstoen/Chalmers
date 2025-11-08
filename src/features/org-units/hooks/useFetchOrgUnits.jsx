@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useDataQuery } from '@dhis2/app-runtime'
-import {useCacheableQuery} from '../cache/cacheableQuery'
+import {useCacheableQuery} from '../../../shared/cache/cacheableQuery'
 // One static query. We substitute {id} at fetch time.
 const BASE_QUERY = {
     ou: {

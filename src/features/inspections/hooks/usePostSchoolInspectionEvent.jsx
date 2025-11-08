@@ -1,5 +1,5 @@
 // src/D2App/services/api/usePostSchoolInspectionEvent.jsx
-import usePostEvent from './postDataAPI'
+import usePostEvent from '../../../shared/api/postDataAPI'
 
 export function usePostSchoolInspectionEvent() {
     const [postEvent, status] = usePostEvent('POST')

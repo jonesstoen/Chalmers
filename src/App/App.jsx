@@ -1,14 +1,14 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import classes from './App.module.css'
-import OrgTreePanel from './components/OrgTreePanel'
-import SchoolInfoCard from './components/SchoolInfoCard'
-import SeatToLearnerList from './components/SeatToLearnerList'
-import AnalyticsTable from './components/AnalyticsTable'
-import useFetchOrgUnits from './services/api/useFetchOrgUnits'
-import useFetchAnalytics from './services/api/analyticsAPI'
-import SchoolInspectionForm from "./services/api/SchoolInspectionForm";
-import AnalyticsSection from './components/AnalyticsSection'
+import OrgTreePanel from '../features/org-units/components/OrgTreePanel'
+import SchoolInfoCard from '../features/org-units/components/SchoolInfoCard'
+import SeatToLearnerList from '../components/SeatToLearnerList'
+import AnalyticsTable from '../features/analytics/components/AnalyticsTable'
+import useFetchOrgUnits from '../features/org-units/hooks/useFetchOrgUnits'
+import useFetchAnalytics from '../features/analytics/api/analyticsAPI'
+import SchoolInspectionForm from "../features/inspections/components/SchoolInspectionForm";
+import AnalyticsSection from '../features/analytics/components/AnalyticsSection'
 
 export default function App() {
     const ROOTS = useMemo(() => [
@@ -50,7 +50,7 @@ export default function App() {
     return (
 
         <div className={classes.container}>
-            <AnalyticsSection />   {/* test-widgeten */}
+
             <OrgTreePanel
                 roots={ROOTS}
                 initialRootId={ROOTS[0].id}

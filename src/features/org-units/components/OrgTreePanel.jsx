@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
-import classes from '../App.module.css'
+import classes from '../../../App/App.module.css'
 
 export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }) {
     // Safe initialisation that does not reference state before it's set

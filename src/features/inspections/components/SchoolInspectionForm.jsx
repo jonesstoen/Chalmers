@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Button, InputField, CheckboxField, CircularLoader } from '@dhis2/ui'
-import { usePostSchoolInspectionEvent } from './usePostSchoolInspectionEvent'
+import { usePostSchoolInspectionEvent } from '../hooks/usePostSchoolInspectionEvent'
 
 const schoolInspectionFields = [
     { id: 'Nvp4hIbXrzF', label: 'Computer Lab present?', type: 'BOOLEAN' },
