@@ -1,9 +1,10 @@
+import React, { useState } from 'react'
 
-function Inspection(props){
+function InspectionInput(props){
     // TODO
     return (<div></div>)
 }
 
 
 
-export default Inspection
+export default InspectionInput
