@@ -27,7 +27,7 @@ export function useCacheableQuery(sectionName, query, options = {}) {
 
     useEffect(() => {
         if (isConnected && (!isCached || !isCacheFresh) && !isRecording) {
-            startRecording()
+            void startRecording()
         }
     }, [isConnected, isCached, isRecording, isCacheFresh, startRecording])
 
@@ -42,7 +42,7 @@ export function useCacheableQuery(sectionName, query, options = {}) {
     // If we’re using cached data, trigger refetch to load it from the service worker
     useEffect(() => {
         if (!shouldFetchOnline && queryState.refetch) {
-            queryState.refetch()
+            void queryState.refetch()
         }
     }, [shouldFetchOnline])
 
