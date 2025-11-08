@@ -51,7 +51,8 @@ function useFetchAnalytics(
         [program_id, JSON.stringify(params)] // dependency list
     )
 
-    return useDataQuery(query)
+
+    return useDataQuery(query,{ variables })
 }
 
 export default useFetchAnalytics
