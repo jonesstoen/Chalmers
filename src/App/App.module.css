@@ -1,0 +1,62 @@
+/* App.module.css */
+.container {
+    width: 100%;
+    height: 100vh;             /* fyll hele høyden */
+    display: grid;
+    grid-template-columns: 320px 1fr; /* sidebar + content */
+    gap: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+/* venstre panel (treet) */
+.sidebar {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    padding: 10px 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    overflow: hidden;          /* skjul overflow på wrapper */
+}
+
+.sidebarHeader {
+    margin: 0 6px 8px 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.treeScroll {
+    height: calc(100vh - 120px); /* gjør treet skrollbart */
+    overflow: auto;
+    padding: 0 6px;
+}
+
+/* høyre panel (detaljer) */
+.content {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fafafa;
+    padding: 14px;
+    overflow: auto;            /* egen scroll for detaljer */
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 6px 10px 6px;
+}
+
+.rootBtn {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.rootBtnActive {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
