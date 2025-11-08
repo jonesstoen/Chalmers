@@ -4,8 +4,10 @@ import i18n from '@dhis2/d2-i18n'
 import classes from '../App.module.css'
 
 export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }) {
-    const [currentRootId, setCurrentRootId] = useState(initialRootId ?? roots[0].id)
-    const [expanded, setExpanded] = useState([`/${currentRootId}`])
+    // Safe initialisation that does not reference state before it's set
+    const safeInitialRoot = initialRootId ?? roots?.[0]?.id
+    const [currentRootId, setCurrentRootId] = useState(safeInitialRoot)
+    const [expanded, setExpanded] = useState(() => (safeInitialRoot ? [`/${safeInitialRoot}`] : []))
     const [selected, setSelected] = useState([])
 
     // Normaliser input fra tree (kan være string, array, eller objekt med path)
@@ -15,6 +17,13 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
         if (typeof arg === 'string') return [arg]
         if (arg.path) return [arg.path]
         return []
+    }
+
+    // Hent node-id fra en path ("/id" eller "/id1/id2" -> siste segment)
+    const pathToId = (p) => {
+        if (!p) return null
+        const segs = String(p).split('/').filter(Boolean)
+        return segs[segs.length - 1] || null
     }
 
     const handleExpand = useCallback((arg) => {
@@ -44,9 +53,18 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
     const handleChange = useCallback(
         (value) => {
             let ids = []
-            if (Array.isArray(value)) ids = value.map((n) => n?.id).filter(Boolean)
-            else if (value?.id) ids = [value.id]
-            else if (value && typeof value === 'object') ids = Object.keys(value).map((p) => p.replace('/', ''))
+            if (Array.isArray(value)) {
+                // Kan være array av noder eller paths
+                ids = value
+                    .map((n) => (typeof n === 'string' ? pathToId(n) : n?.id ?? pathToId(n?.path)))
+                    .filter(Boolean)
+            } else if (value && typeof value === 'object') {
+                if (value.id) ids = [value.id]
+                else if (value.path) ids = [pathToId(value.path)]
+                else ids = Object.keys(value).map(pathToId).filter(Boolean) // selection-map case
+            } else if (typeof value === 'string') {
+                ids = [pathToId(value)].filter(Boolean)
+            }
 
             const next = ids.length ? [ids[0]] : []
             setSelected(next)
@@ -56,8 +74,18 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
     )
 
     useEffect(() => {
-        onRootChange?.(currentRootId)
+        if (currentRootId) onRootChange?.(currentRootId)
     }, [currentRootId, onRootChange])
+
+    // Guard hvis det ikke finnes røtter
+    if (!currentRootId) {
+        return (
+            <aside className={classes.sidebar}>
+                <div className={classes.sidebarHeader}>{i18n.t('Organisation units')}</div>
+                <div style={{ padding: 8, color: '#6b7280' }}>{i18n.t('No roots available')}</div>
+            </aside>
+        )
+    }
 
     return (
         <aside className={classes.sidebar}>
@@ -84,15 +112,16 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
             </div>
 
             <div className={classes.treeScroll}>
-                <OrganisationUnitTree
-                    roots={[currentRootId]}
-                    selected={selected}
-                    expanded={expanded}
-                    singleSelection
-                    onChange={handleChange}
-                    handleExpand={handleExpand}
-                    handleCollapse={handleCollapse}
-                />
+                 <OrganisationUnitTree
+                   key={currentRootId}
+                   roots={[currentRootId]}
+                   selected={selected}
+                   expanded={expanded}
+                   singleSelection
+                   onChange={handleChange}
+                   handleExpand={handleExpand}
+                   handleCollapse={handleCollapse}
+                 />
             </div>
         </aside>
     )
