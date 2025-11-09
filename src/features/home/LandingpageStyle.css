@@ -1,0 +1,87 @@
+/* features/home/LandingPage.module.css */
+
+.page {
+    padding: 16px;
+}
+
+.hero {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.heroGrid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+/* CTA button row */
+.ctaRow {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* KPI tiles */
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+/* Priority cards area */
+.priority {
+    margin-top: 16px;
+}
+
+.priorityGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+/* Buttons (keeps a consistent look & feel) */
+.primaryBtn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondaryBtn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+}
+
+.dashedBtn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px dashed #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+}
+
+/* ====== Breakpoints ====== */
+@media (max-width: 900px) {
+    .heroGrid { grid-template-columns: 1fr; }
+    .ctaRow { justify-content: flex-start; }
+    .priorityGrid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+}
+
+@media (max-width: 560px) {
+    .kpis { grid-template-columns: 1fr; }
+    .ctaRow { gap: 6px; }
+    .primaryBtn, .secondaryBtn, .dashedBtn { width: 100%; }
+}
