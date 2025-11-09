@@ -3,7 +3,7 @@ import React from 'react'
 export default function SyncBanner() {
     return (
         <div style={{ padding:12, border:'1px dashed #cbd5e1', borderRadius:10, background:'#f8fafc' }}>
-            Offline mode ready. Changes will sync when you’re online.
+            Offline mode ready. Changes will sync when you’re online. dettte er kun hardcoded tekst
         </div>
     )
 }
