@@ -76,7 +76,7 @@ export default function usePostEvent(type = 'POST') {
                 throw new Error(`Invalid mutation type '${type}'`)
         }
     }, [type])
-console.log("Using tracker mutation ✅")
+    console.log("Using tracker mutation ✅")
 
     return useDataMutation(selectedQuery)
 }
