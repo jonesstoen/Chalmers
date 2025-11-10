@@ -1,5 +1,5 @@
 import { useDhis2ConnectionStatus } from "@dhis2/app-runtime"
-import useFetchOrgUnits from "../api/organisationAPI"
+import useFetchOrgUnits from "../../features/org-units/api/organisationAPI"
 
 function useOrgIds(ordID_array){
     const { isConnected, isDisconnected, lastConnected } = useDhis2ConnectionStatus()

@@ -88,7 +88,7 @@ const generateInspectionData = () => {
 // Query to fetch all schools (level 5 org units)
 // Replace this section in your script
 // RlPlK44dtoo Bp3y61WbHwn
-const REGION_ID = 'RlPlK44dtoo' // e.g., Kanifing
+const REGION_ID = 'Bp3y61WbHwn' // e.g., Kanifing
 
 const schoolsQuery = {
     schools: {

@@ -1,0 +1,74 @@
+import React from 'react'
+import { CircularLoader, NoticeBox } from '@dhis2/ui'
+import { useSchoolAnalytics } from '../api/useSchoolAnalytics'
+
+// All School Inspection data elements
+const schoolInspectionFields = [
+    { id: 'Nvp4hIbXrzF', label: 'Computer Lab present?', type: 'BOOLEAN' },
+    { id: 'gzhjCMe7OyS', label: 'Computer Lab condition (1–5)', type: 'INTEGER_POSITIVE' },
+    { id: 'IKiSAA19Xvl', label: 'Electricity available?', type: 'BOOLEAN' },
+    { id: 'MH2eDd7qWxR', label: 'Electricity condition (1–5)', type: 'INTEGER_POSITIVE' },
+    { id: 'n9KwS4rY2HC', label: 'Handwashing available?', type: 'BOOLEAN' },
+    { id: 'ie3bFiVatHT', label: 'Handwashing condition (1–5)', type: 'INTEGER_POSITIVE' },
+    { id: 'Y6DQqwTdhiZ', label: 'Library available?', type: 'BOOLEAN' },
+    { id: 'IAomDvMcUDr', label: 'Library condition (1–5)', type: 'NUMBER' },
+    { id: 'ya5SyA5hej4', label: 'Number of classrooms', type: 'NUMBER' },
+    { id: 'XIgpDhDC4Ol', label: 'Number of clean and secure classrooms', type: 'NUMBER' },
+    { id: 'XThfmg6f2oC', label: 'Playground available?', type: 'BOOLEAN' },
+    { id: 'JzZfwXtdL6G', label: 'Playground condition (1–5)', type: 'INTEGER_POSITIVE' },
+    { id: 'I13NTyLrHBm', label: 'Toilets for teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
+    { id: 'QXcKg7GSr4e', label: 'Toilets for boys', type: 'NUMBER' },
+    { id: 'OGmIo4kFUYr', label: 'Toilets for girls', type: 'NUMBER' },
+    { id: 'iytoDmoTUWY', label: 'Total toilets', type: 'INTEGER_ZERO_OR_POSITIVE' },
+    { id: 'DO0LBJfXY00', label: 'Learners (students)', type: 'INTEGER_ZERO_OR_POSITIVE' },
+    { id: 'jcC1uz56IpY', label: 'Number of seats', type: 'INTEGER_ZERO_OR_POSITIVE' },
+    { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
+]
+
+export default function SchoolAnalyticsView({ schoolId }) {
+    const { data, loading, error } = useSchoolAnalytics({
+        programId: 'UxK2o06ScIe',
+        stageId: 'eJiBjm9Rl7E',
+        schoolId,
+        startDate: '2025-01-01',
+        endDate: '2025-12-31',
+        dataElements: schoolInspectionFields.map(f => f.id),
+    })
+
+    if (!schoolId) return null
+    if (loading) return <CircularLoader />
+    if (error) return <NoticeBox error title="Error">{error.message}</NoticeBox>
+
+    const rows = data?.rows ?? []
+    if (rows.length === 0)
+        return <NoticeBox title="No data">No inspection events found for this school.</NoticeBox>
+
+    return (
+        <div style={{ padding: '1rem' }}>
+            <h3>Inspection Events for {schoolId}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        {schoolInspectionFields.map(field => (
+                            <th key={field.id}>{field.label}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((row, i) => {
+                        const [eventId, ...values] = row
+                        return (
+                            <tr key={i}>
+                                <td>{eventId}</td>
+                                {values.map((value, j) => (
+                                    <td key={j}>{value ?? '-'}</td>
+                                ))}
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+        </div>
+    )
+}

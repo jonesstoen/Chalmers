@@ -3,7 +3,7 @@ const config = {
     type: 'app',
 
     entryPoints: {
-        app: './src/App.jsx',
+        app: './src/App/App.jsx',
     },
 
     direction: 'auto',
