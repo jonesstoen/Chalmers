@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { Button, InputField, CheckboxField, CircularLoader } from '@dhis2/ui'
+import React, { useEffect, useRef, useState } from 'react'
+import { Button, InputField, CheckboxField, CircularLoader, AlertStack, AlertBar } from '@dhis2/ui'
 import usePostSchoolInspectionEvent from '../hooks/usePostSchoolInspectionEvent'
 
-const schoolInspectionFields = [
+const defaultSchoolInspectionFields = [
     { id: 'Nvp4hIbXrzF', label: 'Computer Lab present?', type: 'BOOLEAN', child_query: { id: 'gzhjCMe7OyS', label: 'Computer Lab condition (1–5)', type: 'INTEGER_POSITIVE' } },
     { id: 'IKiSAA19Xvl', label: 'Electricity available?', type: 'BOOLEAN', child_query:{ id: 'MH2eDd7qWxR', label: 'Electricity condition (1–5)', type: 'INTEGER_POSITIVE' } },
     { id: 'n9KwS4rY2HC', label: 'Handwashing available?', type: 'BOOLEAN', child_query: { id: 'ie3bFiVatHT', label: 'Handwashing condition (1–5)', type: 'INTEGER_POSITIVE' } }, 
@@ -19,8 +19,14 @@ const schoolInspectionFields = [
     { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
 ]
 
+/*The likert scale is most probably supposed to be something like this:, but its empty 
+https://research.im.dhis2.org/in5320g09/api/optionSets/SGCIMWrjdpI?fields=options[id,name]
+optionSet referred to in the error: wTManXJBRRR
+https://research.im.dhis2.org/in5320g09/api/optionSets/wTManXJBRRR?fields=options[id,name]
+*/
+
 export default function SchoolInspectionForm({ orgUnitId }) {
-    const [formState, setFormState] = useState({})
+    const [formState, setFormState] = useState({}) // holding the states
     const [errors, setErrors] = useState({})
     const [submitInspection, { loading, error, data }] = usePostSchoolInspectionEvent()
 
@@ -53,12 +59,13 @@ export default function SchoolInspectionForm({ orgUnitId }) {
         const newErrors = {}
 
         // Clean classrooms cannot exceed total classrooms
-        if ((formState['XIgpDhDC4Ol'] || 0) > (formState['ya5SyA5hej4'] || 0)) {
+        if ((Number(formState['XIgpDhDC4Ol']) || 0) > (Number(formState['ya5SyA5hej4']) || 0)) { // BUG TODO
+            console.error(`Clean rooms : ${formState['XIgpDhDC4Ol']}, total rooms: ${formState['ya5SyA5hej4']}`)
             newErrors['XIgpDhDC4Ol'] = 'Cannot exceed total classrooms'
         }
 
         // Validate child fields
-        schoolInspectionFields.forEach(field => {
+        defaultSchoolInspectionFields.forEach(field => {
             if (field.child_query) {
                 const childId = field.child_query.id
                 const childValue = formState[childId]
@@ -83,14 +90,13 @@ export default function SchoolInspectionForm({ orgUnitId }) {
         if (!validateForm()) return
 
         const dataValuesArray = Object.entries(formState).map(([dataElement, value]) => ({ dataElement, value }))
-        // Add total toilets
         dataValuesArray.push({ dataElement: 'iytoDmoTUWY', value: totalToilets })
 
         submitInspection({ orgUnit_id: orgUnitId, dataValues: dataValuesArray })
     }
 
     if(!formState){
-        return <CircularLoader/> 
+        return <CircularLoader/>
     }
 
     return (
@@ -101,7 +107,7 @@ export default function SchoolInspectionForm({ orgUnitId }) {
 
             {!loading && (
                 <>
-                    {schoolInspectionFields.map(({ id, label, type, child_query }) => (
+                    {defaultSchoolInspectionFields.map(({ id, label, type, child_query }) => (
                         <div key={id} style={{ marginBottom: '1rem' }}>
                             {type === 'BOOLEAN' ? (
                                 <CheckboxField
@@ -147,14 +153,18 @@ export default function SchoolInspectionForm({ orgUnitId }) {
                         Submit Inspection
                     </Button>
 
-                    {data && <p style={{ color: 'green' }}>Posted the data</p>}
-{error && (
+                    {data && <AlertStack>
+                                <AlertBar success duration={1000}>
+                                    Form Submitted
+                                </AlertBar>
+                            </AlertStack>}
+                {error && (
                 <div style={{ color: 'red', marginTop: '1rem' }}>
                     <p><strong>Error:</strong> {error.message || 'An unexpected error occurred'}</p>
                     {error.code && <p><strong>Code:</strong> {error.code}</p>}
                     {error.details && <pre>{JSON.stringify(error.details, null, 2)}</pre>}
                 </div>
-            )}
+                )}
                 </>
             )}
         </div>
