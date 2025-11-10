@@ -1,11 +1,11 @@
 import React from 'react'
-import { CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useSchoolAnalytics } from '../api/useSchoolAnalytics'
 import { useMemo } from 'react'
 
 // Helper hook that wraps the analytics query and returns a clean, sorted data list
-export function useSchoolInspectionData(schoolId) {
-    const { data, loading, error } = useSchoolAnalytics({
+export default function SchoolAnalyticsView(schoolId) {
+ 
+   const { data, loading, error } = useSchoolAnalytics({
         programId: 'UxK2o06ScIe',
         stageId: 'eJiBjm9Rl7E',
         schoolId,

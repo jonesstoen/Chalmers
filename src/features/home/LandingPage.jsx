@@ -8,6 +8,7 @@ import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
 import SchoolAnalyticsView from '../analytics/components/SchoolAnalyticsView'
 import PopulateDataButton from '../inspections/components/PopulateDataButton'
+import InspectionTimeline from '../analytics/components/InspectionTimeline'
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -94,7 +95,7 @@ export default function LandingPage() {
     return (
 
         <div style={{ padding: 16 }}>
-                                    {<SchoolAnalyticsView schoolId={'k6MLijE92iz'}/> }
+                                    {<InspectionTimeline schoolId={'k6MLijE92iz'}/> }
         {/* <PopulateDataButton/> */}
             <h2 style={{ marginBottom: 8 }}> Overview</h2>
             <SyncBanner />
