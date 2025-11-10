@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Button, InputField, CheckboxField, CircularLoader, AlertStack, AlertBar } from '@dhis2/ui'
+import React, { useEffect, useState } from 'react'
+import { Button, InputField, CheckboxField, CircularLoader, AlertStack, AlertBar} from '@dhis2/ui'
 import usePostSchoolInspectionEvent from '../hooks/usePostSchoolInspectionEvent'
 
 const defaultSchoolInspectionFields = [
@@ -19,7 +19,8 @@ const defaultSchoolInspectionFields = [
     { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
 ]
 
-/*The likert scale is most probably supposed to be something like this:, but its empty 
+/* Cause of bug is an empty optionset
+The likert scale is most probably supposed to be something like this:, but its empty 
 https://research.im.dhis2.org/in5320g09/api/optionSets/SGCIMWrjdpI?fields=options[id,name]
 optionSet referred to in the error: wTManXJBRRR
 https://research.im.dhis2.org/in5320g09/api/optionSets/wTManXJBRRR?fields=options[id,name]
@@ -28,6 +29,7 @@ https://research.im.dhis2.org/in5320g09/api/optionSets/wTManXJBRRR?fields=option
 export default function SchoolInspectionForm({ orgUnitId }) {
     const [formState, setFormState] = useState({}) // holding the states
     const [errors, setErrors] = useState({})
+    const [lastSubmitted, setLastSubmitted] = useState([])
     const [submitInspection, { loading, error, data }] = usePostSchoolInspectionEvent()
 
     useEffect(() => { 
@@ -70,10 +72,14 @@ export default function SchoolInspectionForm({ orgUnitId }) {
                 const childId = field.child_query.id
                 const childValue = formState[childId]
 
+
+                // Remove the child fields TODO
+
+
                 // Cannot set child condition if parent is unchecked
-                if (childValue != null && !formState[field.id]) {
-                    newErrors[childId] = 'Cannot set condition without parent being checked'
-                }
+                // if (childValue != null && !formState[field.id]) {
+                //     newErrors[childId] = 'Cannot set condition without parent being checked'
+                // }
 
                 // Child value must be between 1 and 5
                 if (childValue != null && (childValue < 1 || childValue > 5)) {
@@ -89,9 +95,32 @@ export default function SchoolInspectionForm({ orgUnitId }) {
     const handleSubmit = async () => {
         if (!validateForm()) return
 
-        const dataValuesArray = Object.entries(formState).map(([dataElement, value]) => ({ dataElement, value }))
-        dataValuesArray.push({ dataElement: 'iytoDmoTUWY', value: totalToilets })
+            // const dataValuesArray = Object.entries(formState).map(([dataElement, value]) => ({ dataElement, value }))
 
+            const dataValuesArray = defaultSchoolInspectionFields.reduce((acc, field) => {
+            const orgId = field.id
+            const value = formState[orgId];
+
+            // Children elements can be undefined
+            const childId = field.child_query?.id
+            const child_value = childId ? formState[childId] : undefined;
+
+            if (value === undefined || value === null) return acc; // keep 0 and false
+
+            acc.push({ dataElement: field.id, value });
+            
+            if (childId && child_value && value === true) {
+                    acc.push({ dataElement: field.child_query.id, value: formState[field.child_query.id] });
+            }
+            return acc;
+            }, []);
+
+
+        // Check if not null/undefined
+
+        dataValuesArray.push({ dataElement: 'iytoDmoTUWY', value: totalToilets })
+        console.log(dataValuesArray)
+        setLastSubmitted(dataValuesArray)
         submitInspection({ orgUnit_id: orgUnitId, dataValues: dataValuesArray })
     }
 
@@ -154,8 +183,8 @@ export default function SchoolInspectionForm({ orgUnitId }) {
                     </Button>
 
                     {data && <AlertStack>
-                                <AlertBar success duration={1000}>
-                                    Form Submitted
+                                <AlertBar success duration={8000}>
+                                <p><strong>Success:</strong> {`Data posted with num fields:${lastSubmitted.length}` }</p>
                                 </AlertBar>
                             </AlertStack>}
                 {error && (
