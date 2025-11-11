@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
 import classes from '../../../App/App.module.css'
+import SchoolSearchBar from '../../inspections/components/SchoolSearchBar.jsx'
 
 export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }) {
     // Safe initialisation that does not reference state before it's set
@@ -92,6 +93,8 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 6px 10px 6px' }}>
                 <div className={classes.sidebarHeader}>{i18n.t('Organisation units')}</div>
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+
+
                     {roots.map((r) => (
                         <button
                             key={r.id}
@@ -110,6 +113,7 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
                     ))}
                 </div>
             </div>
+            <SchoolSearchBar regionid={roots} />
 
             <div className={classes.treeScroll}>
                  <OrganisationUnitTree
@@ -123,6 +127,7 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
                    handleCollapse={handleCollapse}
                  />
             </div>
+
         </aside>
     )
 }
