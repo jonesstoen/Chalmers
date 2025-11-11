@@ -10,6 +10,7 @@ import SchoolAnalyticsView from '../analytics/components/SchoolAnalyticsView'
 import PopulateDataButton from '../inspections/components/PopulateDataButton'
 import InspectionTimeline from '../analytics/components/InspectionTimeline'
 import Graph from '../analytics/components/useGraph'
+
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -30,11 +31,11 @@ export default function LandingPage() {
     const openSchool = (ouId) => navigate(`/inspect?ou=${ouId}`)
     const openRoot = (rootId) => navigate(`/inspect?root=${rootId}`)
     const openInspector = () => navigate('/inspect')
+    const openSchoolInspection = () => navigate('/school-inspection') // ✅ NY
 
     const lastOu = typeof window !== 'undefined' ? window.localStorage.getItem('lastOu') : null
     const { startDate, endDate } = useMemo(() => monthRangeISO(), [])
 
-    // Hent analytics via eksisterende hook
     const { data, loading, error } = useFetchAnalytics(
         PROGRAM_ID,
         { startDate, endDate, stage: STAGE_ID },
@@ -94,16 +95,9 @@ export default function LandingPage() {
     const pendingSync = 0
 
     return (
-
         <div style={{ padding: 16 }}>
-<Graph
-  schoolId="k6MLijE92iz"
-  dataElements={['DO0LBJfXY00']}
-  label="Seats"
-/>
-                                    {/* {<Inspe ctionTimeline schoolId={'k6MLijE92iz'}/> } */}
-        {/* <PopulateDataButton/> */}
-            <h2 style={{ marginBottom: 8 }}> Overview</h2>
+            {<InspectionTimeline schoolId={'k6MLijE92iz'}/>}
+            <h2 style={{ marginBottom: 8 }}>Overview</h2>
             <SyncBanner />
 
             {/* HERO / PRIMARY CTA */}
@@ -137,6 +131,17 @@ export default function LandingPage() {
                     >
                         Open inspector
                     </button>
+
+                    {/* ✅ NY knapp til test-siden med tabs (Submit/Edit/Delete) */}
+                    <button
+                        onClick={openSchoolInspection}
+                        style={{ padding: '10px 14px', borderRadius: 10, border: '1px dashed #2563eb',
+                            background: '#fff', color: '#2563eb', cursor: 'pointer' }}
+                        title="Go to School Inspection (Submit/Edit/Delete tabs)"
+                    >
+                        Open School Inspection (tabs)
+                    </button>
+
                     <button
                         onClick={() => openRoot('Bp3y61WbHwn')}
                         style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb',
@@ -167,7 +172,7 @@ export default function LandingPage() {
             {/* KPI-er */}
             <section style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px,1fr))', gap:12, marginTop:16 }}>
                 <MetricTile title="Inspections this month" value={loading ? '…' : String(inspectionsThisMonth)} />
-                <MetricTile title="Pending sync" value={String(pendingSync)} /> 
+                <MetricTile title="Pending sync" value={String(pendingSync)} />
                 <MetricTile title="Schools needing follow-up" value={loading ? '…' : String(ouList.length)} />
             </section>
 

@@ -25,7 +25,7 @@ const schoolInspectionFields = [
     { id: 'LME331J5aev', label: 'Number of teachers' },
 ]
 
-export default function InspectionTimeline({ schoolId }) {
+export default function InspectionTimeline({ schoolId, onSelect }) {
     const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
 
     const [sortKey, setSortKey] = useState('eventdate')
@@ -55,6 +55,7 @@ export default function InspectionTimeline({ schoolId }) {
 
     const handleRowClick = (event) => {
         setSelectedEvent(event)
+        onSelect?.(event)
     }
 
     return (
