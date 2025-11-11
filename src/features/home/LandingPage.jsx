@@ -9,6 +9,7 @@ import PrioritySchoolCard from './PrioritySchoolCard'
 import SchoolAnalyticsView from '../analytics/components/SchoolAnalyticsView'
 import PopulateDataButton from '../inspections/components/PopulateDataButton'
 import InspectionTimeline from '../analytics/components/InspectionTimeline'
+import Graph from '../analytics/components/useGraph'
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -95,7 +96,12 @@ export default function LandingPage() {
     return (
 
         <div style={{ padding: 16 }}>
-                                    {<InspectionTimeline schoolId={'k6MLijE92iz'}/> }
+<Graph
+  schoolId="k6MLijE92iz"
+  dataElements={['DO0LBJfXY00']}
+  label="Seats"
+/>
+                                    {/* {<Inspe ctionTimeline schoolId={'k6MLijE92iz'}/> } */}
         {/* <PopulateDataButton/> */}
             <h2 style={{ marginBottom: 8 }}> Overview</h2>
             <SyncBanner />
@@ -161,7 +167,7 @@ export default function LandingPage() {
             {/* KPI-er */}
             <section style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px,1fr))', gap:12, marginTop:16 }}>
                 <MetricTile title="Inspections this month" value={loading ? '…' : String(inspectionsThisMonth)} />
-                <MetricTile title="Pending sync" value={String(pendingSync)} />
+                <MetricTile title="Pending sync" value={String(pendingSync)} /> 
                 <MetricTile title="Schools needing follow-up" value={loading ? '…' : String(ouList.length)} />
             </section>
 

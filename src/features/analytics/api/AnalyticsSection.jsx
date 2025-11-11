@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react'
-import useFetchAnalytics from '../api/analyticsAPI'
+import useFetchAnalytics from './analyticsAPI'
 
 /**
  * General-purpose DHIS2 analytics hook.
