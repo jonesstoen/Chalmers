@@ -2,12 +2,13 @@ import React, { useState, useMemo } from 'react'
 import { CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useDataQuery } from '@dhis2/app-runtime'
 import useSchoolAnalyticsWrapper from './SchoolAnalyticsView'
+import classes from './InspectionTimeline.module.css'
 
 const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },
     elec: { on: 'IKiSAA19Xvl', cond: 'MH2eDd7qWxR' },
     wash: { on: 'n9KwS4rY2HC', cond: 'ie3bFiVatHT' },
-    lib: { on: 'Y6DQqwTdhiZ', cond: 'IAomDvMcUDr' },
+    lib:  { on: 'Y6DQqwTdhiZ', cond: 'IAomDvMcUDr' },
     play: { on: 'XThfmg6f2oC', cond: 'JzZfwXtdL6G' },
     rooms: 'ya5SyA5hej4',
     clean: 'XIgpDhDC4Ol',
@@ -20,6 +21,7 @@ const F = {
     seats: 'jcC1uz56IpY',
 }
 
+// Query to fetch organisation unit details
 const ouQuery = {
     ou: {
         resource: 'organisationUnits',
@@ -29,29 +31,49 @@ const ouQuery = {
 }
 
 const Bool = ({ v }) => (
-    <span style={{ fontWeight: 700, color: v ? '#065f46' : '#991b1b' }}>{v ? '✓' : '✗'}</span>
+    <span className={v ? classes.boolOk : classes.boolBad}>{v ? '✓' : '✗'}</span>
 )
 
 const Badge = ({ v }) => (
-    <span style={styles.badge}>
-        <span
-            style={{
-                ...styles.badgeFill,
-                width: `${(Math.max(0, Math.min(5, Number(v) || 0)) / 5) * 100}%`,
-            }}
-        />
-        <span style={styles.badgeText}>{v ?? '–'}</span>
-    </span>
+    <span className={classes.badge}>
+    <span
+        className={classes.badgeFill}
+        style={{ width: `${(Math.max(0, Math.min(5, Number(v) || 0)) / 5) * 100}%` }}
+    />
+    <span className={classes.badgeText}>{v ?? '–'}</span>
+  </span>
 )
 
+const RatioChip = ({ seats, learners }) => {
+    const s = Number(seats) || 0
+    const l = Number(learners) || 0
+    if (!l) return <span className={`${classes.ratioChip} ${classes.ratioGray}`}>–</span>
+    const r = s / l
+    const tone =
+        r < 0.7 ? classes.ratioRed : r < 1 ? classes.ratioAmber : classes.ratioGreen
+    return <span className={`${classes.ratioChip} ${tone}`}>{r.toFixed(2)}</span>
+}
 
+function Th({ label, active, asc, onClick, first }) {
+    return (
+        <th
+            onClick={onClick}
+            className={`${classes.th} ${first ? classes.firstColTh : ''}`}
+        >
+            {label}{active ? (asc ? ' ▲' : ' ▼') : ''}
+        </th>
+    )
+}
+
+function toBool(v) {
+    if (v === true || v === 'true') return true
+    const n = Number(v)
+    return !Number.isNaN(n) && n > 0
+}
 
 export default function InspectionTimeline({ schoolId, onSelect }) {
-    // 1) Hooks først – aldri betinget
-    console.log(schoolId)
+    // Hooks først
     const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
-
-    // Stabil "variables"-ref så useDataQuery ikke retrigges unødig
     const ouVars = useMemo(() => ({ id: schoolId || '' }), [schoolId])
     const { data: ouData } = useDataQuery(ouQuery, { variables: ouVars, lazy: !schoolId })
     const schoolName = ouData?.ou?.displayName || ouData?.ou?.name || schoolId
@@ -60,7 +82,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
     const [sortAsc, setSortAsc] = useState(true)
     const [selectedEvent, setSelectedEvent] = useState(null)
 
-    // Sortering beregnes alltid før early returns (unngå “rendered more hooks”)
     const sorted = useMemo(() => {
         const list = Array.isArray(events) ? [...events] : []
         list.sort((a, b) => {
@@ -72,88 +93,81 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         return list
     }, [events, sortKey, sortAsc])
 
-    // 2) Early returns etter at alle hooks er kalt
+    // Early returns etter hooks
     if (!schoolId) return null
     if (loading) return <CircularLoader />
     if (error) return <NoticeBox error title="Error">{error.message}</NoticeBox>
     if (!events?.length) return <NoticeBox title="No data">No inspection events found.</NoticeBox>
 
     const toggleSort = (key) => {
-        if (sortKey === key) setSortAsc((v) => !v)
-        else {
-            setSortKey(key)
-            setSortAsc(true)
-        }
+        if (sortKey === key) setSortAsc(v => !v)
+        else { setSortKey(key); setSortAsc(true) }
     }
 
-    const pick = (ev) => {
-        setSelectedEvent(ev)
-        onSelect?.(ev)
-    }
+    const pick = (ev) => { setSelectedEvent(ev); onSelect?.(ev) }
 
     return (
         <div style={{ padding: '0.75rem', overflowX: 'auto' }}>
-            <h3 style={{ margin: '0 0 .5rem' }}>Inspection Events for {schoolName}</h3>
+            <h3 style={{ margin: '0 0 .5rem' }}>
+                Inspection Events for {schoolName}
+            </h3>
 
-            <table style={styles.table}>
+            <table className={classes.table}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                 <tr>
-                    {th('Date', () => toggleSort('eventdate'), sortKey === 'eventdate', sortAsc)}
-                    {th('Status', () => toggleSort('eventstatus'), sortKey === 'eventstatus', sortAsc)}
-                    {th('Learners', () => toggleSort(F.learners), sortKey === F.learners, sortAsc)}
-                    {th('Seats', () => toggleSort(F.seats), sortKey === F.seats, sortAsc)}
-                    {th('Classrooms', () => toggleSort(F.rooms), sortKey === F.rooms, sortAsc)}
-                    {th('Clean rooms', () => toggleSort(F.clean), sortKey === F.clean, sortAsc)}
-                    {th('Teachers', () => toggleSort(F.teachers), sortKey === F.teachers, sortAsc)}
-                    <th style={styles.group}>Lab</th>
-                    <th style={styles.group}>Lab cond</th>
-                    <th style={styles.group}>Electricity</th>
-                    <th style={styles.group}>Elec cond</th>
-                    <th style={styles.group}>Handwash</th>
-                    <th style={styles.group}>HW cond</th>
-                    <th style={styles.group}>Library</th>
-                    <th style={styles.group}>Lib cond</th>
-                    <th style={styles.group}>Playground</th>
-                    <th style={styles.group}>Play cond</th>
-                    {th('Toilets T', () => toggleSort(F.toiletsT), sortKey === F.toiletsT, sortAsc)}
-                    {th('Toilets B', () => toggleSort(F.toiletsB), sortKey === F.toiletsB, sortAsc)}
-                    {th('Toilets G', () => toggleSort(F.toiletsG), sortKey === F.toiletsG, sortAsc)}
-                    {th('Toilets total', () => toggleSort(F.toiletsTot), sortKey === F.toiletsTot, sortAsc)}
+                    <Th label="Date"     first onClick={() => toggleSort('eventdate')}   active={sortKey==='eventdate'}   asc={sortAsc}/>
+                    <Th label="Status"        onClick={() => toggleSort('eventstatus')} active={sortKey==='eventstatus'} asc={sortAsc}/>
+                    <Th label="Learners"      onClick={() => toggleSort(F.learners)}    active={sortKey===F.learners}    asc={sortAsc}/>
+                    <Th label="Seats"         onClick={() => toggleSort(F.seats)}       active={sortKey===F.seats}       asc={sortAsc}/>
+                    <Th label="Classrooms"    onClick={() => toggleSort(F.rooms)}       active={sortKey===F.rooms}       asc={sortAsc}/>
+                    <Th label="Clean rooms"   onClick={() => toggleSort(F.clean)}       active={sortKey===F.clean}       asc={sortAsc}/>
+                    <Th label="Teachers"      onClick={() => toggleSort(F.teachers)}    active={sortKey===F.teachers}    asc={sortAsc}/>
+                    <th className={classes.group}>Lab</th>
+                    <th className={classes.group}>Lab cond</th>
+                    <th className={classes.group}>Electricity</th>
+                    <th className={classes.group}>Elec cond</th>
+                    <th className={classes.group}>Handwash</th>
+                    <th className={classes.group}>HW cond</th>
+                    <th className={classes.group}>Library</th>
+                    <th className={classes.group}>Lib cond</th>
+                    <th className={classes.group}>Playground</th>
+                    <th className={classes.group}>Play cond</th>
+                    <Th label="Toilets T"     onClick={() => toggleSort(F.toiletsT)}    active={sortKey===F.toiletsT}    asc={sortAsc}/>
+                    <Th label="Toilets B"     onClick={() => toggleSort(F.toiletsB)}    active={sortKey===F.toiletsB}    asc={sortAsc}/>
+                    <Th label="Toilets G"     onClick={() => toggleSort(F.toiletsG)}    active={sortKey===F.toiletsG}    asc={sortAsc}/>
+                    <Th label="Toilets total" onClick={() => toggleSort(F.toiletsTot)}  active={sortKey===F.toiletsTot}  asc={sortAsc}/>
                 </tr>
                 </thead>
 
                 <tbody>
                 {sorted.map((e, i) => {
                     const isSel = selectedEvent?.psi === e.psi
-                    const rowStyle = {
-                        ...styles.tr,
-                        background: isSel ? '#f1f5f9' : i % 2 ? '#fafafa' : '#fff',
-                    }
+                    const rowClass = `${classes.tr} ${isSel ? classes.rowSelected : (i % 2 ? classes.rowAlt : classes.row)}`
                     return (
-                        <tr key={e.psi || i} onClick={() => pick(e)} style={rowStyle}>
-                            <td style={styles.td}>{new Date(e.eventdate).toLocaleDateString()}</td>
-                            <td style={styles.td}>{e.eventstatus}</td>
-                            <td style={styles.tdNum}>{e[F.learners] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.seats] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.rooms] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.clean] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.teachers] ?? '–'}</td>
+                        <tr key={e.psi || i} onClick={() => pick(e)} className={rowClass}>
+                            <td className={`${classes.td} ${classes.firstCol}`}>{new Date(e.eventdate).toLocaleDateString()}</td>
+                            <td className={classes.td}>{e.eventstatus}</td>
+                            <td className={classes.tdNum}>{e[F.learners] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.seats] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.rooms] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.clean] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.teachers] ?? '–'}</td>
 
-                            <td style={styles.tdCenter}><Bool v={toBool(e[F.lab.on])} /></td>
-                            <td style={styles.td}><Badge v={e[F.lab.cond]} /></td>
-                            <td style={styles.tdCenter}><Bool v={toBool(e[F.elec.on])} /></td>
-                            <td style={styles.td}><Badge v={e[F.elec.cond]} /></td>
-                            <td style={styles.tdCenter}><Bool v={toBool(e[F.wash.on])} /></td>
-                            <td style={styles.td}><Badge v={e[F.wash.cond]} /></td>
-                            <td style={styles.tdCenter}><Bool v={toBool(e[F.lib.on])} /></td>
-                            <td style={styles.td}><Badge v={e[F.lib.cond]} /></td>
-                            <td style={styles.tdCenter}><Bool v={toBool(e[F.play.on])} /></td>
-                            <td style={styles.td}><Badge v={e[F.play.cond]} /></td>
+                            <td className={classes.tdCenter}><Bool v={toBool(e[F.lab.on])} /></td>
+                            <td className={classes.td}><Badge v={e[F.lab.cond]} /></td>
+                            <td className={classes.tdCenter}><Bool v={toBool(e[F.elec.on])} /></td>
+                            <td className={classes.td}><Badge v={e[F.elec.cond]} /></td>
+                            <td className={classes.tdCenter}><Bool v={toBool(e[F.wash.on])} /></td>
+                            <td className={classes.td}><Badge v={e[F.wash.cond]} /></td>
+                            <td className={classes.tdCenter}><Bool v={toBool(e[F.lib.on])} /></td>
+                            <td className={classes.td}><Badge v={e[F.lib.cond]} /></td>
+                            <td className={classes.tdCenter}><Bool v={toBool(e[F.play.on])} /></td>
+                            <td className={classes.td}><Badge v={e[F.play.cond]} /></td>
 
-                            <td style={styles.tdNum}>{e[F.toiletsT] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.toiletsB] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.toiletsG] ?? '–'}</td>
-                            <td style={styles.tdNum}>{e[F.toiletsTot] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.toiletsT] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.toiletsB] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.toiletsG] ?? '–'}</td>
+                            <td className={classes.tdNum}>{e[F.toiletsTot] ?? '–'}</td>
                         </tr>
                     )
                 })}
@@ -161,7 +175,7 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
             </table>
 
             {selectedEvent && (
-                <div style={styles.detailBox}>
+                <div className={classes.detailBox}>
                     <h4 style={{ marginTop: 0 }}>Selected Event</h4>
                     <p><strong>ID:</strong> {selectedEvent.psi}</p>
                     <p><strong>Date:</strong> {new Date(selectedEvent.eventdate).toLocaleString()}</p>
@@ -170,80 +184,4 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
             )}
         </div>
     )
-}
-
-function th(label, onClick, active, asc) {
-    return (
-        <th onClick={onClick} style={styles.th}>
-            {label}
-            {active ? (asc ? ' ▲' : ' ▼') : ''}
-        </th>
-    )
-}
-
-function toBool(v) {
-    if (v === true || v === 'true') return true
-    const n = Number(v)
-    return !Number.isNaN(n) && n > 0
-}
-
-const styles = {
-    table: {
-        borderCollapse: 'separate',
-        borderSpacing: 0,
-        width: '100%',
-        background: '#fff',
-        boxShadow: '0 1px 4px rgba(0,0,0,.06)',
-        border: '1px solid #e5e7eb',
-    },
-    th: {
-        position: 'sticky',
-        top: 0,
-        background: '#f1f5f9',
-        borderBottom: '1px solid #e5e7eb',
-        textAlign: 'left',
-        padding: '6px 8px',
-        fontWeight: 700,
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-        userSelect: 'none',
-        zIndex: 1,
-    },
-    group: {
-        position: 'sticky',
-        top: 0,
-        background: '#f8fafc',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '6px 8px',
-        whiteSpace: 'nowrap',
-        fontWeight: 600,
-    },
-    tr: { cursor: 'pointer' },
-    td: { padding: '6px 8px', borderBottom: '1px solid #f1f5f9', verticalAlign: 'middle' },
-    tdNum: {
-        padding: '6px 8px',
-        borderBottom: '1px solid #f1f5f9',
-        textAlign: 'right',
-        fontVariantNumeric: 'tabular-nums',
-    },
-    tdCenter: { padding: '6px 8px', borderBottom: '1px solid #f1f5f9', textAlign: 'center' },
-    badge: {
-        position: 'relative',
-        display: 'inline-block',
-        minWidth: 42,
-        height: 18,
-        border: '1px solid #e5e7eb',
-        borderRadius: 10,
-        background: '#f8fafc',
-        overflow: 'hidden',
-    },
-    badgeFill: { position: 'absolute', left: 0, top: 0, bottom: 0, background: '#bfdbfe' },
-    badgeText: { position: 'relative', fontSize: 12, padding: '0 6px' },
-    detailBox: {
-        marginTop: '1rem',
-        padding: '0.75rem',
-        border: '1px solid #e5e7eb',
-        borderRadius: 8,
-        background: '#fff',
-    },
 }
