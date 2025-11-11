@@ -169,7 +169,7 @@ export default function LandingPage() {
             <section style={{ marginTop: 16 }}>
                 <h3>Priority schools</h3>
                 {error && <p style={{ color: 'crimson' }}>Error loading analytics: {error.message}</p>}
-                {!loading && ouList.length === 0 && <p>No priority schools detected this month.</p>}
+                {!loading && !error && ouList.length === 0 && <p>No priority schools detected this month.</p>}
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:12 }}>
                     {ouList.map(ou => (
                         <PrioritySchoolCard

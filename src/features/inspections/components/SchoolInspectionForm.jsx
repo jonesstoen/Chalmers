@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Button, InputField, CheckboxField, CircularLoader, AlertStack, AlertBar} from '@dhis2/ui'
 import usePostSchoolInspectionEvent from '../hooks/usePostSchoolInspectionEvent'
+import InspectionContext from '../../../context/InspectionContext'
 
 const defaultSchoolInspectionFields = [
     { id: 'Nvp4hIbXrzF', label: 'Computer Lab present?', type: 'BOOLEAN', child_query: { id: 'gzhjCMe7OyS', label: 'Computer Lab condition (1–5)', type: 'INTEGER_POSITIVE' } },
@@ -31,6 +32,7 @@ export default function SchoolInspectionForm({ orgUnitId }) {
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
     const [submitInspection, { loading, error, data }] = usePostSchoolInspectionEvent()
+    const [inspectionDict, setInspectionDict] = useContext(InspectionContext)
 
     useEffect(() => { 
             if(data){
@@ -119,8 +121,8 @@ export default function SchoolInspectionForm({ orgUnitId }) {
         // Check if not null/undefined
 
         dataValuesArray.push({ dataElement: 'iytoDmoTUWY', value: totalToilets })
-        console.log(dataValuesArray)
         setLastSubmitted(dataValuesArray)
+        setInspectionDict(prev => ({...prev, [orgUnitId]:dataValuesArray}))
         submitInspection({ orgUnit_id: orgUnitId, dataValues: dataValuesArray })
     }
 
