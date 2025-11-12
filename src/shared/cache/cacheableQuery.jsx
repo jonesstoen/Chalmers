@@ -1,62 +1,87 @@
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import {
-    useCacheableSection,
-    CacheableSection,
     useDhis2ConnectionStatus,
     useDataQuery,
 } from "@dhis2/app-runtime"
+import {aggregatedCache, eventsCache, outboxCache} from "./config";
+
 
 // 18 hours in milliseconds
 const HOURS_18 = 18 * 60 * 60 * 1000
 
-export function useCacheableQuery(sectionName, query, options = {}) {
+export function useCacheableQuery(cacheKey, dataKey, query, options = {}) {
     const {isConnected} = useDhis2ConnectionStatus()
-    const {
-        startRecording,
-        isRecording,
-        isCached,
-        lastUpdated
-    } = useCacheableSection(sectionName)
+    const cacheMap = {
+        events: eventsCache,
+        aggregated: aggregatedCache,
+        outbox: outboxCache
+    }
+    const cache = cacheMap[cacheKey]
 
-    // compares lastUpdated to now, and checks if the difference is larger than 18 hours or not
-    const isCacheFresh = (() => {
-        if (!lastUpdated) return false
-        const ageMs = Date.now() - new Date(lastUpdated).getTime()
-        return ageMs <= HOURS_18
-    })()
+    const [data, setData] = useState(null)
+    const [isFresh, setIsFresh] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    const { data: onlineData, refetch, loading: onlineLoading, error: onlineError } =
+        useDataQuery(query, options)
 
     useEffect(() => {
-        if (isConnected && (!isCached || !isCacheFresh) && !isRecording) {
-            void startRecording()
+        let isMounted = true
+
+        async function fetchData() {
+            setLoading(true)
+
+            if (!cache) {
+                console.error(`Unknown cache key: ${cacheKey}`)
+                setLoading(false)
+                return
+            }
+
+            try {
+                if (isConnected) {
+                    if (onlineData) {
+                        await cache.setItem(dataKey, {
+                            data: onlineData,
+                            lastUpdated: Date.now()
+                        })
+                        if (isMounted) {
+                            setData(onlineData)
+                            setIsFresh(true)
+                        }
+                    }
+                } else {
+                    const cached = await cache.getItem(dataKey)
+                    if (cached) {
+                        const age = Date.now() - cached.lastUpdated
+                        const fresh = age <= HOURS_18
+                        if (isMounted) {
+                            setData(cached.data)
+                            setIsFresh(fresh)
+                        }
+                    } else {
+                        if (isMounted) setError('No connection and no cached data found')
+                    }
+                }
+            } catch (error) {
+                if (isMounted) setError(error)
+            } finally {
+                if  (isMounted) setLoading(false)
+            }
         }
-    }, [isConnected, isCached, isRecording, isCacheFresh, startRecording])
 
-    // Only fetch online if cache is stale or missing
-    const shouldFetchOnline = isConnected && (!isCacheFresh || !isCached)
+        fetchData()
 
-    const queryState = useDataQuery(query, {
-        ...options,
-        lazy: !shouldFetchOnline, // prevent auto-fetch if cache is fresh
-    })
-
-    // If we’re using cached data, trigger refetch to load it from the service worker
-    useEffect(() => {
-        if (!shouldFetchOnline && queryState.refetch) {
-            void queryState.refetch()
+        return () => {
+            isMounted = false
         }
-    }, [shouldFetchOnline])
+    }, [isConnected, onlineData, cacheKey, dataKey])
 
     return {
-        ...queryState,
-        isConnected,
-        isCached,
-        lastUpdated,
-        sectionName
+        data,
+        isFresh,
+        loading: isConnected ? onlineLoading || loading : loading,
+        error: onlineError || error,
+        refetch,
     }
 }
-
-export const CacheableQuerySection = ({ id, children, loadingMask }) => (
-    <CacheableSection id={id} loadingMask={loadingMask}>
-        {children}
-    </CacheableSection>
-)
