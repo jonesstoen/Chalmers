@@ -26,8 +26,10 @@ export default function inspectionPage() {
         setActiveStage(null)
     }, [])
 
-    const handleSelect = useCallback((ids) => {
-        setSelected(ids)
+    const handleSelect = useCallback((idsOrId) => {
+        const arr = Array.isArray(idsOrId) ? idsOrId : [idsOrId]
+        const last = arr[arr.length - 1]
+        setSelected(last ? [last] : [])
         setActiveProgram(null)
         setActiveStage(null)
     }, [])

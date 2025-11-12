@@ -74,8 +74,9 @@ export default function SchoolInspectionPage() {
                                     <div style={{ marginBottom: 12 }}>
                                         {/* Timeline med velgbar rad */}
                                         <InspectionTimeline
-                                            schoolId={orgUnitId}
-                                            onSelect={(ev) => setSelectedEvent(ev)}
+                                             key={orgUnitId}
+                                             schoolId={orgUnitId}
+                                             onSelect={(ev) => setSelectedEvent(ev)}
                                         />
                                     </div>
 

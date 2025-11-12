@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, InputField, CheckboxField, CircularLoader } from '@dhis2/ui'
 import { usePostSchoolInspectionEvent } from '../hooks/usePostSchoolInspectionEvent'
 
