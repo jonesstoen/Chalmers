@@ -7,7 +7,8 @@ import SyncBanner from './SyncBanner'
 import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
 import InspectionTimeline from '../analytics/components/InspectionTimeline'
-
+import Graph from '../analytics/components/useGraph'
+import SchoolHeatmap from '../analytics/heatmap/SchoolHeatmap'
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -73,7 +74,7 @@ export default function LandingPage() {
         setPriorityOuIds(bad.slice(0, 8).map(x => x.ou))
     }, [rows, headers])
 
-    // ✅ ÉN stabil query for batchede OU-opplysninger (ikke dupliser!)
+
     const OU_BATCH_QUERY = useMemo(() => ({
         ous: {
             resource: 'organisationUnits',
@@ -94,10 +95,12 @@ export default function LandingPage() {
     const pendingSync = 0
 
     return (
-        <div style={{ padding: 16 }}>
-            <InspectionTimeline schoolId={'k6MLijE92iz'} />
 
-            <h2 style={{ marginBottom: 8 }}>Overview</h2>
+        <div style={{ padding: 16 }}>
+
+                                    {/* {<Inspe ctionTimeline schoolId={'k6MLijE92iz'}/> } */}
+        {/* <PopulateDataButton/> */}
+            <h2 style={{ marginBottom: 8 }}> Overview</h2>
             <SyncBanner />
 
             {/* HERO / PRIMARY CTA */}
@@ -116,7 +119,7 @@ export default function LandingPage() {
             >
                 <div>
                     <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                        Welcome — key metrics and quick links to get you started.
+                        Welcome Under you can see some key metrics and quick links to get you started.
                     </div>
                     <p style={{ margin: 0, color: '#475569' }}>
                         Go to the inspection module to browse organisation trees, open your school's form, and submit data.

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useSchoolAnalytics } from '../api/useSchoolAnalytics'
+import { useSchoolAnalytics } from './useSchoolAnalytics'
 import { useMemo } from 'react'
 
 // Helper hook that wraps the analytics query and returns a clean, sorted data list
