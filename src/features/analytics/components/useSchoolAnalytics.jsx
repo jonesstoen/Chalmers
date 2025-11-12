@@ -2,43 +2,36 @@ import { useDataQuery } from '@dhis2/app-runtime'
 
 const schoolAnalyticsQuery = {
     analytics: {
-        // keep resource static
         resource: 'analytics/events/query',
-        // dynamically append program ID through `id`
-        id: ({ program }) => program,
-        params: ({ program, stage, schoolId, startDate, endDate, dataElements }) => {
-            const dimensions = [`ou:${schoolId}`, ...(dataElements || [])]
+        id: ({ programId }) => programId,
+        params: ({ programId, stageId, schoolId, startDate, endDate, dataElements = [] }) => {
+            const baseDimensions = [
+                `ou:${schoolId}`,
+                ...dataElements.filter(Boolean)
+            ]
 
             return {
-                stage,
-                outputType: 'EVENT',
-                skipMeta: false,
-                displayProperty: 'NAME',
-                includeMetadataDetails: true,
-                paging: false,
+                program: programId,
+                stage: stageId,
+                dimension: baseDimensions,
+                outputType: 'EVENT',               
                 startDate: startDate ?? '2024-01-01',
                 endDate: endDate ?? new Date().toISOString().split('T')[0],
-                dimension: dimensions, // @dhis2/runtime repeats these automatically
+                displayProperty: 'NAME',
+                skipMeta: false,
+                includeMetadataDetails: true,
+                paging: false,
             }
         },
     },
 }
 
+
 export function useSchoolAnalytics({ programId, stageId, schoolId, startDate, endDate, dataElements }) {
     const ready = Boolean(programId && schoolId)
-    const variables = {
-        program: programId,
-        stage: stageId,
-        schoolId,
-        startDate,
-        endDate,
-        dataElements,
-    }
-
     const { loading, error, data } = useDataQuery(schoolAnalyticsQuery, {
-        variables,
+        variables: { programId, stageId, schoolId, startDate, endDate, dataElements },
         lazy: !ready,
     })
-
     return { loading, error, data: data?.analytics }
 }
