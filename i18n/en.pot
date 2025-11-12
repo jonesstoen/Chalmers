@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-08T18:51:33.606Z\n"
-"PO-Revision-Date: 2025-11-08T18:51:33.607Z\n"
+"POT-Creation-Date: 2025-11-11T12:21:51.394Z\n"
+"PO-Revision-Date: 2025-11-11T12:21:51.395Z\n"
 
 msgid "Select a school"
 msgstr "Select a school"
@@ -16,6 +16,21 @@ msgstr "Pick a node in the tree to see details."
 
 msgid "Analytics"
 msgstr "Analytics"
+
+msgid "School Inspection"
+msgstr "School Inspection"
+
+msgid "Pick a school in the tree to continue."
+msgstr "Pick a school in the tree to continue."
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Delete"
+msgstr "Delete"
 
 msgid "Organisation units"
 msgstr "Organisation units"

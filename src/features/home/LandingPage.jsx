@@ -1,14 +1,13 @@
 // features/home/LandingPage.jsx
-import React, { useMemo, useEffect, useState } from 'react'
+import React, { useMemo, useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'
 import useFetchAnalytics from '../analytics/api/analyticsAPI'
 import SyncBanner from './SyncBanner'
 import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
-import SchoolAnalyticsView from '../analytics/components/SchoolAnalyticsView'
-import PopulateDataButton from '../inspections/components/PopulateDataButton'
 import InspectionTimeline from '../analytics/components/InspectionTimeline'
+
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -26,14 +25,14 @@ function monthRangeISO(d = new Date()) {
 
 export default function LandingPage() {
     const navigate = useNavigate()
-    const openSchool = (ouId) => navigate(`/inspect?ou=${ouId}`)
-    const openRoot = (rootId) => navigate(`/inspect?root=${rootId}`)
-    const openInspector = () => navigate('/inspect')
+    const openSchool = useCallback((ouId) => navigate(`/inspect?ou=${ouId}`), [navigate])
+    const openRoot = useCallback((rootId) => navigate(`/inspect?root=${rootId}`), [navigate])
+    const openInspector = useCallback(() => navigate('/inspect'), [navigate])
+    const openSchoolInspection = useCallback(() => navigate('/school-inspection'), [navigate])
 
     const lastOu = typeof window !== 'undefined' ? window.localStorage.getItem('lastOu') : null
     const { startDate, endDate } = useMemo(() => monthRangeISO(), [])
 
-    // Hent analytics via eksisterende hook
     const { data, loading, error } = useFetchAnalytics(
         PROGRAM_ID,
         { startDate, endDate, stage: STAGE_ID },
@@ -61,8 +60,8 @@ export default function LandingPage() {
             const learners = Number(r[learnersIdx] || 0)
             const seats = Number(r[seatsIdx] || 0)
             const agg = byOu.get(ou) ?? { learners: 0, seats: 0 }
-            agg.learners += isNaN(learners) ? 0 : learners
-            agg.seats += isNaN(seats) ? 0 : seats
+            agg.learners += Number.isNaN(learners) ? 0 : learners
+            agg.seats += Number.isNaN(seats) ? 0 : seats
             byOu.set(ou, agg)
         }
 
@@ -74,30 +73,31 @@ export default function LandingPage() {
         setPriorityOuIds(bad.slice(0, 8).map(x => x.ou))
     }, [rows, headers])
 
-    const ouBatchQuery = useMemo(() => {
-        if (!priorityOuIds.length) return null
-        return {
-            ous: {
-                resource: 'organisationUnits',
-                params: {
-                    filter: `id:in:[${priorityOuIds.join(',')}]`,
-                    fields: 'id,name,displayName,parent[name]',
-                    paging: false,
-                },
-            },
-        }
-    }, [priorityOuIds])
+    // ✅ ÉN stabil query for batchede OU-opplysninger (ikke dupliser!)
+    const OU_BATCH_QUERY = useMemo(() => ({
+        ous: {
+            resource: 'organisationUnits',
+            params: ({ ids }) => ({
+                ...(ids?.length ? { filter: `id:in:[${ids.join(',')}]` } : {}),
+                fields: 'id,name,displayName,parent[name]',
+                paging: false,
+            }),
+        },
+    }), [])
 
-    const { data: ouData } = useDataQuery(ouBatchQuery ?? {}, { lazy: !ouBatchQuery })
-    const ouList = ouData?.ous?.organisationUnits ?? []
+    const { data: ouResp } = useDataQuery(OU_BATCH_QUERY, {
+        variables: { ids: priorityOuIds },
+        lazy: !priorityOuIds.length,
+    })
+
+    const ouList = ouResp?.ous?.organisationUnits ?? []
     const pendingSync = 0
 
     return (
-
         <div style={{ padding: 16 }}>
-                                    {<InspectionTimeline schoolId={'k6MLijE92iz'}/> }
-        {/* <PopulateDataButton/> */}
-            <h2 style={{ marginBottom: 8 }}> Overview</h2>
+            <InspectionTimeline schoolId={'k6MLijE92iz'} />
+
+            <h2 style={{ marginBottom: 8 }}>Overview</h2>
             <SyncBanner />
 
             {/* HERO / PRIMARY CTA */}
@@ -116,7 +116,7 @@ export default function LandingPage() {
             >
                 <div>
                     <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                        Welcome Under you can see some key metrics and quick links to get you started.
+                        Welcome — key metrics and quick links to get you started.
                     </div>
                     <p style={{ margin: 0, color: '#475569' }}>
                         Go to the inspection module to browse organisation trees, open your school's form, and submit data.
@@ -131,6 +131,16 @@ export default function LandingPage() {
                     >
                         Open inspector
                     </button>
+
+                    <button
+                        onClick={openSchoolInspection}
+                        style={{ padding: '10px 14px', borderRadius: 10, border: '1px dashed #2563eb',
+                            background: '#fff', color: '#2563eb', cursor: 'pointer' }}
+                        title="Go to School Inspection (Submit/Edit/Delete tabs)"
+                    >
+                        Open School Inspection (tabs)
+                    </button>
+
                     <button
                         onClick={() => openRoot('Bp3y61WbHwn')}
                         style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb',

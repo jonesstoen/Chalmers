@@ -6,6 +6,8 @@ import LandingPage from '../features/home/LandingPage'
 import InspectPage from '../features/inspections/inspectionPage'
 import InspectionContext from '../context/InspectionContext'
 import AttributeContext from '../context/AttributeContext'
+import SchoolInspectionPage from '../features/inspections/pages/SchoolInspectionPage'
+
 
 export default function App() {
     const [inspectionDict, setInspectionDict] = useState({})
@@ -22,6 +24,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/inspect" element={<InspectPage />} />
+                <Route path="/school-inspection" element={<SchoolInspectionPage />} />
                 {/* fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

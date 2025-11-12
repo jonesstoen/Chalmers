@@ -1,0 +1,90 @@
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    border: 1px solid #e5e7eb;
+}
+
+.th {
+    position: sticky;
+    top: 0;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    white-space: nowrap;
+    user-select: none;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.group {
+    composes: th;
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.tr { cursor: pointer; }
+
+.row { background: #fff; }
+.rowAlt { background: #fafafa; }
+.rowSelected { background: #f1f5f9; outline: 1px solid #cbd5e1; }
+
+.td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.tdNum {
+    composes: td;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.tdCenter {
+    composes: td;
+    text-align: center;
+}
+
+.badge {
+    position: relative; display: inline-block;
+    min-width: 42px; height: 18px;
+    border: 1px solid #e5e7eb; border-radius: 10px;
+    background: #f8fafc; overflow: hidden;
+}
+.badgeFill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: #bfdbfe;
+}
+.badgeText { position: relative; font-size: 12px; padding: 0 6px; }
+
+.ratioChip {
+    display: inline-block; padding: 2px 6px; border-radius: 10px;
+    background: #fff; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+
+.ratioGreen { border: 1px solid #065f46; color: #065f46; }
+.ratioAmber { border: 1px solid #b45309; color: #b45309; }
+.ratioRed   { border: 1px solid crimson; color: crimson; }
+.ratioGray  { border: 1px solid #9ca3af; color: #374151; }
+
+.boolOk { font-weight: 700; color: #065f46; }
+.boolBad { font-weight: 700; color: #991b1b; }
+
+.detailBox {
+    margin-top: 1rem; padding: .75rem;
+    border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;
+}
+
+/* Sticky first column (Date) */
+.firstCol, .firstColTh {
+    position: sticky; left: 0; z-index: 2; background: inherit;
+    box-shadow: 1px 0 0 #e5e7eb;
+}
+
+/* Hover */
+tbody tr:hover { background: #f8fafc; }
