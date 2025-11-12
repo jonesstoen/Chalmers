@@ -8,6 +8,7 @@ import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
 import InspectionTimeline from '../analytics/components/InspectionTimeline'
 
+
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -98,6 +99,7 @@ export default function LandingPage() {
             <InspectionTimeline schoolId={'k6MLijE92iz'} />
 
             <h2 style={{ marginBottom: 8 }}>Overview</h2>
+
             <SyncBanner />
 
             {/* HERO / PRIMARY CTA */}
