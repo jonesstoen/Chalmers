@@ -1,3 +1,4 @@
+// features/org-units/components/OrgTreePanel.jsx
 import React, { useState, useCallback, useEffect } from 'react'
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
@@ -7,14 +8,17 @@ import SchoolSearchBar from '../../inspections/components/SchoolSearchBar.jsx'
 export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }) {
     const safeInitialRoot = initialRootId ?? roots?.[0]?.id
     const [currentRootId, setCurrentRootId] = useState(safeInitialRoot)
+
+    //  Holding paths in state
     const [expanded, setExpanded] = useState(() => (safeInitialRoot ? [`/${safeInitialRoot}`] : []))
-    const [selected, setSelected] = useState([])
+    const [selectedPaths, setSelectedPaths] = useState([]) // f.eks. ['/d4eGL0CYbBT']
 
     const asPaths = (arg) => {
         if (!arg) return []
         if (Array.isArray(arg)) return arg
         if (typeof arg === 'string') return [arg]
         if (arg.path) return [arg.path]
+        if (arg.id) return [`/${arg.id}`]
         return []
     }
     const pathToId = (p) => {
@@ -37,33 +41,25 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
     const switchRoot = (id) => {
         setCurrentRootId(id)
         setExpanded([`/${id}`])
-        setSelected([])
+        setSelectedPaths([])
         onRootChange?.(id)
-        onSelect?.([])        // reset oppover
+        onSelect?.([]) // reset oppover (IDer)
     }
 
-    // <- Viktig: bruk SISTE id fra tree selection
+    //  Tree selection → paths to the tree, ID to parent
     const handleChange = useCallback((value) => {
-        let ids = []
-        if (Array.isArray(value)) {
-            ids = value.map((n) => (typeof n === 'string' ? pathToId(n) : n?.id ?? pathToId(n?.path))).filter(Boolean)
-        } else if (value && typeof value === 'object') {
-            if (value.id) ids = [value.id]
-            else if (value.path) ids = [pathToId(value.path)]
-            else ids = Object.keys(value).map(pathToId).filter(Boolean) // map-format
-        } else if (typeof value === 'string') {
-            ids = [pathToId(value)].filter(Boolean)
-        }
-        const last = ids.length ? ids[ids.length - 1] : null
-        const next = last ? [last] : []
-        setSelected(next)
-        onSelect?.(next)
+        const paths = asPaths(value).map((p) => (p.startsWith('/') ? p : `/${p}`))
+        const next = paths.length ? [paths[paths.length - 1]] : []
+        setSelectedPaths(next)
+        const id = next.length ? pathToId(next[0]) : null
+        onSelect?.(id ? [id] : [])
     }, [onSelect])
 
-    // ← Koble søk til seleksjon (du hadde `regionid` her før — den gjorde ingenting)
+    // ✅ Søk → set path; send ID opp
     const handleSearchPick = useCallback((school) => {
         if (!school?.id) return
-        setSelected([school.id])
+        const p = `/${school.id}`
+        setSelectedPaths([p])
         onSelect?.([school.id])
     }, [onSelect])
 
@@ -80,33 +76,29 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
 
     return (
         <aside className={classes.sidebar}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 6px 10px 6px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, margin:'0 6px 10px 6px' }}>
                 <div className={classes.sidebarHeader}>{i18n.t('Organisation units')}</div>
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                <div style={{ marginLeft:'auto', display:'flex', gap:6 }}>
                     {roots.map((r) => (
-                        <button
-                            key={r.id}
-                            onClick={() => switchRoot(r.id)}
-                            style={{
-                                border: '1px solid ' + (currentRootId === r.id ? '#2563eb' : '#e5e7eb'),
-                                background: '#fff', padding: '6px 10px', borderRadius: 8, cursor: 'pointer',
-                                boxShadow: currentRootId === r.id ? '0 0 0 2px rgba(37,99,235,.15)' : 'none',
-                            }}
-                        >
+                        <button key={r.id} onClick={() => switchRoot(r.id)}
+                                style={{
+                                    border:'1px solid ' + (currentRootId === r.id ? '#2563eb' : '#e5e7eb'),
+                                    background:'#fff', padding:'6px 10px', borderRadius:8, cursor:'pointer',
+                                    boxShadow: currentRootId === r.id ? '0 0 0 2px rgba(37,99,235,.15)' : 'none',
+                                }}>
                             {r.label}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* NY: faktisk wiring */}
             <SchoolSearchBar onSelect={handleSearchPick} />
 
             <div className={classes.treeScroll}>
                 <OrganisationUnitTree
                     key={currentRootId}
                     roots={[currentRootId]}
-                    selected={selected}
+                    selected={selectedPaths}
                     expanded={expanded}
                     singleSelection
                     onChange={handleChange}
