@@ -27,7 +27,7 @@ optionSet referred to in the error: wTManXJBRRR
 https://research.im.dhis2.org/in5320g09/api/optionSets/wTManXJBRRR?fields=options[id,name]
 */
 
-export default function SchoolInspectionForm({ orgUnitId }) {
+export default function SchoolInspectionForm({ orgUnitId, setActiveTab}) {
     const [formState, setFormState] = useState({}) // holding the states
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
@@ -124,6 +124,7 @@ export default function SchoolInspectionForm({ orgUnitId }) {
         setLastSubmitted(dataValuesArray)
         setInspectionDict(prev => ({...prev, [orgUnitId]:dataValuesArray}))
         submitInspection({ orgUnit_id: orgUnitId, dataValues: dataValuesArray })
+        setActiveTab('tldr') // Change screen to Recent Summary
     }
 
     if(!formState){
@@ -132,7 +133,8 @@ export default function SchoolInspectionForm({ orgUnitId }) {
 
     return (
         <div style={{ marginTop: '1rem' }}>
-            <h3>School Inspection – Form</h3>
+            <h3>School Inspection at {orgUnitId}</h3>
+            
 
             {loading && <CircularLoader small />}
 

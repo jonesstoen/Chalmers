@@ -1,5 +1,5 @@
 // features/inspections/pages/SchoolInspectionPage.jsx
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useMemo, useState, useCallback, useContext } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import { TabBar, Tab } from '@dhis2/ui'
 import classes from '../../../App/App.module.css'
@@ -9,6 +9,8 @@ import EditInspectionForm from '../components/EditInspectionForm'
 import DeleteInspectionPanel from '../components/DeleteInspectionPanel'
 import InspectionTimeline from '../../analytics/components/InspectionTimeline'
 import useFetchOrgUnits from '../../org-units/hooks/useFetchOrgUnits'
+import Result from '../components/inspection_result/Result'
+import InspectionContext from '../../../context/InspectionContext'
 
 export default function SchoolInspectionPage() {
     const ROOTS = useMemo(() => [
@@ -17,8 +19,9 @@ export default function SchoolInspectionPage() {
     ], [])
 
     const [selected, setSelected] = useState([])   // [orgUnitId]
-    const [activeTab, setActiveTab] = useState('submit') // submit | edit | delete
+    const [activeTab, setActiveTab] = useState('submit') // submit | edit | delete | tldr
     const [selectedEvent, setSelectedEvent] = useState(null) // fra timeline
+    const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // BDSM
 
     const handleRootChange = useCallback(() => {
         setSelected([])
@@ -27,6 +30,7 @@ export default function SchoolInspectionPage() {
 
     const handleSelect = useCallback((ids) => {
         setSelected(ids)
+        setActiveTab('submit')
         setSelectedEvent(null)
     }, [])
 
@@ -59,17 +63,20 @@ export default function SchoolInspectionPage() {
                             <Tab selected={activeTab === 'delete'} onClick={() => setActiveTab('delete')}>
                                 {i18n.t('Delete')}
                             </Tab>
+                            <Tab selected={activeTab === 'tldr'} onClick={() => setActiveTab('tldr')}>
+                                {i18n.t('Recent Summary')}
+                            </Tab>
                         </TabBar>
 
                         {/* Content per tab */}
                         <div style={{ marginTop: 16 }}>
-                            {activeTab === 'submit' && (
+                            {activeTab === 'submit' &&(
                                 <div>
-                                    <SchoolInspectionForm orgUnitId={orgUnitId} />
+                                    <SchoolInspectionForm orgUnitId={orgUnitId} setActiveTab={setActiveTab}/>
                                 </div>
-                            )}
+                            )}    
 
-                            {activeTab !== 'submit' && (
+                            {activeTab !== 'submit' && activeTab !== 'tldr' && (
                                 <>
                                     <div style={{ marginBottom: 12 }}>
                                         {/* Timeline med velgbar rad */}
@@ -90,8 +97,10 @@ export default function SchoolInspectionPage() {
                                             event={selectedEvent}
                                         />
                                     )}
+
                                 </>
                             )}
+                            {activeTab === 'tldr' && <Result OrgId={selected}/>}
                         </div>
                     </>
                 )}
