@@ -1,4 +1,3 @@
-// features/inspections/pages/SchoolInspectionPage.jsx
 import React, { useMemo, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import { Button, ButtonStrip, NoticeBox, IconEdit16, IconAdd16, IconDelete16, Tag } from '@dhis2/ui'
@@ -143,10 +142,7 @@ export default function SchoolInspectionPage() {
                         {mode !== 'submit' && (
                             <>
                                 <div style={{ marginBottom: 12 }}>
-                                    <InspectionTimeline
-                                        schoolId={orgUnitId}
-                                        onSelect={ev => setSelectedEvent(ev)}
-                                    />
+                                    <InspectionTimeline key={orgUnitId} schoolId={orgUnitId} onSelect={ev => setSelectedEvent(ev)} />
                                 </div>
 
                                 <EventSummary event={selectedEvent} />
