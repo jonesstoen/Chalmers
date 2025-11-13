@@ -1,7 +1,6 @@
 // features/inspections/components/EditInspectionForm.jsx
 import React, { useEffect, useState } from 'react'
 import { Button, InputField, CheckboxField, NoticeBox } from '@dhis2/ui'
-// ⬇️ RIKTIG import
 import { useUpdateSchoolInspectionEvent } from '../hooks/useUpdateSchoolInspection'
 
 // Samme feltliste som i submit-formen
@@ -27,7 +26,11 @@ const FIELDS = [
     { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
 ]
 
-export default function EditInspectionForm({ event }) {
+// DHIS2 ids brukt i prosjektet
+const PROGRAM_ID = 'UxK2o06ScIe'
+const STAGE_ID   = 'eJiBjm9Rl7E'
+
+export default function EditInspectionForm({ event, orgUnitId }) {
     const [form, setForm] = useState({})
     const [updateEvent, { loading, error }] = useUpdateSchoolInspectionEvent()
 
@@ -42,25 +45,54 @@ export default function EditInspectionForm({ event }) {
     }, [event])
 
     if (!event) {
-        return <NoticeBox title="Select an event">Pick an event in the table above to edit.</NoticeBox>
+        return (
+            <NoticeBox title="Select an event">
+                Pick an event in the table above to edit.
+            </NoticeBox>
+        )
     }
 
-    const handleChange = (id, value) => setForm(prev => ({ ...prev, [id]: value }))
+    const handleChange = (id, value) =>
+        setForm(prev => ({ ...prev, [id]: value }))
 
     const handleSubmit = async () => {
         const dataValues = FIELDS.map(({ id, type }) => {
-            let value = form[id]
-            if (type === 'BOOLEAN') value = !!value
-            return { dataElement: id, value }
+            const raw = form[id]
+            if (type === 'BOOLEAN') return { dataElement: id, value: (raw === true || raw === 'true') }
+            return { dataElement: id, value: String(raw ?? '') } // send som string
         })
-        await updateEvent({ eventId: event.psi, dataValues })
+
+        const eventId = event?.psi || event?.event
+        if (!eventId) { alert('Missing eventId for update'); return }
+
+        const ou = orgUnitId ?? event?.ou ?? event?.orgUnit
+        if (!ou) { alert('Missing orgUnitId for update'); return }
+
+        const occurredAt = event?.eventdate
+            ? new Date(event.eventdate).toISOString()
+            : new Date().toISOString()
+
+        const status = event?.eventstatus || 'COMPLETED'
+
+        await updateEvent({
+            eventId,
+            orgUnit: ou,
+            occurredAt,
+            status,
+            programId: 'UxK2o06ScIe',
+            programStageId: 'eJiBjm9Rl7E',
+            dataValues,
+        })
+
         alert('Event updated!')
     }
 
     return (
         <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 12, background: '#fff' }}>
             <h3>Edit inspection</h3>
-            <p style={{ marginTop: 0, color: '#475569' }}><strong>Event ID:</strong> {event.psi}</p>
+            <p style={{ marginTop: 0, color: '#475569' }}>
+                <strong>Event ID:</strong> {event.psi || event.event}
+            </p>
 
             {FIELDS.map(({ id, label, type }) => (
                 <div key={id} style={{ marginBottom: '0.75rem' }}>
@@ -68,7 +100,9 @@ export default function EditInspectionForm({ event }) {
                         <CheckboxField
                             label={label}
                             checked={form[id] === true || form[id] === 'true'}
-                            onChange={() => handleChange(id, !(form[id] === true || form[id] === 'true'))}
+                            onChange={() =>
+                                handleChange(id, !(form[id] === true || form[id] === 'true'))
+                            }
                         />
                     ) : (
                         <InputField

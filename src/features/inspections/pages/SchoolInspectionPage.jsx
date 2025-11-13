@@ -149,7 +149,7 @@ export default function SchoolInspectionPage() {
 
                                 {mode === 'edit' && (
                                     selectedEvent
-                                        ? <EditInspectionForm event={selectedEvent} />
+                                        ? <EditInspectionForm event={selectedEvent} orgUnitId={orgUnitId} />
                                         : <NoticeBox title={i18n.t('Select an event')}>
                                             {i18n.t('Pick an event in the table above to edit.')}
                                         </NoticeBox>
