@@ -7,8 +7,7 @@ import SyncBanner from './SyncBanner'
 import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
 import InspectionTimeline from '../analytics/components/InspectionTimeline'
-import Graph from '../analytics/components/useGraph'
-import SchoolHeatmap from '../analytics/heatmap/SchoolHeatmap'
+
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 const ROOTS = [
@@ -68,13 +67,15 @@ export default function LandingPage() {
 
         const bad = []
         for (const [ou, { learners, seats }] of byOu.entries()) {
-            if (learners > 0 && seats / learners < RATIO_THRESHOLD) bad.push({ ou, ratio: seats / learners })
+            if (learners > 0 && seats / learners < RATIO_THRESHOLD) {
+                bad.push({ ou, ratio: seats / learners })
+            }
         }
         bad.sort((a, b) => a.ratio - b.ratio)
         setPriorityOuIds(bad.slice(0, 8).map(x => x.ou))
     }, [rows, headers])
 
-
+    // ✅ ÉN stabil query for batchede OU-opplysninger
     const OU_BATCH_QUERY = useMemo(() => ({
         ous: {
             resource: 'organisationUnits',
@@ -95,12 +96,11 @@ export default function LandingPage() {
     const pendingSync = 0
 
     return (
-
         <div style={{ padding: 16 }}>
+            <InspectionTimeline schoolId={'k6MLijE92iz'} />
 
-                                    {/* {<Inspe ctionTimeline schoolId={'k6MLijE92iz'}/> } */}
-        {/* <PopulateDataButton/> */}
-            <h2 style={{ marginBottom: 8 }}> Overview</h2>
+            <h2 style={{ marginBottom: 8 }}>Overview</h2>
+
             <SyncBanner />
 
             {/* HERO / PRIMARY CTA */}
@@ -119,7 +119,7 @@ export default function LandingPage() {
             >
                 <div>
                     <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                        Welcome Under you can see some key metrics and quick links to get you started.
+                        Welcome — key metrics and quick links to get you started.
                     </div>
                     <p style={{ margin: 0, color: '#475569' }}>
                         Go to the inspection module to browse organisation trees, open your school's form, and submit data.
@@ -128,8 +128,15 @@ export default function LandingPage() {
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     <button
                         onClick={openInspector}
-                        style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #2563eb',
-                            background: '#2563eb', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                        style={{
+                            padding: '10px 14px',
+                            borderRadius: 10,
+                            border: '1px solid #2563eb',
+                            background: '#2563eb',
+                            color: '#fff',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                        }}
                         aria-label="Open Inspector"
                     >
                         Open inspector
@@ -137,8 +144,14 @@ export default function LandingPage() {
 
                     <button
                         onClick={openSchoolInspection}
-                        style={{ padding: '10px 14px', borderRadius: 10, border: '1px dashed #2563eb',
-                            background: '#fff', color: '#2563eb', cursor: 'pointer' }}
+                        style={{
+                            padding: '10px 14px',
+                            borderRadius: 10,
+                            border: '1px dashed #2563eb',
+                            background: '#fff',
+                            color: '#2563eb',
+                            cursor: 'pointer'
+                        }}
                         title="Go to School Inspection (Submit/Edit/Delete tabs)"
                     >
                         Open School Inspection (tabs)
@@ -146,23 +159,38 @@ export default function LandingPage() {
 
                     <button
                         onClick={() => openRoot('Bp3y61WbHwn')}
-                        style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb',
-                            background: '#fff', cursor: 'pointer' }}
+                        style={{
+                            padding: '10px 14px',
+                            borderRadius: 10,
+                            border: '1px solid #e5e7eb',
+                            background: '#fff',
+                            cursor: 'pointer'
+                        }}
                     >
                         Open Kanifing root
                     </button>
                     <button
                         onClick={() => openRoot('RlPlK44dtoo')}
-                        style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid #e5e7eb',
-                            background: '#fff', cursor: 'pointer' }}
+                        style={{
+                            padding: '10px 14px',
+                            borderRadius: 10,
+                            border: '1px solid #e5e7eb',
+                            background: '#fff',
+                            cursor: 'pointer'
+                        }}
                     >
                         Open Banjul root
                     </button>
                     {lastOu && (
                         <button
                             onClick={() => openSchool(lastOu)}
-                            style={{ padding: '10px 14px', borderRadius: 10, border: '1px dashed #e5e7eb',
-                                background: '#fff', cursor: 'pointer' }}
+                            style={{
+                                padding: '10px 14px',
+                                borderRadius: 10,
+                                border: '1px dashed #e5e7eb',
+                                background: '#fff',
+                                cursor: 'pointer'
+                            }}
                             title="Open your last visited school"
                         >
                             Resume last school
@@ -172,18 +200,46 @@ export default function LandingPage() {
             </section>
 
             {/* KPI-er */}
-            <section style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px,1fr))', gap:12, marginTop:16 }}>
-                <MetricTile title="Inspections this month" value={loading ? '…' : String(inspectionsThisMonth)} />
-                <MetricTile title="Pending sync" value={String(pendingSync)} />
-                <MetricTile title="Schools needing follow-up" value={loading ? '…' : String(ouList.length)} />
+            <section
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))',
+                    gap: 12,
+                    marginTop: 16
+                }}
+            >
+                <MetricTile
+                    title="Inspections this month"
+                    value={loading ? '…' : String(inspectionsThisMonth)}
+                />
+                <MetricTile
+                    title="Pending sync"
+                    value={String(pendingSync)}
+                />
+                <MetricTile
+                    title="Schools needing follow-up"
+                    value={loading ? '…' : String(ouList.length)}
+                />
             </section>
 
             {/* Prioritetsliste */}
             <section style={{ marginTop: 16 }}>
                 <h3>Priority schools</h3>
-                {error && <p style={{ color: 'crimson' }}>Error loading analytics: {error.message}</p>}
-                {!loading && ouList.length === 0 && <p>No priority schools detected this month.</p>}
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:12 }}>
+                {error && (
+                    <p style={{ color: 'crimson' }}>
+                        Error loading analytics: {error.message}
+                    </p>
+                )}
+                {!loading && !error && ouList.length === 0 && (
+                    <p>No priority schools detected this month.</p>
+                )}
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
+                        gap: 12
+                    }}
+                >
                     {ouList.map(ou => (
                         <PrioritySchoolCard
                             key={ou.id}

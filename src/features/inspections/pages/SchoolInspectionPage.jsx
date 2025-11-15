@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useCallback } from 'react'
+// features/inspections/pages/SchoolInspectionPage.jsx
+import React, { useMemo, useState, useCallback, useContext } from 'react'
 import i18n from '@dhis2/d2-i18n'
-import { Button, ButtonStrip, NoticeBox, IconEdit16, IconAdd16, IconDelete16, Tag } from '@dhis2/ui'
+import { TabBar, Tab, NoticeBox, Tag } from '@dhis2/ui'
 import classes from '../../../App/App.module.css'
 import OrgTreePanel from '../../org-units/components/OrgTreePanel'
 import SchoolInspectionForm from '../components/SchoolInspectionForm'
@@ -8,10 +9,13 @@ import EditInspectionForm from '../components/EditInspectionForm'
 import DeleteInspectionPanel from '../components/DeleteInspectionPanel'
 import InspectionTimeline from '../../analytics/components/InspectionTimeline'
 import useFetchOrgUnits from '../../org-units/hooks/useFetchOrgUnits'
+import Result from '../components/inspection_result/Result'
+import InspectionContext from '../../../context/InspectionContext'
 
 function EventSummary({ event }) {
     if (!event) return null
     const date = new Date(event.eventdate)
+
     return (
         <div
             style={{
@@ -29,8 +33,16 @@ function EventSummary({ event }) {
             <strong style={{ marginRight: 8 }}>{i18n.t('Selected event')}</strong>
             <Tag positive>{date.toLocaleDateString()}</Tag>
             <Tag>{i18n.t('Status')}: {event.eventstatus}</Tag>
-            {'DO0LBJfXY00' in event && <Tag>{i18n.t('Learners')}: {event.DO0LBJfXY00 ?? '–'}</Tag>}
-            {'jcC1uz56IpY' in event && <Tag>{i18n.t('Seats')}: {event.jcC1uz56IpY ?? '–'}</Tag>}
+            {'DO0LBJfXY00' in event && (
+                <Tag>
+                    {i18n.t('Learners')}: {event.DO0LBJfXY00 ?? '–'}
+                </Tag>
+            )}
+            {'jcC1uz56IpY' in event && (
+                <Tag>
+                    {i18n.t('Seats')}: {event.jcC1uz56IpY ?? '–'}
+                </Tag>
+            )}
             <span style={{ marginLeft: 'auto', color: '#64748b' }}>ID: {event.psi}</span>
         </div>
     )
@@ -42,25 +54,30 @@ export default function SchoolInspectionPage() {
         { id: 'RlPlK44dtoo', label: 'Banjul' },
     ], [])
 
-    const [selected, setSelected] = useState([])                 // [orgUnitId]
-    const [mode, setMode] = useState('submit')                  // 'submit' | 'edit' | 'delete'
-    const [selectedEvent, setSelectedEvent] = useState(null)    // valgt fra timeline
+    const [selected, setSelected] = useState([])            // [orgUnitId]
+    const [activeTab, setActiveTab] = useState('submit')   // 'submit' | 'edit' | 'delete' | 'tldr'
+    const [selectedEvent, setSelectedEvent] = useState(null)
+
+    // Om dere faktisk trenger context senere:
+    const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line no-unused-vars
 
     const handleRootChange = useCallback(() => {
         setSelected([])
         setSelectedEvent(null)
+        setActiveTab('submit')
     }, [])
 
     const handleSelect = useCallback((ids) => {
         setSelected(ids)
+        setActiveTab('submit')
         setSelectedEvent(null)
     }, [])
 
-    const { data, selectedId, loading } = useFetchOrgUnits(selected)
+    const { data, selectedId } = useFetchOrgUnits(selected)
     const ou = data?.ou
     const orgUnitId = ou?.id
 
-    const Header = (
+    const header = (
         <div
             style={{
                 display: 'flex',
@@ -82,35 +99,6 @@ export default function SchoolInspectionPage() {
         </div>
     )
 
-    // tab buttons
-    const ModeStrip = (
-        <ButtonStrip style={{ margin: '4px 0 12px' }}>
-            <Button
-                primary={mode === 'submit'}
-                onClick={() => setMode('submit')}
-                icon={<IconAdd16 />}
-            >
-                {i18n.t('Submit')}
-            </Button>
-            <Button
-                primary={mode === 'edit'}
-                onClick={() => setMode('edit')}
-                disabled={!orgUnitId}
-                icon={<IconEdit16 />}
-            >
-                {i18n.t('Edit')}
-            </Button>
-            <Button
-                destructive={mode === 'delete'}
-                onClick={() => setMode('delete')}
-                disabled={!orgUnitId}
-                icon={<IconDelete16 />}
-            >
-                {i18n.t('Delete')}
-            </Button>
-        </ButtonStrip>
-    )
-
     return (
         <div className={classes.container}>
             <OrgTreePanel
@@ -121,7 +109,7 @@ export default function SchoolInspectionPage() {
             />
 
             <main className={classes.content}>
-                {Header}
+                {header}
 
                 {!selectedId && (
                     <NoticeBox title={i18n.t('Pick a school')}>
@@ -131,39 +119,88 @@ export default function SchoolInspectionPage() {
 
                 {selectedId && (
                     <>
-                        {ModeStrip}
+                        {/* Tabs */}
+                        <TabBar>
+                            <Tab
+                                selected={activeTab === 'submit'}
+                                onClick={() => setActiveTab('submit')}
+                            >
+                                {i18n.t('Submit')}
+                            </Tab>
+                            <Tab
+                                selected={activeTab === 'edit'}
+                                onClick={() => setActiveTab('edit')}
+                            >
+                                {i18n.t('Edit')}
+                            </Tab>
+                            <Tab
+                                selected={activeTab === 'delete'}
+                                onClick={() => setActiveTab('delete')}
+                            >
+                                {i18n.t('Delete')}
+                            </Tab>
+                            <Tab
+                                selected={activeTab === 'tldr'}
+                                onClick={() => setActiveTab('tldr')}
+                            >
+                                {i18n.t('Recent Summary')}
+                            </Tab>
+                        </TabBar>
 
-                        {mode === 'submit' && (
-                            <div>
-                                <SchoolInspectionForm orgUnitId={orgUnitId} />
-                            </div>
-                        )}
-
-                        {mode !== 'submit' && (
-                            <>
-                                <div style={{ marginBottom: 12 }}>
-                                    <InspectionTimeline key={orgUnitId} schoolId={orgUnitId} onSelect={ev => setSelectedEvent(ev)} />
+                        {/* Content per tab */}
+                        <div style={{ marginTop: 16 }}>
+                            {activeTab === 'submit' && (
+                                <div>
+                                    <SchoolInspectionForm
+                                        orgUnitId={orgUnitId}
+                                        setActiveTab={setActiveTab}
+                                    />
                                 </div>
+                            )}
 
-                                <EventSummary event={selectedEvent} />
+                            {activeTab !== 'submit' && activeTab !== 'tldr' && (
+                                <>
+                                    <div style={{ marginBottom: 12 }}>
+                                        <InspectionTimeline
+                                            key={orgUnitId}
+                                            schoolId={orgUnitId}
+                                            onSelect={ev => setSelectedEvent(ev)}
+                                        />
+                                    </div>
 
-                                {mode === 'edit' && (
-                                    selectedEvent
-                                        ? <EditInspectionForm event={selectedEvent} orgUnitId={orgUnitId} />
-                                        : <NoticeBox title={i18n.t('Select an event')}>
-                                            {i18n.t('Pick an event in the table above to edit.')}
-                                        </NoticeBox>
-                                )}
+                                    <EventSummary event={selectedEvent} />
 
-                                {mode === 'delete' && (
-                                    selectedEvent
-                                        ? <DeleteInspectionPanel event={selectedEvent} />
-                                        : <NoticeBox title={i18n.t('Select an event')}>
-                                            {i18n.t('Pick an event in the table above to delete.')}
-                                        </NoticeBox>
-                                )}
-                            </>
-                        )}
+                                    {activeTab === 'edit' && (
+                                        selectedEvent
+                                            ? (
+                                                <EditInspectionForm
+                                                    event={selectedEvent}
+                                                    orgUnitId={orgUnitId}
+                                                />
+                                            ) : (
+                                                <NoticeBox title={i18n.t('Select an event')}>
+                                                    {i18n.t('Pick an event in the table above to edit.')}
+                                                </NoticeBox>
+                                            )
+                                    )}
+
+                                    {activeTab === 'delete' && (
+                                        selectedEvent
+                                            ? (
+                                                <DeleteInspectionPanel event={selectedEvent} />
+                                            ) : (
+                                                <NoticeBox title={i18n.t('Select an event')}>
+                                                    {i18n.t('Pick an event in the table above to delete.')}
+                                                </NoticeBox>
+                                            )
+                                    )}
+                                </>
+                            )}
+
+                            {activeTab === 'tldr' && (
+                                <Result OrgId={selected} />
+                            )}
+                        </div>
                     </>
                 )}
             </main>
