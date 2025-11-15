@@ -28,7 +28,7 @@ import {
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID   = 'eJiBjm9Rl7E'
 
-export default function EditInspectionForm({ event, orgUnitId, onDeleted }) {
+export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDeleted }) {
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSaved, setLastSaved] = useState(null)
@@ -76,7 +76,9 @@ export default function EditInspectionForm({ event, orgUnitId, onDeleted }) {
 
     const eventId = event?.psi || event?.event
     const effectiveOrgUnit = orgUnitId ?? event?.ou ?? event?.orgUnit
-
+    const inspectionDateLabel = event?.eventdate
+        ? new Date(event.eventdate).toLocaleDateString()
+        : 'Not set'
     const handleChange = (id, value) => {
         const newValue = normalizeChange(id, value)
         setFormState(prev => ({
@@ -256,11 +258,17 @@ export default function EditInspectionForm({ event, orgUnitId, onDeleted }) {
                 }}
             >
                 <div>
-                    <h3 style={{ margin: 0 }}>Edit inspection</h3>
+                    <h3 style={{ margin: 0 }}>
+                        Edit inspection – {orgUnitName || effectiveOrgUnit}
+                    </h3>
                     <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                        <strong>Date:</strong> {inspectionDateLabel}
+                    </p>
+                    <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
                         <strong>Event ID:</strong> {eventId}
                     </p>
                 </div>
+
                 <div style={{ fontSize: 12, color: '#64748b' }}>
                     {filledCount} of {totalCount} fields completed
                 </div>

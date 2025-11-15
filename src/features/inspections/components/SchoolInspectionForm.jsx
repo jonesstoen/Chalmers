@@ -23,12 +23,13 @@ import {
     normalizeChange,
 } from '../configs/inspectionFormUtils'
 
-export default function SchoolInspectionForm({ orgUnitId, setActiveTab }) {
+export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActiveTab }) {
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
     const [submitInspection, { loading, error, data }] = usePostSchoolInspectionEvent()
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext)
+    const inspectionDateLabel = new Date().toLocaleDateString()
 
     useEffect(() => {
         if (data) {
@@ -175,7 +176,15 @@ export default function SchoolInspectionForm({ orgUnitId, setActiveTab }) {
                     flexWrap: 'wrap',
                 }}
             >
-                <h3 style={{ margin: 0 }}>School inspection at {orgUnitId}</h3>
+                <div>
+                    <h3 style={{ margin: 0 }}>
+                        School inspection – {orgUnitName || orgUnitId}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                        Inspection date: {inspectionDateLabel}
+                    </p>
+                </div>
+
                 <div style={{ fontSize: 12, color: '#64748b' }}>
                     {filledCount} of {totalCount} fields completed
                 </div>

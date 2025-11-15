@@ -76,6 +76,7 @@ export default function SchoolInspectionPage() {
     const { data, selectedId } = useFetchOrgUnits(selected)
     const ou = data?.ou
     const orgUnitId = ou?.id
+    const orgUnitName = ou?.displayName || ou?.name
 
     const header = (
         <div
@@ -153,6 +154,7 @@ export default function SchoolInspectionPage() {
                                 <div>
                                     <SchoolInspectionForm
                                         orgUnitId={orgUnitId}
+                                        orgUnitName={orgUnitName}
                                         setActiveTab={setActiveTab}
                                     />
                                 </div>
@@ -171,17 +173,18 @@ export default function SchoolInspectionPage() {
                                     <EventSummary event={selectedEvent} />
 
                                     {activeTab === 'edit' && (
-                                        selectedEvent
-                                            ? (
-                                                <EditInspectionForm
-                                                    event={selectedEvent}
-                                                    orgUnitId={orgUnitId}
-                                                />
-                                            ) : (
-                                                <NoticeBox title={i18n.t('Select an event')}>
-                                                    {i18n.t('Pick an event in the table above to edit.')}
-                                                </NoticeBox>
-                                            )
+                                        selectedEvent ? (
+                                            <EditInspectionForm
+                                                event={selectedEvent}
+                                                orgUnitId={orgUnitId}
+                                                orgUnitName={orgUnitName}
+                                                onDeleted={() => setSelectedEvent(null)}
+                                            />
+                                        ) : (
+                                            <NoticeBox title={i18n.t('Select an event')}>
+                                                {i18n.t('Pick an event in the table above to edit.')}
+                                            </NoticeBox>
+                                        )
                                     )}
 
                                     {activeTab === 'delete' && (
