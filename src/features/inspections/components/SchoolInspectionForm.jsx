@@ -14,11 +14,11 @@ import InspectionContext from '../../../context/InspectionContext'
 const schoolInspectionFields = [
     {
         id: 'Nvp4hIbXrzF',
-        label: 'Computer Lab present?',
+        label: 'Computer lab available?',
         type: 'BOOLEAN',
         child_query: {
             id: 'gzhjCMe7OyS',
-            label: 'Computer Lab condition (1–5)',
+            label: 'Computer lab condition (1–5)',
             type: 'INTEGER_POSITIVE',
         },
     },
@@ -34,7 +34,7 @@ const schoolInspectionFields = [
     },
     {
         id: 'n9KwS4rY2HC',
-        label: 'Handwashing available?',
+        label: 'Handwashing facilities available?',
         type: 'BOOLEAN',
         child_query: {
             id: 'ie3bFiVatHT',
@@ -76,6 +76,11 @@ const schoolInspectionFields = [
     { id: 'jcC1uz56IpY', label: 'Number of seats', type: 'INTEGER_ZERO_OR_POSITIVE' },
     { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
 ]
+
+// grupper for layout/UX
+const FACILITY_IDS = ['Nvp4hIbXrzF', 'IKiSAA19Xvl', 'n9KwS4rY2HC', 'Y6DQqwTdhiZ', 'XThfmg6f2oC']
+const CAPACITY_IDS = ['ya5SyA5hej4', 'XIgpDhDC4Ol', 'DO0LBJfXY00', 'jcC1uz56IpY', 'LME331J5aev']
+const SANITATION_IDS = ['I13NTyLrHBm', 'QXcKg7GSr4e', 'OGmIo4kFUYr']
 
 export default function SchoolInspectionForm({ orgUnitId, setActiveTab }) {
     const [formState, setFormState] = useState({})
@@ -226,62 +231,242 @@ export default function SchoolInspectionForm({ orgUnitId, setActiveTab }) {
         }
     }
 
+    // progress-indikator (enkel)
+    const { filledCount, totalCount, progressPct } = (() => {
+        let filled = 0
+        let total = 0
+
+        schoolInspectionFields.forEach(field => {
+            total += 1
+            const v = formState[field.id]
+            if (v !== undefined && v !== '') filled += 1
+
+            if (field.child_query) {
+                total += 1
+                const cv = formState[field.child_query.id]
+                if (cv !== undefined && cv !== '') filled += 1
+            }
+        })
+
+        const pct = total > 0 ? Math.round((filled / total) * 100) : 0
+        return { filledCount: filled, totalCount: total, progressPct: pct }
+    })()
+
+    const renderField = ({ id, label, type, child_query }) => (
+        <div key={id} style={{ marginBottom: '0.75rem' }}>
+            {type === 'BOOLEAN' ? (
+                <CheckboxField
+                    label={label}
+                    checked={!!formState[id]}
+                    onChange={() =>
+                        handleChange(
+                            id,
+                            !(formState[id] === 'true' || formState[id] === true)
+                        )
+                    }
+                />
+            ) : (
+                <InputField
+                    label={label}
+                    type="number"
+                    min="0"
+                    value={formState[id] ?? ''}
+                    onChange={({ value }) => handleChange(id, value)}
+                    error={errors[id]}
+                />
+            )}
+
+            {/* child-felt vises bare hvis parent-checkbox er true */}
+            {child_query && formState[id] === true && (
+                <div style={{ marginLeft: '1.75rem', marginTop: '0.35rem' }}>
+                    <InputField
+                        label={child_query.label}
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={formState[child_query.id] ?? ''}
+                        onChange={({ value }) => handleChange(child_query.id, value)}
+                        error={errors[child_query.id]}
+                    />
+                </div>
+            )}
+        </div>
+    )
+
+    const facilities = schoolInspectionFields.filter(f => FACILITY_IDS.includes(f.id))
+    const capacity = schoolInspectionFields.filter(f => CAPACITY_IDS.includes(f.id))
+    const sanitation = schoolInspectionFields.filter(f => SANITATION_IDS.includes(f.id))
+
     return (
-        <div style={{ marginTop: '1rem' }}>
-            <h3>School Inspection at {orgUnitId}</h3>
+        <div
+            style={{
+                marginTop: '1rem',
+                background: '#ffffff',
+                borderRadius: 12,
+                border: '1px solid #e2e8f0',
+                padding: 16,
+                boxShadow: '0 1px 3px rgba(15,23,42,0.08)',
+            }}
+        >
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    marginBottom: 12,
+                    gap: 12,
+                    flexWrap: 'wrap',
+                }}
+            >
+                <h3 style={{ margin: 0 }}>School inspection at {orgUnitId}</h3>
+                <div style={{ fontSize: 12, color: '#64748b' }}>
+                    {filledCount} of {totalCount} fields completed
+                </div>
+            </div>
+
+            {/* progress bar */}
+            <div style={{ marginBottom: 16 }}>
+                <div
+                    style={{
+                        height: 6,
+                        borderRadius: 999,
+                        background: '#e5e7eb',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <div
+                        style={{
+                            width: `${progressPct}%`,
+                            height: '100%',
+                            borderRadius: 999,
+                            transition: 'width 0.2s ease-out',
+                            background:
+                                progressPct === 100 ? '#16a34a' : '#2563eb',
+                        }}
+                    />
+                </div>
+            </div>
 
             {loading && <CircularLoader small />}
 
             {!loading && (
                 <>
-                    {schoolInspectionFields.map(({ id, label, type, child_query }) => (
-                        <div key={id} style={{ marginBottom: '1rem' }}>
-                            {type === 'BOOLEAN' ? (
-                                <CheckboxField
-                                    label={label}
-                                    checked={!!formState[id]}
-                                    onChange={() =>
-                                        handleChange(
-                                            id,
-                                            !(formState[id] === 'true' || formState[id] === true)
-                                        )
-                                    }
-                                />
-                            ) : (
-                                <InputField
-                                    label={label}
-                                    type="number"
-                                    min="0"
-                                    value={formState[id] ?? ''}
-                                    onChange={({ value }) => handleChange(id, value)}
-                                    error={errors[id]}
-                                />
-                            )}
+                    {/* Facilities */}
+                    <section style={{ marginBottom: '1.5rem' }}>
+                        <h4
+                            style={{
+                                marginBottom: '0.5rem',
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: '#0f172a',
+                            }}
+                        >
+                            Facilities
+                        </h4>
+                        <p
+                            style={{
+                                marginTop: 0,
+                                marginBottom: '0.75rem',
+                                fontSize: 12,
+                                color: '#64748b',
+                            }}
+                        >
+                            Check which facilities are available at the school and rate their
+                            condition from 1 (very poor) to 5 (excellent).
+                        </p>
+                        {facilities.map(renderField)}
+                    </section>
 
-                            {/* child-felt vises bare hvis parent-checkbox er true */}
-                            {child_query && formState[id] === true && (
-                                <div style={{ marginLeft: '2rem', marginTop: '0.5rem' }}>
-                                    <InputField
-                                        label={child_query.label}
-                                        type="number"
-                                        min="1"
-                                        max="5"
-                                        value={formState[child_query.id] ?? ''}
-                                        onChange={({ value }) => handleChange(child_query.id, value)}
-                                        error={errors[child_query.id]}
-                                    />
-                                </div>
-                            )}
+                    {/* Capacity */}
+                    <section style={{ marginBottom: '1.5rem' }}>
+                        <h4
+                            style={{
+                                marginBottom: '0.5rem',
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: '#0f172a',
+                            }}
+                        >
+                            Capacity
+                        </h4>
+                        <p
+                            style={{
+                                marginTop: 0,
+                                marginBottom: '0.75rem',
+                                fontSize: 12,
+                                color: '#64748b',
+                            }}
+                        >
+                            Provide numbers for classrooms, learners, seats and teachers to
+                            understand how crowded the school is.
+                        </p>
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                                gap: 16,
+                            }}
+                        >
+                            {capacity.map(renderField)}
                         </div>
-                    ))}
+                    </section>
 
-                    <div style={{ marginBottom: '1rem' }}>
-                        <strong>Total toilets: {totalToilets}</strong>
+                    {/* Sanitation & staffing */}
+                    <section style={{ marginBottom: '1.5rem' }}>
+                        <h4
+                            style={{
+                                marginBottom: '0.5rem',
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: '#0f172a',
+                            }}
+                        >
+                            Sanitation & staffing
+                        </h4>
+                        <p
+                            style={{
+                                marginTop: 0,
+                                marginBottom: '0.75rem',
+                                fontSize: 12,
+                                color: '#64748b',
+                            }}
+                        >
+                            Report available toilets for different groups. Total toilets are
+                            calculated automatically.
+                        </p>
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                                gap: 16,
+                            }}
+                        >
+                            {sanitation.map(renderField)}
+                        </div>
+
+                        <div style={{ marginTop: '0.75rem', marginBottom: '1rem' }}>
+                            <strong>Total toilets: {totalToilets}</strong>
+                        </div>
+                    </section>
+
+                    <div
+                        style={{
+                            marginTop: 8,
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                        }}
+                    >
+                        <Button
+                            primary
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            style={{ minWidth: 180 }}
+                        >
+                            Submit inspection
+                        </Button>
                     </div>
-
-                    <Button primary onClick={handleSubmit} disabled={loading}>
-                        Submit Inspection
-                    </Button>
 
                     {data && (
                         <AlertStack>

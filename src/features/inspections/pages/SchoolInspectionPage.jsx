@@ -125,25 +125,25 @@ export default function SchoolInspectionPage() {
                                 selected={activeTab === 'submit'}
                                 onClick={() => setActiveTab('submit')}
                             >
-                                {i18n.t('Submit')}
+                                {i18n.t('New inspection')}
                             </Tab>
                             <Tab
                                 selected={activeTab === 'edit'}
                                 onClick={() => setActiveTab('edit')}
                             >
-                                {i18n.t('Edit')}
+                                {i18n.t('Edit inspections')}
                             </Tab>
                             <Tab
                                 selected={activeTab === 'delete'}
                                 onClick={() => setActiveTab('delete')}
                             >
-                                {i18n.t('Delete')}
+                                {i18n.t('Delete inspection')}
                             </Tab>
                             <Tab
                                 selected={activeTab === 'tldr'}
                                 onClick={() => setActiveTab('tldr')}
                             >
-                                {i18n.t('Recent Summary')}
+                                {i18n.t('History')}
                             </Tab>
                         </TabBar>
 
