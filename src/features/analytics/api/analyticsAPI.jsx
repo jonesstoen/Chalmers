@@ -1,6 +1,7 @@
 // services/api/analyticsAPI.jsx
 import { useMemo } from 'react'
 import { useDataQuery } from '@dhis2/app-runtime'
+import {useCacheableQuery} from "../../../shared/cache/cacheableQuery";
 
 export default function useFetchAnalytics(
     programId,
@@ -9,6 +10,7 @@ export default function useFetchAnalytics(
     orgIds = [],
     { descendants = false, paging = false } = {}
 ) {
+    const dataKey = orgIds.join(",")
     // Bygg dimensjoner stabilt
     const dimensions = useMemo(() => {
         const d = []
@@ -36,8 +38,17 @@ export default function useFetchAnalytics(
         },
     }), [])
 
+    return useCacheableQuery(
+        'events',
+        dataKey,
+        query,
+        {program: programId, dimensions, startDate, endDate, stage, descendants, paging}
+    )
+    /*
     return useDataQuery(query, {
         lazy: !programId,
         variables: { program: programId, dimensions, startDate, endDate, stage, descendants, paging },
     })
+
+     */
 }

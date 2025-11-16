@@ -79,9 +79,10 @@ export function useCacheableQuery(cacheKey, dataKey, query, options = {}) {
 
     return {
         data,
-        isFresh,
         loading: isConnected ? onlineLoading || loading : loading,
         error: onlineError || error,
         refetch,
+        isFresh,
+        isConnected,
     }
 }

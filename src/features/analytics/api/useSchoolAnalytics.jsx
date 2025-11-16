@@ -1,4 +1,5 @@
 import { useDataQuery } from '@dhis2/app-runtime'
+import {useCacheableQuery} from "../../../shared/cache/cacheableQuery";
 
 const schoolAnalyticsQuery = {
     analytics: {
@@ -29,9 +30,18 @@ const schoolAnalyticsQuery = {
 
 export function useSchoolAnalytics({ programId, stageId, schoolId, startDate, endDate, dataElements }) {
     const ready = Boolean(programId && schoolId)
+    const { loading, error, data, refetch, isFresh, isConnected } = useCacheableQuery(
+        'events',
+        schoolId,
+        schoolAnalyticsQuery,
+        { programId, stageId, schoolId, startDate, endDate, dataElements }
+    )
+    /*
     const { loading, error, data } = useDataQuery(schoolAnalyticsQuery, {
         variables: { programId, stageId, schoolId, startDate, endDate, dataElements },
         lazy: !ready,
     })
     return { loading, error, data: data?.analytics }
+
+     */
 }
