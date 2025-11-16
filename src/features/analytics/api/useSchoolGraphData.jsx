@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSchoolAnalytics } from './useSchoolAnalytics'
+import { useSchoolAnalytics } from '../components/useSchoolAnalytics'
 
 export function useSchoolGraphData(options) {
     const { loading, error, data } = useSchoolAnalytics(options)
