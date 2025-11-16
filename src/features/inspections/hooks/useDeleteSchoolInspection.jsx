@@ -1,5 +1,5 @@
 // features/inspections/hooks/useDeleteSchoolInspectionEvent.jsx
-import usePostEvent from '../../../shared/api/postDataAPI'
+import usePostEvent from '../../../shared/api/useTrackerEventMutation'
 
 export function useDeleteSchoolInspectionEvent() {
     const [mutate, status] = usePostEvent('DELETE')

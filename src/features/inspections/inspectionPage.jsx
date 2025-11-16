@@ -1,4 +1,6 @@
 // features/inspect/InspectPage.jsx
+
+//denne brukes ikke
 import React, { useMemo, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import classes from '../../App/App.module.css'

@@ -1,6 +1,6 @@
 import { useDataQuery } from '@dhis2/app-runtime'
 import { useOrgUnitTree } from './useOrgUnitTree'
-
+/*
 export function useSchoolProgramData({ rootIds, programId, stageId }) {
     const tree = useOrgUnitTree({ rootIds })
     const selectedOrgUnit = tree.selected[0]
@@ -23,3 +23,4 @@ export function useSchoolProgramData({ rootIds, programId, stageId }) {
 
     return { ...tree, data, loading, error }
 }
+*/

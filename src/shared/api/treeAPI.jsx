@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
 
+// brukes ikkke !!!!!
+/*
 export function useOrgUnitTree({ rootIds = [], singleSelection = false }) {
     const [selected, setSelected] = useState([])
     const [initiallyExpanded] = useState(rootIds.map(id => `/${id}`)) // paths not raw IDs
@@ -49,6 +51,8 @@ export function useOrgUnitTree({ rootIds = [], singleSelection = false }) {
         handleChange,
     }
 }
+
+*/
 
 
 // const handleChange = useCallback(

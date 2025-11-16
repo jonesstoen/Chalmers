@@ -1,9 +1,9 @@
 import React from 'react'
-import { useSchoolAnalytics } from './useSchoolAnalytics'
+import { useSchoolAnalytics } from '../components/useSchoolAnalytics'
 import { useMemo } from 'react'
 
 // Helper hook that wraps the analytics query and returns a clean, sorted data list
-export default function SchoolAnalyticsView(schoolId) {
+export default function UseSchoolEvents(schoolId) {
  
    const { data, loading, error } = useSchoolAnalytics({
         programId: 'UxK2o06ScIe',
@@ -83,7 +83,7 @@ export default function SchoolAnalyticsView(schoolId) {
 //     { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
 // ]
 
-// export default function SchoolAnalyticsView({ schoolId }) {
+// export default function UseSchoolEvents({ schoolId }) {
 //     const { data, loading, error } = useSchoolAnalytics({
 //         programId: 'UxK2o06ScIe',
 //         stageId: 'eJiBjm9Rl7E',

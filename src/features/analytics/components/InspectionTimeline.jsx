@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useDataQuery } from '@dhis2/app-runtime'
-import useSchoolAnalyticsWrapper from './SchoolAnalyticsView'
+import useSchoolAnalyticsWrapper from '../hooks/useSchoolEvents'
 import classes from './InspectionTimeline.module.css'
 
 const F = {

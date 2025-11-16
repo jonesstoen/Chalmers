@@ -127,7 +127,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                     <button
-                        onClick={openInspector}
+                        onClick={openSchoolInspection}
                         style={{
                             padding: '10px 14px',
                             borderRadius: 10,
@@ -142,20 +142,6 @@ export default function LandingPage() {
                         Open inspector
                     </button>
 
-                    <button
-                        onClick={openSchoolInspection}
-                        style={{
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px dashed #2563eb',
-                            background: '#fff',
-                            color: '#2563eb',
-                            cursor: 'pointer'
-                        }}
-                        title="Go to School Inspection (Submit/Edit/Delete tabs)"
-                    >
-                        Open School Inspection (tabs)
-                    </button>
 
                     <button
                         onClick={() => openRoot('Bp3y61WbHwn')}
