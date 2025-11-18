@@ -6,6 +6,10 @@ const config = {
         app: './src/App/App.jsx',
     },
 
+    pwa: {
+        enabled: true,
+    },
+
     direction: 'auto',
 }
 

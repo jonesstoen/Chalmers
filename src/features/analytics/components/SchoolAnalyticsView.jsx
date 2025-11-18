@@ -3,7 +3,7 @@ import { useSchoolAnalytics } from './useSchoolAnalytics'
 import { useMemo } from 'react'
 
 // Helper hook that wraps the analytics query and returns a clean, sorted data list
-export default function SchoolAnalyticsView(schoolId) {
+export function useSchoolAnalyticsView(schoolId) {
  
    const { data, loading, error } = useSchoolAnalytics({
         programId: 'UxK2o06ScIe',

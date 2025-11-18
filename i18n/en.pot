@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-11T12:21:51.394Z\n"
-"PO-Revision-Date: 2025-11-11T12:21:51.395Z\n"
+"POT-Creation-Date: 2025-11-16T14:40:44.757Z\n"
+"PO-Revision-Date: 2025-11-16T14:40:44.757Z\n"
 
 msgid "Select a school"
 msgstr "Select a school"
@@ -17,20 +17,47 @@ msgstr "Pick a node in the tree to see details."
 msgid "Analytics"
 msgstr "Analytics"
 
+msgid "Selected event"
+msgstr "Selected event"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Learners"
+msgstr "Learners"
+
+msgid "Seats"
+msgstr "Seats"
+
 msgid "School Inspection"
 msgstr "School Inspection"
 
-msgid "Pick a school in the tree to continue."
-msgstr "Pick a school in the tree to continue."
+msgid "Pick a school"
+msgstr "Pick a school"
 
-msgid "Submit"
-msgstr "Submit"
+msgid "Select a node in the tree to continue."
+msgstr "Select a node in the tree to continue."
 
-msgid "Edit"
-msgstr "Edit"
+msgid "New inspection"
+msgstr "New inspection"
 
-msgid "Delete"
-msgstr "Delete"
+msgid "Edit inspections"
+msgstr "Edit inspections"
+
+msgid "Delete inspection"
+msgstr "Delete inspection"
+
+msgid "History"
+msgstr "History"
+
+msgid "Select an event"
+msgstr "Select an event"
+
+msgid "Pick an event in the table above to edit."
+msgstr "Pick an event in the table above to edit."
+
+msgid "Pick an event in the table above to delete."
+msgstr "Pick an event in the table above to delete."
 
 msgid "Organisation units"
 msgstr "Organisation units"

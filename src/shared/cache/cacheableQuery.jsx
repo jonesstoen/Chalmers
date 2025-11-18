@@ -1,88 +1,116 @@
-import {useEffect, useState} from 'react'
-import {
-    useDhis2ConnectionStatus,
-    useDataQuery,
-} from "@dhis2/app-runtime"
-import {aggregatedCache, eventsCache, outboxCache} from "./config";
-
-
-// 18 hours in milliseconds
-const HOURS_18 = 18 * 60 * 60 * 1000
+import { useEffect, useMemo, useState } from "react";
+import { useDhis2ConnectionStatus, useDataQuery } from "@dhis2/app-runtime";
+import { aggregatedCache, eventsCache, outboxCache } from "./config";
 
 export function useCacheableQuery(cacheKey, dataKey, query, options = {}) {
-    const {isConnected} = useDhis2ConnectionStatus()
     const cacheMap = {
         events: eventsCache,
         aggregated: aggregatedCache,
-        outbox: outboxCache
-    }
-    const cache = cacheMap[cacheKey]
+        outbox: outboxCache,
+    };
 
-    const [data, setData] = useState(null)
-    const [isFresh, setIsFresh] = useState(false)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    // memoize chosen cache instance
+    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey]);
 
-    const { data: onlineData, refetch, loading: onlineLoading, error: onlineError } =
-        useDataQuery(query, options)
+    const [cachedData, setCachedData] = useState(null);
+    const [cacheStatus, setCacheStatus] = useState("none");
+    // "none" | "cache" | "stale-cache" | "network"
 
+    // --- 1. Load cache on mount / dataKey change
     useEffect(() => {
-        let isMounted = true
+        const controller = new AbortController();
+        const { signal } = controller;
 
-        async function fetchData() {
-            setLoading(true)
-
-            if (!cache) {
-                console.error(`Unknown cache key: ${cacheKey}`)
-                setLoading(false)
-                return
-            }
-
+        (async () => {
             try {
-                if (isConnected) {
-                    if (onlineData) {
-                        await cache.setItem(dataKey, {
-                            data: onlineData,
-                            lastUpdated: Date.now()
-                        })
-                        if (isMounted) {
-                            setData(onlineData)
-                            setIsFresh(true)
-                        }
-                    }
+                const item = await cache.getItem(dataKey);
+                if (signal.aborted) return;
+                if (item) {
+                    const isStale = isCacheStale(item.timestamp);
+                    setCachedData(item.value);
+                    setCacheStatus(isStale ? "stale-cache" : "cache");
                 } else {
-                    const cached = await cache.getItem(dataKey)
-                    if (cached) {
-                        const age = Date.now() - cached.lastUpdated
-                        const fresh = age <= HOURS_18
-                        if (isMounted) {
-                            setData(cached.data)
-                            setIsFresh(fresh)
-                        }
-                    } else {
-                        if (isMounted) setError('No connection and no cached data found')
-                    }
+                    setCacheStatus("none");
+                    setCachedData(null);
                 }
-            } catch (error) {
-                if (isMounted) setError(error)
-            } finally {
-                if  (isMounted) setLoading(false)
+            } catch (e) {
+                // ignore read errors for now
             }
-        }
+        })();
 
-        fetchData()
+        return () => controller.abort();
+    }, [dataKey, cache]);
 
-        return () => {
-            isMounted = false
-        }
-    }, [isConnected, onlineData, cacheKey, dataKey])
+    // decide whether to run the network query:
+    const shouldFetchFromNetwork = !cachedData || cacheStatus === "stale-cache";
+
+    // --- 2. Run DHIS2 network query (lazy when we have a fresh cache)
+    const { data, loading, error } = useDataQuery(query, {
+        variables: options,
+        lazy: !shouldFetchFromNetwork,
+    });
+
+    // --- 3. When network fetch succeeds → update cache (but avoid redundant writes)
+    useEffect(() => {
+        if (!data) return;
+
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        (async () => {
+            try {
+                // Avoid repeated writes if the cached value already matches network data
+                if (cachedData && deepEqual(cachedData, data)) {
+                    if (signal.aborted) return;
+                    // only change status if it's not already "network" to avoid extra renders
+                    setCacheStatus((prev) => (prev === "network" ? prev : "network"));
+                    // don't call setCachedData(data) here — avoid changing reference when value is equal
+                    return;
+                }
+
+                await cache.setItem(dataKey, {
+                    value: data,
+                    timestamp: Date.now(),
+                });
+
+                if (signal.aborted) return;
+
+                setCacheStatus("network");
+                setCachedData(data);
+            } catch (e) {
+                // ignore write errors
+            }
+        })();
+
+        return () => controller.abort();
+    }, [data, dataKey, cache, cachedData, cacheStatus]);
+
+    // --- 4. If network fails → fall back to cache
+    const finalData = error && cachedData ? cachedData : data || cachedData;
+
+    const finalStatus = (() => {
+        if (data) return "network";
+        if (error && cachedData) return cacheStatus;
+        return cacheStatus;
+    })();
 
     return {
-        data,
-        loading: isConnected ? onlineLoading || loading : loading,
-        error: onlineError || error,
-        refetch,
-        isFresh,
-        isConnected,
+        data: finalData,
+        loading,
+        error,
+        source: finalStatus,
+    };
+}
+
+// Example: stale after ~16h
+function isCacheStale(time) {
+    return Date.now() - time > 16 * 60 * 60 * 1000;
+}
+
+function deepEqual(a, b) {
+    try {
+        return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+        return false;
     }
 }
