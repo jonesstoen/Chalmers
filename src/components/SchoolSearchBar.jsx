@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { Input, CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useSchoolsByRegions } from '../services/api/useSchoolsAPI'
-
+/*
 export default function SchoolSearchBar({ onSelect }) {
     // Define region IDs once and memoize to prevent re-fetching
     const regionIds = useMemo(() => ['RlPlK44dtoo', 'Bp3y61WbHwn'], [])
@@ -74,3 +74,4 @@ export default function SchoolSearchBar({ onSelect }) {
         </div>
     )
 }
+*/
