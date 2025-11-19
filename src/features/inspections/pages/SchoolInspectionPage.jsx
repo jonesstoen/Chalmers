@@ -193,14 +193,13 @@ export default function SchoolInspectionPage() {
         { id: 'RlPlK44dtoo', label: 'Banjul' },
     ], [])
 
-    const [selected, setSelected] = useState([])            // [orgUnitId]
-    const [activeTab, setActiveTab] = useState('submit')   // 'submit' | 'edit' | 'delete' | 'tldr'
+    const [selected, setSelected] = useState([])
+    const [activeTab, setActiveTab] = useState('submit')
     const [selectedEvent, setSelectedEvent] = useState(null)
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
     const { data, selectedId } = useFetchOrgUnits(selected)
-
-
-    // Om dere faktisk trenger context senere:
-    const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line no-unused-vars
+    const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
 
     const handleRootChange = useCallback(() => {
         setSelected([])
@@ -212,6 +211,8 @@ export default function SchoolInspectionPage() {
         setSelected(ids)
         setActiveTab('submit')
         setSelectedEvent(null)
+        // lukk panel på mobil når man har valgt en skole
+        setMobileSidebarOpen(false)
     }, [])
 
     const ou = data?.ou
@@ -220,23 +221,68 @@ export default function SchoolInspectionPage() {
 
     return (
         <div className={classes.container}>
-            <OrgTreePanel
-                roots={ROOTS}
-                initialRootId={ROOTS[0].id}
-                onRootChange={handleRootChange}
-                onSelect={handleSelect}
-            />
+            {/* Sidebar / org tree */}
+            <aside className={classes.sidebar}>
+                {/* Desktop-versjon: alltid synlig */}
+                <div className={classes.sidebarDesktop}>
+                    <OrgTreePanel
+                        roots={ROOTS}
+                        initialRootId={ROOTS[0].id}
+                        onRootChange={handleRootChange}
+                        onSelect={handleSelect}
+                    />
+                </div>
 
+                {/* Mobil-versjon: kollapsbar */}
+                <div className={classes.sidebarMobile}>
+                    <button
+                        type="button"
+                        className={classes.sidebarMobileToggle}
+                        onClick={() =>
+                            setMobileSidebarOpen((open) => !open)
+                        }
+                    >
+                        <span>{i18n.t('Organisation units')}</span>
+                        <span>{mobileSidebarOpen ? '▲' : '▼'}</span>
+                    </button>
+
+                    {mobileSidebarOpen && (
+                        <div className={classes.sidebarMobileBody}>
+                            <OrgTreePanel
+                                roots={ROOTS}
+                                initialRootId={ROOTS[0].id}
+                                onRootChange={handleRootChange}
+                                onSelect={handleSelect}
+                            />
+                        </div>
+                    )}
+                </div>
+            </aside>
+
+            {/* Main content */}
             <main className={classes.content}>
-                <Header isCluster={isAggregate} data={data}/>
+                <Header isCluster={isAggregate} data={data} />
 
                 {!selectedId && (
                     <NoticeBox title={i18n.t('Pick a School or Cluster')}>
                         {i18n.t('Select a node in the tree to continue.')}
                     </NoticeBox>
                 )}
-                {selectedId && isAggregate && <AggregatedAnalyticsPanel OrgId={orgUnitId}/>}
-                {selectedId &&  !isAggregate && <InspectionPanel  selected={selected} activeTab={activeTab} setActiveTab={setActiveTab} selectedEvent={selectedEvent} setSelectedEvent={setSelectedEvent}  data={data} />}
+
+                {selectedId && isAggregate && (
+                    <AggregatedAnalyticsPanel OrgId={orgUnitId} />
+                )}
+
+                {selectedId && !isAggregate && (
+                    <InspectionPanel
+                        selected={selected}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        selectedEvent={selectedEvent}
+                        setSelectedEvent={setSelectedEvent}
+                        data={data}
+                    />
+                )}
             </main>
         </div>
     )
