@@ -24,14 +24,14 @@ ChartJS.register(
 )
 
 export default function ClusterGraph({
-  schoolId,
+  OrgId,
   dataElements = [],
   label = 'Value',
   startDate = '2024-01-01',
   endDate = new Date().toISOString().split('T')[0],
 }) {
   const { timeSeries, loading, error } = useAggregatedSchoolAnalytics({
-    schoolId,
+    OrgId,
     dataElementIds: dataElements,
     startDate,
     endDate,

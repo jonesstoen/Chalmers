@@ -2,7 +2,7 @@
 
 //denne brukes ikke tror jeg men kræsjer hvis jeg kommenterer ut
 
-import React, { useMemo, useState, useCallback } from 'react'
+import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import classes from '../../App/App.module.css'
 import OrgTreePanel from '../org-units/components/OrgTreePanel'
@@ -12,6 +12,7 @@ import AnalyticsTable from '../analytics/components/AnalyticsTable'
 import useFetchOrgUnits from '../org-units/hooks/useFetchOrgUnits'
 import useFetchAnalytics from '../analytics/api/analyticsAPI'
 import SchoolInspectionForm from "../inspections/components/SchoolInspectionForm"
+import AggregatedAnalyticsPage from '../analytics/components/AggregatedAnalyticsPanel'
 
 export default function inspectionPage() {
     const ROOTS = useMemo(() => [
@@ -39,10 +40,9 @@ export default function inspectionPage() {
 
     const { data, loading, error, selectedId } = useFetchOrgUnits(selected)
     const orgUnitId = data?.ou?.id
-    const isAggregate = (data?.ou?.level ?? Infinity) < 5
+    // const isAggregate = (data?.ou?.level ?? Infinity) < 5 // Does this work??
 
-    const { data: analyticsData, loading: analyticsLoading, error: analyticsError } =
-        useFetchAnalytics(activeProgram, { stage: activeStage }, [], selected, { descendants: isAggregate })
+    const isAggregate = data?.ou?.children && data.ou.children.length > 0
 
     return (
         <div className={classes.container}>
@@ -59,14 +59,10 @@ export default function inspectionPage() {
 
                 {selectedId && data?.ou && (
                     <>
-                        <SchoolInspectionForm orgUnitId={orgUnitId} />
+                       {!isAggregate && <SchoolInspectionForm orgUnitId={orgUnitId} />}
 
-                        {activeStage && (
-                            <div style={{ marginTop: '1.5rem', background: '#eef6ff', padding: '1rem', borderRadius: 8, border: '1px solid #cfe2ff' }}>
-                                <h4>{i18n.t('Analytics')}</h4>
-                                <AnalyticsTable data={analyticsData} loading={analyticsLoading} error={analyticsError} />
-                            </div>
-                        )}
+                        {isAggregate && <AggregatedAnalyticsPage OrgId={orgUnitId}/>}
+                
                     </>
                 )}
             </main>

@@ -11,6 +11,7 @@ import InspectionTimeline from '../../analytics/components/InspectionTimeline'
 import useFetchOrgUnits from '../../org-units/hooks/useFetchOrgUnits'
 import Result from '../components/inspection_result/Result'
 import InspectionContext from '../../../context/InspectionContext'
+import AggregatedAnalyticsPanel from '../../analytics/components/AggregatedAnalyticsPanel'
 
 function EventSummary({ event }) {
     if (!event) return null
@@ -48,37 +49,18 @@ function EventSummary({ event }) {
     )
 }
 
-export default function SchoolInspectionPage() {
-    const ROOTS = useMemo(() => [
-        { id: 'Bp3y61WbHwn', label: 'Kanifing' },
-        { id: 'RlPlK44dtoo', label: 'Banjul' },
-    ], [])
 
-    const [selected, setSelected] = useState([])            // [orgUnitId]
-    const [activeTab, setActiveTab] = useState('submit')   // 'submit' | 'edit' | 'delete' | 'tldr'
-    const [selectedEvent, setSelectedEvent] = useState(null)
 
-    // Om dere faktisk trenger context senere:
-    const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line no-unused-vars
 
-    const handleRootChange = useCallback(() => {
-        setSelected([])
-        setSelectedEvent(null)
-        setActiveTab('submit')
-    }, [])
+function Header({isCluster, data}){
 
-    const handleSelect = useCallback((ids) => {
-        setSelected(ids)
-        setActiveTab('submit')
-        setSelectedEvent(null)
-    }, [])
+    const inspection ='School Inspection'
+    const analytics = 'Analytics'
 
-    const { data, selectedId } = useFetchOrgUnits(selected)
     const ou = data?.ou
     const orgUnitId = ou?.id
-    const orgUnitName = ou?.displayName || ou?.name
 
-    const header = (
+    return (
         <div
             style={{
                 display: 'flex',
@@ -87,7 +69,9 @@ export default function SchoolInspectionPage() {
                 marginBottom: 10,
             }}
         >
-            <h2 style={{ margin: 0 }}>{i18n.t('School Inspection')}</h2>
+            <h2 style={{ margin: 0 }}>
+                {i18n.t(isCluster ? analytics: inspection)}
+            </h2>
             {orgUnitId && (
                 <>
                     <span style={{ color: '#64748b' }}>•</span>
@@ -99,26 +83,18 @@ export default function SchoolInspectionPage() {
             )}
         </div>
     )
+}
+
+
+
+function InspectionPanel({selected, activeTab, setActiveTab, selectedEvent, setSelectedEvent, data}){
+
+    const ou = data?.ou
+    const orgUnitId = ou?.id
+    const orgUnitName = ou?.displayName || ou?.name
+
 
     return (
-        <div className={classes.container}>
-            <OrgTreePanel
-                roots={ROOTS}
-                initialRootId={ROOTS[0].id}
-                onRootChange={handleRootChange}
-                onSelect={handleSelect}
-            />
-
-            <main className={classes.content}>
-                {header}
-
-                {!selectedId && (
-                    <NoticeBox title={i18n.t('Pick a school')}>
-                        {i18n.t('Select a node in the tree to continue.')}
-                    </NoticeBox>
-                )}
-
-                {selectedId && (
                     <>
                         {/* Tabs */}
                         <TabBar>
@@ -205,7 +181,62 @@ export default function SchoolInspectionPage() {
                             )}
                         </div>
                     </>
+                )
+}
+
+
+
+
+export default function SchoolInspectionPage() {
+    const ROOTS = useMemo(() => [
+        { id: 'Bp3y61WbHwn', label: 'Kanifing' },
+        { id: 'RlPlK44dtoo', label: 'Banjul' },
+    ], [])
+
+    const [selected, setSelected] = useState([])            // [orgUnitId]
+    const [activeTab, setActiveTab] = useState('submit')   // 'submit' | 'edit' | 'delete' | 'tldr'
+    const [selectedEvent, setSelectedEvent] = useState(null)
+    const { data, selectedId } = useFetchOrgUnits(selected)
+
+
+    // Om dere faktisk trenger context senere:
+    const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line no-unused-vars
+
+    const handleRootChange = useCallback(() => {
+        setSelected([])
+        setSelectedEvent(null)
+        setActiveTab('submit')
+    }, [])
+
+    const handleSelect = useCallback((ids) => {
+        setSelected(ids)
+        setActiveTab('submit')
+        setSelectedEvent(null)
+    }, [])
+
+    const ou = data?.ou
+    const orgUnitId = ou?.id
+    const isAggregate = ou?.children && data.ou.children.length > 0
+
+    return (
+        <div className={classes.container}>
+            <OrgTreePanel
+                roots={ROOTS}
+                initialRootId={ROOTS[0].id}
+                onRootChange={handleRootChange}
+                onSelect={handleSelect}
+            />
+
+            <main className={classes.content}>
+                <Header isCluster={isAggregate} data={data}/>
+
+                {!selectedId && (
+                    <NoticeBox title={i18n.t('Pick a School or Cluster')}>
+                        {i18n.t('Select a node in the tree to continue.')}
+                    </NoticeBox>
                 )}
+                {selectedId && isAggregate && <AggregatedAnalyticsPanel OrgId={orgUnitId}/>}
+                {selectedId &&  !isAggregate && <InspectionPanel  selected={selected} activeTab={activeTab} setActiveTab={setActiveTab} selectedEvent={selectedEvent} setSelectedEvent={setSelectedEvent}  data={data} />}
             </main>
         </div>
     )
