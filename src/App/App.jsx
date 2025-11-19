@@ -23,7 +23,7 @@ export default function App() {
         <HashRouter>
             <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/inspect" element={<InspectPage />} />
+                {/* <Route path="/inspect" element={<InspectPage />} /> */}
                 <Route path="/school-inspection" element={<SchoolInspectionPage />} />
                 {/* fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
