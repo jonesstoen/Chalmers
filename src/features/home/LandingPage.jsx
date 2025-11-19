@@ -26,7 +26,7 @@ function monthRangeISO(d = new Date()) {
 export default function LandingPage() {
     const navigate = useNavigate()
     const openSchool = useCallback((ouId) => navigate(`/inspect?ou=${ouId}`), [navigate])
-    const openRoot = useCallback((rootId) => navigate(`/inspect?root=${rootId}`), [navigate])
+    // const openRoot = useCallback((rootId) => navigate(`/inspect?root=${rootId}`), [navigate])
     const openInspector = useCallback(() => navigate('/inspect'), [navigate])
     const openSchoolInspection = useCallback(() => navigate('/school-inspection'), [navigate])
 
@@ -140,32 +140,6 @@ export default function LandingPage() {
                         aria-label="Open Inspector"
                     >
                         Open inspector
-                    </button>
-
-
-                    <button
-                        onClick={() => openRoot('Bp3y61WbHwn')}
-                        style={{
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px solid #e5e7eb',
-                            background: '#fff',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Open Kanifing root
-                    </button>
-                    <button
-                        onClick={() => openRoot('RlPlK44dtoo')}
-                        style={{
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px solid #e5e7eb',
-                            background: '#fff',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Open Banjul root
                     </button>
                     {lastOu && (
                         <button
