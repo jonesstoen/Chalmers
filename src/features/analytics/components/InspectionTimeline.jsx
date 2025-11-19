@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react'
 import { CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useDataQuery } from '@dhis2/app-runtime'
-import { useSchoolAnalyticsView } from './SchoolAnalyticsView'
 import classes from './InspectionTimeline.module.css'
-import {useCacheableQuery} from "../../../shared/cache/cacheableQuery";
+import {useCacheableQuery} from '../../../shared/cache/cacheableQuery'
+import {useSchoolAnalyticsView} from '../hooks/useSchoolEvents'
 
 const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },

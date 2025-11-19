@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@dhis2/app-runtime": "^3.14.6",
+    "@dhis2/ui": "^10.9.2",
     "chart.js": "^4.5.1",
     "chartjs-chart-matrix": "^3.0.0",
     "chartjs-plugin-datalabels": "^2.2.0",
