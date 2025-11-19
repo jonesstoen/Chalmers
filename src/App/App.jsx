@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import LandingPage from '../features/home/LandingPage'
-import InspectPage from '../features/inspections/inspectionPage'
+
 import InspectionContext from '../context/InspectionContext'
 import AttributeContext from '../context/AttributeContext'
 import SchoolInspectionPage from '../features/inspections/pages/SchoolInspectionPage'
