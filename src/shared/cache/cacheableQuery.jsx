@@ -2,115 +2,102 @@ import { useEffect, useMemo, useState } from "react";
 import { useDhis2ConnectionStatus, useDataQuery } from "@dhis2/app-runtime";
 import { aggregatedCache, eventsCache, outboxCache } from "./config";
 
-export function useCacheableQuery(cacheKey, dataKey, query, options = {}) {
+export function useCacheableQuery(cacheKey, dataKey, query, variables = {}) {
     const cacheMap = {
         events: eventsCache,
         aggregated: aggregatedCache,
         outbox: outboxCache,
-    };
+    }
 
-    // memoize chosen cache instance
-    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey]);
+    // Stable cache instance
+    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey])
 
-    const [cachedData, setCachedData] = useState(null);
-    const [cacheStatus, setCacheStatus] = useState("none");
+    const [cachedData, setCachedData] = useState(null)
+    const [cacheStatus, setCacheStatus] = useState("none")
     // "none" | "cache" | "stale-cache" | "network"
 
-    // --- 1. Load cache on mount / dataKey change
+    // ---- 1. Load cache when dataKey changes ----
     useEffect(() => {
-        const controller = new AbortController();
-        const { signal } = controller;
+        let cancelled = false
 
-        (async () => {
-            try {
-                const item = await cache.getItem(dataKey);
-                if (signal.aborted) return;
-                if (item) {
-                    const isStale = isCacheStale(item.timestamp);
-                    setCachedData(item.value);
-                    setCacheStatus(isStale ? "stale-cache" : "cache");
-                } else {
-                    setCacheStatus("none");
-                    setCachedData(null);
-                }
-            } catch (e) {
-                // ignore read errors for now
+        ;(async () => {
+            const item = await cache.getItem(dataKey)
+
+            if (cancelled) return
+
+            if (item) {
+                const stale = isCacheStale(item.timestamp)
+                setCachedData(item.value)
+                setCacheStatus(stale ? "stale-cache" : "cache")
+            } else {
+                setCachedData(null)
+                setCacheStatus("none")
             }
-        })();
+        })()
 
-        return () => controller.abort();
-    }, [dataKey, cache]);
+        return () => {
+            cancelled = true
+        }
+    }, [dataKey, cache])
 
-    // decide whether to run the network query:
-    const shouldFetchFromNetwork = !cachedData || cacheStatus === "stale-cache";
+    // Should we query the network?
+    const shouldFetch = cacheStatus === "none" || cacheStatus === "stale-cache"
 
-    // --- 2. Run DHIS2 network query (lazy when we have a fresh cache)
-    const { data, loading, error } = useDataQuery(query, {
-        variables: options,
-        lazy: !shouldFetchFromNetwork,
-    });
+    // ---- 2. DHIS2 network query ----
+    const {
+        data: networkData,
+        loading,
+        error,
+    } = useDataQuery(query, {
+        variables,
+        lazy: !shouldFetch,
+    })
 
-    // --- 3. When network fetch succeeds → update cache (but avoid redundant writes)
+    // ---- 3. When network returns valid data, update cache ----
     useEffect(() => {
-        if (!data) return;
+        if (!networkData) return
 
-        const controller = new AbortController();
-        const { signal } = controller;
+        let cancelled = false
 
-        (async () => {
-            try {
-                // Avoid repeated writes if the cached value already matches network data
-                if (cachedData && deepEqual(cachedData, data)) {
-                    if (signal.aborted) return;
-                    // only change status if it's not already "network" to avoid extra renders
-                    setCacheStatus((prev) => (prev === "network" ? prev : "network"));
-                    // don't call setCachedData(data) here — avoid changing reference when value is equal
-                    return;
-                }
-
+        ;(async () => {
+            if (!deepEqual(networkData, cachedData)) {
                 await cache.setItem(dataKey, {
-                    value: data,
+                    value: networkData,
                     timestamp: Date.now(),
-                });
-
-                if (signal.aborted) return;
-
-                setCacheStatus("network");
-                setCachedData(data);
-            } catch (e) {
-                // ignore write errors
+                })
             }
-        })();
 
-        return () => controller.abort();
-    }, [data, dataKey, cache, cachedData, cacheStatus]);
+            if (cancelled) return
 
-    // --- 4. If network fails → fall back to cache
-    const finalData = error && cachedData ? cachedData : data || cachedData;
+            setCachedData(networkData)
+            setCacheStatus("network")
+        })()
 
-    const finalStatus = (() => {
-        if (data) return "network";
-        if (error && cachedData) return cacheStatus;
-        return cacheStatus;
-    })();
+        return () => {
+            cancelled = true
+        }
+    }, [networkData, dataKey, cache]) // <-- NOTICE: cachedData removed
+
+    // ---- 4. Choose final result ----
+    const finalData = networkData || cachedData
 
     return {
         data: finalData,
         loading,
         error,
-        source: finalStatus,
-    };
+        source: cacheStatus,
+    }
 }
 
-// Example: stale after ~16h
-function isCacheStale(time) {
-    return Date.now() - time > 16 * 60 * 60 * 1000;
+// ~16 hours stale
+function isCacheStale(timestamp) {
+    return Date.now() - timestamp > 16 * 60 * 60 * 1000
 }
 
 function deepEqual(a, b) {
     try {
-        return JSON.stringify(a) === JSON.stringify(b);
+        return JSON.stringify(a) === JSON.stringify(b)
     } catch {
-        return false;
+        return false
     }
 }

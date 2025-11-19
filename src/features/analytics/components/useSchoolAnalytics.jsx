@@ -1,5 +1,6 @@
 import {useCacheableQuery} from "../../../shared/cache/cacheableQuery";
 import {useMemo} from "react";
+import {useDataQuery} from "@dhis2/app-runtime";
 
 const schoolAnalyticsQuery = {
     analytics: {
@@ -42,18 +43,21 @@ export function useSchoolAnalytics({ programId, stageId, schoolId, startDate, en
     const dataKey =
         `${schoolId}-${programId}-${stageId}-${startDate}-${endDate}-${(dataElements || []).join('_')}`
 
+    /*
     return useCacheableQuery(
         'events',
         dataKey,
         schoolAnalyticsQuery,   // already stable
         variables
     )
-}
-    /*
-    const { loading, error, data } = useDataQuery(schoolAnalyticsQuery, {
-        variables: { programId, stageId, schoolId, startDate, endDate, dataElements },
-        lazy: !ready,
+
+    */
+
+
+    const {loading, error, data} = useDataQuery(schoolAnalyticsQuery, {
+        variables: variables,
     })
-    return { loading, error, data: data?.analytics }
-     */
+    return {loading, error, data: data?.analytics}
+
+}
 
