@@ -36,6 +36,85 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
 
     const inspectionDateLabel = new Date().toLocaleDateString()
 
+    const sectionBoxStyle = {
+        background: "#fafafa",
+        padding: "16px",
+        borderRadius: 10,
+        border: "1px solid #e5e7eb",
+        marginBottom: "1.5rem",
+    }
+    const sectionGridStyle = {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        columnGap: 16,
+        rowGap: 12,
+        gap: 20,
+        alignItems: 'flex-start',
+        maxWidth: 960,         // on laptop
+        marginTop: 4,
+        marginBottom: 4,
+    }
+    const numberFieldContainerStyle = {
+        marginBottom: '0.75rem',
+        maxWidth: 320,
+        width: '100%',
+    }
+
+    const numberLabelStyle = {
+        display: 'block',
+        marginBottom: 4,
+        fontSize: 13,
+        fontWeight: 500,
+        minHeight: 32,
+        color: '#0f172a',
+    }
+
+    const numberInputStyle = {
+        width: '100%',
+        padding: '6px 10px',
+        borderRadius: 8,
+        border: '1px solid #cbd5e1',
+        fontSize: 14,
+        outline: 'none',
+        boxSizing: 'border-box',
+    }
+
+    const numberInputFocusStyle = {
+        ...numberInputStyle,
+        border: '1px solid #2563eb',
+        boxShadow: '0 0 0 1px rgba(37,99,235,0.2)',
+    }
+    function NumberField({ label, value, onChange, error }) {
+        const [isFocused, setIsFocused] = React.useState(false)
+
+        return (
+            <div style={numberFieldContainerStyle}>
+                <label style={numberLabelStyle}>{label}</label>
+                <input
+                    type="number"
+                    min="0"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    style={isFocused ? numberInputFocusStyle : numberInputStyle}
+                />
+                {error && (
+                    <p
+                        style={{
+                            marginTop: 4,
+                            marginBottom: 0,
+                            fontSize: 12,
+                            color: '#b91c1c',
+                        }}
+                    >
+                        {error}
+                    </p>
+                )}
+            </div>
+        )
+    }
+
     useEffect(() => {
         if (data) {
             setFormState({})
@@ -59,7 +138,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
         return ok
     }
 
-    // valider fortløpende slik at Submit-knappen enable/disable oppdateres
+    // validerer fortløpende slik at Submit-knappen enable/disable oppdateres
     useEffect(() => {
         validateForm()
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,7 +170,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
             return acc
         }, [])
 
-        // auto-computed toilets
+        // auto computed toilets
         dataValuesArray.push({
             dataElement: 'iytoDmoTUWY',
             value: totalToilets,
@@ -123,7 +202,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
 
         const isTrue = value === true || value === 'true'
 
-        // BOOLEAN with condition rating (1–5)
+        // BOOLEAN with condition rating
         if (type === 'BOOLEAN' && hasChild) {
             return (
                 <div key={id} style={{ marginBottom: '1.25rem' }}>
@@ -135,7 +214,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
                                 // Oppdater availability
                                 handleChange(id, v)
 
-                                // 👇 hvis man velger "Not available", nullstill condition
+                                // hvis man velger "Not available", nullstilles condition
                                 if (v === false || v === 'false') {
                                     handleChange(childId, null)
                                 }
@@ -147,7 +226,6 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
 
                         <ConditionRatingField
                             label={child_query.label}
-                            // ingen default – ingen blå knapp før bruker trykker
                             value={numericChildValue}
                             onChange={num => handleChange(childId, num)}
                             disabled={!isTrue}
@@ -158,7 +236,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
             )
         }
 
-        // Regular BOOLEAN → Yes/No choice
+        // Regular BOOLEAN  Yes/No choice
         if (type === 'BOOLEAN') {
             return (
                 <div key={id} style={{ marginBottom: '1rem' }}>
@@ -172,18 +250,16 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
             )
         }
 
-        // Numeric input
+        //  Numeric input
+        const numericValue = formState[id] ?? ''
         return (
-            <div key={id} style={{ marginBottom: '1rem' }}>
-                <InputField
-                    label={label}
-                    type="number"
-                    min="0"
-                    value={formState[id] ?? ''}
-                    onChange={({ value }) => handleChange(id, value)}
-                    error={errors[id]}
-                />
-            </div>
+            <NumberField
+                key={id}
+                label={label}
+                value={numericValue}
+                onChange={val => handleChange(id, val)}
+                error={errors[id]}
+            />
         )
     }
 
@@ -252,7 +328,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
             {!loading && (
                 <>
                     {/* FACILITIES */}
-                    <details open style={{ marginBottom: '1.25rem' }}>
+                    <details open style={sectionBoxStyle}>
                         <summary style={{ fontWeight: 600, cursor: 'pointer' }}>
                             Facilities
                         </summary>
@@ -263,19 +339,45 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
                     </details>
 
                     {/* CAPACITY */}
-                    <details open style={{ marginBottom: '1.25rem' }}>
+                    <details open style={sectionBoxStyle}>
                         <summary style={{ fontWeight: 600, cursor: 'pointer' }}>
                             Capacity
                         </summary>
-                        {capacity.map(renderField)}
+                        <p
+                            style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                                marginTop: 4,
+                                marginBottom: 12,
+                            }}
+                        >
+                            Enter basic counts for classrooms, learners, seats and teachers.
+                        </p>
+
+                        <div style={sectionGridStyle}>
+                            {capacity.map(renderField)}
+                        </div>
                     </details>
 
                     {/* SANITATION */}
-                    <details open>
+                    <details open style={sectionBoxStyle}>
                         <summary style={{ fontWeight: 600, cursor: 'pointer' }}>
                             Sanitation & staffing
                         </summary>
-                        {sanitation.map(renderField)}
+                        <p
+                            style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                                marginTop: 4,
+                                marginBottom: 12,
+                            }}
+                        >
+                            Report toilets per group. Total toilets is calculated automatically.
+                        </p>
+
+                        <div style={sectionGridStyle}>
+                            {sanitation.map(renderField)}
+                        </div>
 
                         <strong style={{ display: 'block', marginTop: 10 }}>
                             Total toilets: {totalToilets}
@@ -293,7 +395,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
                         <Button
                             primary
                             onClick={handleSubmit}
-                            // 🔹 disable så lenge form ikke er valid
+                            // disable så lenge form ikke er valid
                             disabled={loading || !isFormValid}
                         >
                             Submit inspection
