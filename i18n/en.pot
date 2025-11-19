@@ -5,17 +5,35 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-10-09T15:06:51.570Z\n"
-"PO-Revision-Date: 2025-10-09T15:06:51.570Z\n"
+"POT-Creation-Date: 2025-11-11T12:21:51.394Z\n"
+"PO-Revision-Date: 2025-11-11T12:21:51.395Z\n"
 
-msgid "ERROR"
-msgstr "ERROR"
+msgid "Select a school"
+msgstr "Select a school"
 
-msgid "Loading..."
-msgstr "Loading..."
+msgid "Pick a node in the tree to see details."
+msgstr "Pick a node in the tree to see details."
 
-msgid "Hello {{name}}"
-msgstr "Hello {{name}}"
+msgid "Analytics"
+msgstr "Analytics"
 
-msgid "Welcome to DHIS2!"
-msgstr "Welcome to DHIS2!"
+msgid "School Inspection"
+msgstr "School Inspection"
+
+msgid "Pick a school in the tree to continue."
+msgstr "Pick a school in the tree to continue."
+
+msgid "Submit"
+msgstr "Submit"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Organisation units"
+msgstr "Organisation units"
+
+msgid "No roots available"
+msgstr "No roots available"
