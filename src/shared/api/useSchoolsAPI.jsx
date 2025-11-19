@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDataEngine } from '@dhis2/app-runtime'
-
+/* Brukes ikke
 export function useSchoolsByRegions(regionIds = []) {
     const engine = useDataEngine()
     const [schools, setSchools] = useState([])
@@ -54,3 +54,4 @@ export function useSchoolsByRegions(regionIds = []) {
 
     return { schools, loading, error }
 }
+*/

@@ -1,5 +1,5 @@
 import { useDhis2ConnectionStatus } from '@dhis2/app-runtime'
-import usePostEvent from '../api/postDataAPI'
+import usePostEvent from '../api/useTrackerEventMutation'
 
 
 

@@ -14,6 +14,7 @@ import useFetchAnalytics from './analyticsAPI'
  *
  * @returns {Object} { data, headers, rows, loading, error }
  */
+/*
 export function AnalyticsSection({
     programId,
     stage = {},
@@ -45,3 +46,4 @@ export function AnalyticsSection({
 
     return { data, headers, rows, loading, error }
 }
+*/
