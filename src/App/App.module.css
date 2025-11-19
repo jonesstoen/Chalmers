@@ -73,7 +73,6 @@
         max-width: none;
         max-height: none;
         margin-bottom: 8px;
-        /* fjern “kort”-følelsen på wrapperen – vi lager eget kort i MobileBody */
         border: none;
         padding: 0;
         background: transparent;
