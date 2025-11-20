@@ -2,6 +2,7 @@ import { useContext } from "react"
 import InspectionContext from "../../../../context/InspectionContext"
 import SchoolGraph from "../../../analytics/components/SchoolGraph"
 import HeatmapComparison from "../../../analytics/heatmap/HeatmapComparison"
+import { dataElementIdToDescription } from "../../configs/inspectionFormUtils"
 
 function Result({ OrgId }) {
   const [inspectionDict] = useContext(InspectionContext)
@@ -39,6 +40,9 @@ function Result({ OrgId }) {
 
 /* ------------------ Graph Card ------------------ */
 function GraphCard({ schoolId, dataElement, localPoints }) {
+
+  const name = dataElementIdToDescription(dataElement)
+
   return (
     <div
       style={{
@@ -51,7 +55,7 @@ function GraphCard({ schoolId, dataElement, localPoints }) {
       <SchoolGraph
         schoolId={schoolId}
         dataElements={[dataElement]}
-        label={`Data Element: ${dataElement}`}
+        label={`${name}`}
         localPoints={localPoints}
       />
     </div>
