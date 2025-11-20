@@ -14,6 +14,7 @@ import {
     FACILITY_IDS,
     CAPACITY_IDS,
     SANITATION_IDS,
+    TOTAL_TOILETS_ID,
 } from '../configs/schoolInspectionConfig'
 import {
     computeTotalToilets,
@@ -73,8 +74,9 @@ const numberInputStyle = {
 const numberInputFocusStyle = {
     ...numberInputStyle,
     border: '1px solid #2563eb',
-    boxShadow: '0 0 0 1px rgba(37,99,235,0.2)',
+    boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.2)',
 }
+
 function NumberField({ label, value = '', onChange, error }) {
     const [isFocused, setIsFocused] = React.useState(false)
 
@@ -91,7 +93,14 @@ function NumberField({ label, value = '', onChange, error }) {
                 style={isFocused ? numberInputFocusStyle : numberInputStyle}
             />
             {error && (
-                <p style={{ marginTop: 4, marginBottom: 0, fontSize: 12, color: '#b91c1c' }}>
+                <p
+                    style={{
+                        marginTop: 4,
+                        marginBottom: 0,
+                        fontSize: 12,
+                        color: '#b91c1c',
+                    }}
+                >
                     {error}
                 </p>
             )}
@@ -99,14 +108,20 @@ function NumberField({ label, value = '', onChange, error }) {
     )
 }
 
-
-export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActiveTab }) {
+export default function SchoolInspectionForm({
+                                                 orgUnitId,
+                                                 orgUnitName,
+                                                 setActiveTab,
+                                             }) {
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
-    const [isFormValid, setIsFormValid] = useState(false)
 
-    const [submitInspection, { loading, error, data }] = usePostSchoolInspectionEvent()
+    const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
+    const [showMissingPopup, setShowMissingPopup] = useState(false)
+
+    const [submitInspection, { loading, error, data }] =
+        usePostSchoolInspectionEvent()
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext)
 
     const inspectionDateLabel = new Date().toLocaleDateString()
@@ -116,7 +131,8 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
         if (data) {
             setFormState({})
             setErrors({})
-            setIsFormValid(false)
+            setMissingRequiredLabels([])
+            setShowMissingPopup(false)
         }
     }, [data])
 
@@ -128,13 +144,20 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
 
     const validateForm = () => {
         const normalizedState = {}
+
         SCHOOL_INSPECTION_FIELDS.forEach(field => {
             const parentId = field.id
-            normalizedState[parentId] = normalizeChange(parentId, formState[parentId])
+            normalizedState[parentId] = normalizeChange(
+                parentId,
+                formState[parentId]
+            )
 
             if (field.child_query) {
                 const childId = field.child_query.id
-                normalizedState[childId] = normalizeChange(childId, formState[childId])
+                normalizedState[childId] = normalizeChange(
+                    childId,
+                    formState[childId]
+                )
             }
         })
 
@@ -142,68 +165,105 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
         const isEmpty = v => v === undefined || v === null || v === ''
 
         SCHOOL_INSPECTION_FIELDS.forEach(field => {
+            const id = field.id
+
+            // ❗ Ikke krev Total toilets – den er auto-beregnet
+            if (id === TOTAL_TOILETS_ID) {
+                return
+            }
+
             if (field.type === 'BOOLEAN') {
-                if (isEmpty(normalizedState[field.id]) && !errorsFound[field.id])
-                    errorsFound[field.id] = 'Required'
-                if (field.child_query) {
-                    const childValue = normalizedState[field.child_query.id]
-                    const isTrue = normalizedState[field.id] === true || normalizedState[field.id] === 'true'
-                    if (isTrue && isEmpty(childValue))
-                        errorsFound[field.child_query.id] = 'Required'
+                if (isEmpty(normalizedState[id]) && !errorsFound[id]) {
+                    errorsFound[id] = 'Required'
                 }
-            } else if (isEmpty(normalizedState[field.id])) {
-                errorsFound[field.id] = 'Required'
+
+                if (field.child_query) {
+                    const childId = field.child_query.id
+                    const childValue = normalizedState[childId]
+                    const isTrue =
+                        normalizedState[id] === true ||
+                        normalizedState[id] === 'true'
+
+                    if (
+                        isTrue &&
+                        isEmpty(childValue) &&
+                        !errorsFound[childId]
+                    ) {
+                        errorsFound[childId] = 'Required'
+                    }
+                }
+            } else if (isEmpty(normalizedState[id]) && !errorsFound[id]) {
+                errorsFound[id] = 'Required'
             }
         })
 
         setErrors(errorsFound)
+
+        const missingLabels = []
+        SCHOOL_INSPECTION_FIELDS.forEach(field => {
+            // ikke ta med total-toilets i popup-listen heller
+            if (field.id === TOTAL_TOILETS_ID) return
+
+            if (errorsFound[field.id] === 'Required') {
+                missingLabels.push(field.label)
+            }
+            if (
+                field.child_query &&
+                errorsFound[field.child_query.id] === 'Required'
+            ) {
+                missingLabels.push(field.child_query.label)
+            }
+        })
+        setMissingRequiredLabels(missingLabels)
+
         const ok = Object.keys(errorsFound).length === 0
-        setIsFormValid(ok)
         return { ok, normalizedState }
     }
 
-    useEffect(() => {
-        const isEmpty = v => v === undefined || v === null || v === ''
-        let complete = true
-
-        SCHOOL_INSPECTION_FIELDS.forEach(field => {
-            if (!complete) return
-
-            if (field.type === 'BOOLEAN') {
-                if (isEmpty(formState[field.id])) complete = false
-                if (field.child_query) {
-                    const isTrue = formState[field.id] === true || formState[field.id] === 'true'
-                    if (isTrue && isEmpty(formState[field.child_query.id])) complete = false
-                }
-            } else {
-                if (isEmpty(formState[field.id])) complete = false
-            }
-        })
-
-        setIsFormValid(complete)
-    }, [formState])
-
     const handleSubmit = async () => {
         const { ok, normalizedState } = validateForm()
-        if (!ok) return
 
-        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
-            const val = normalizedState[field.id]
-            if (val !== undefined && val !== null)
-                acc.push({ dataElement: field.id, value: field.type === 'BOOLEAN' ? !!val : val })
+        if (!ok) {
+            setShowMissingPopup(true)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            return
+        }
 
-            if (field.child_query) {
-                const childVal = normalizedState[field.child_query.id]
-                if (val === true && childVal)
-                    acc.push({ dataElement: field.child_query.id, value: childVal })
-            }
-            return acc
-        }, [])
+        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce(
+            (acc, field) => {
+                const val = normalizedState[field.id]
+                if (val !== undefined && val !== null) {
+                    acc.push({
+                        dataElement: field.id,
+                        value: field.type === 'BOOLEAN' ? !!val : val,
+                    })
+                }
 
-        dataValuesArray.push({ dataElement: 'iytoDmoTUWY', value: totalToilets })
+                if (field.child_query) {
+                    const childVal = normalizedState[field.child_query.id]
+                    if (val === true && childVal) {
+                        acc.push({
+                            dataElement: field.child_query.id,
+                            value: childVal,
+                        })
+                    }
+                }
+                return acc
+            },
+            []
+        )
+
+        // auto computed toilets – fortsatt sendt til DHIS2
+        dataValuesArray.push({
+            dataElement: TOTAL_TOILETS_ID,
+            value: totalToilets,
+        })
 
         setLastSubmitted(dataValuesArray)
-        setInspectionDict(prev => ({ ...prev, [orgUnitId]: dataValuesArray }))
+        setInspectionDict(prev => ({
+            ...prev,
+            [orgUnitId]: dataValuesArray,
+        }))
 
         await submitInspection({
             orgUnit_id: orgUnitId,
@@ -218,13 +278,22 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
     const renderField = ({ id, label, type, child_query }) => {
         const value = formState[id]
         const childValue = child_query ? formState[child_query.id] : null
-        const numericChildValue = childValue !== '' && childValue !== null ? Number(childValue) : null
+        const numericChildValue =
+            childValue !== '' && childValue !== null
+                ? Number(childValue)
+                : null
         const isTrue = value === true || value === 'true'
 
         if (type === 'BOOLEAN' && child_query) {
             return (
                 <div key={id} style={{ marginBottom: '1.25rem' }}>
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            flexWrap: 'wrap',
+                        }}
+                    >
                         <BooleanChoiceField
                             label={label}
                             value={value}
@@ -239,7 +308,9 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
                         <ConditionRatingField
                             label={child_query.label}
                             value={numericChildValue}
-                            onChange={num => handleChange(child_query.id, num)}
+                            onChange={num =>
+                                handleChange(child_query.id, num)
+                            }
                             disabled={!isTrue}
                             error={errors[child_query.id]}
                         />
@@ -272,30 +343,109 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
         )
     }
 
-    const facilities = SCHOOL_INSPECTION_FIELDS.filter(f => FACILITY_IDS.includes(f.id))
-    const capacity = SCHOOL_INSPECTION_FIELDS.filter(f => CAPACITY_IDS.includes(f.id))
-    const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f => SANITATION_IDS.includes(f.id))
+    const facilities = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        FACILITY_IDS.includes(f.id)
+    )
+    const capacity = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        CAPACITY_IDS.includes(f.id)
+    )
+    const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        SANITATION_IDS.includes(f.id)
+    )
 
     return (
-        <div style={{ marginTop: '1rem', background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', padding: 16, boxShadow: '0 1px 3px rgba(15,23,42,0.08)' }}>
+        <div
+            style={{
+                marginTop: '1rem',
+                background: '#fff',
+                borderRadius: 12,
+                border: '1px solid #e2e8f0',
+                padding: 16,
+                boxShadow: '0 1px 3px rgba(15,23,42,0.08)',
+            }}
+        >
+            {/* Popup med liste over manglende felt */}
+            {showMissingPopup && missingRequiredLabels.length > 0 && (
+                <AlertStack>
+                    <AlertBar
+                        warning
+                        duration={8000}
+                        onHidden={() => setShowMissingPopup(false)}
+                    >
+                        <div>
+                            <strong>
+                                Please fill in the required fields:
+                            </strong>
+                            <ul
+                                style={{
+                                    margin: '4px 0 0 18px',
+                                    padding: 0,
+                                }}
+                            >
+                                {missingRequiredLabels.map(label => (
+                                    <li key={label}>{label}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </AlertBar>
+                </AlertStack>
+            )}
 
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, flexWrap: 'wrap' }}>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    marginBottom: 16,
+                    flexWrap: 'wrap',
+                }}
+            >
                 <div>
-                    <h3 style={{ margin: 0 }}>School inspection – {orgUnitName || orgUnitId}</h3>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                    <h3 style={{ margin: 0 }}>
+                        School inspection – {orgUnitName || orgUnitId}
+                    </h3>
+                    <p
+                        style={{
+                            margin: 0,
+                            fontSize: 12,
+                            color: '#64748b',
+                        }}
+                    >
                         Inspection date: {inspectionDateLabel}
                     </p>
                 </div>
-                <div style={{ fontSize: 12, color: '#64748b' }}>
+                <div
+                    style={{
+                        fontSize: 12,
+                        color: '#64748b',
+                    }}
+                >
                     {filledCount} / {totalCount} fields completed
                 </div>
             </div>
 
             {/* progress bar */}
             <div style={{ marginBottom: 20 }}>
-                <div style={{ height: 6, background: '#e5e7eb', borderRadius: 999, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${progressPct}%`, background: progressPct === 100 ? '#16a34a' : '#2563eb', transition: 'width .25s' }} />
+                <div
+                    style={{
+                        height: 6,
+                        background: '#e5e7eb',
+                        borderRadius: 999,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <div
+                        style={{
+                            height: '100%',
+                            width: `${progressPct}%`,
+                            background:
+                                progressPct === 100
+                                    ? '#16a34a'
+                                    : '#2563eb',
+                            transition: 'width .25s',
+                        }}
+                    />
                 </div>
             </div>
 
@@ -304,30 +454,86 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
             {!loading && (
                 <>
                     <details open style={sectionBoxStyle}>
-                        <summary style={{ fontWeight: 600, cursor: 'pointer' }}>Facilities</summary>
-                        <p style={{ fontSize: 12, color: '#64748b' }}>Select if available and rate condition from 1–5.</p>
+                        <summary
+                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                        >
+                            Facilities
+                        </summary>
+                        <p
+                            style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                            }}
+                        >
+                            Select if available and rate condition from 1–5.
+                        </p>
                         {facilities.map(renderField)}
                     </details>
 
                     <details open style={sectionBoxStyle}>
-                        <summary style={{ fontWeight: 600, cursor: 'pointer' }}>Capacity</summary>
-                        <p style={{ fontSize: 12, color: '#64748b', marginTop: 4, marginBottom: 12 }}>
-                            Enter basic counts for classrooms, learners, seats and teachers.
+                        <summary
+                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                        >
+                            Capacity
+                        </summary>
+                        <p
+                            style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                                marginTop: 4,
+                                marginBottom: 12,
+                            }}
+                        >
+                            Enter basic counts for classrooms, learners, seats
+                            and teachers.
                         </p>
-                        <div style={sectionGridStyle}>{capacity.map(renderField)}</div>
+                        <div style={sectionGridStyle}>
+                            {capacity.map(renderField)}
+                        </div>
                     </details>
 
                     <details open style={sectionBoxStyle}>
-                        <summary style={{ fontWeight: 600, cursor: 'pointer' }}>Sanitation & staffing</summary>
-                        <p style={{ fontSize: 12, color: '#64748b', marginTop: 4, marginBottom: 12 }}>
-                            Report toilets per group. Total toilets is calculated automatically.
+                        <summary
+                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                        >
+                            Sanitation & staffing
+                        </summary>
+                        <p
+                            style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                                marginTop: 4,
+                                marginBottom: 12,
+                            }}
+                        >
+                            Report toilets per group. Total toilets is
+                            calculated automatically.
                         </p>
-                        <div style={sectionGridStyle}>{sanitation.map(renderField)}</div>
-                        <strong style={{ display: 'block', marginTop: 10 }}>Total toilets: {totalToilets}</strong>
+                        <div style={sectionGridStyle}>
+                            {sanitation.map(renderField)}
+                        </div>
+                        <strong
+                            style={{
+                                display: 'block',
+                                marginTop: 10,
+                            }}
+                        >
+                            Total toilets: {totalToilets}
+                        </strong>
                     </details>
 
-                    <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button primary onClick={handleSubmit} disabled={loading || !isFormValid}>
+                    <div
+                        style={{
+                            marginTop: '2rem',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                        }}
+                    >
+                        <Button
+                            primary
+                            onClick={handleSubmit}
+                            disabled={loading}
+                        >
                             Submit inspection
                         </Button>
                     </div>
@@ -335,12 +541,17 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
                     {data && (
                         <AlertStack>
                             <AlertBar success duration={5000}>
-                                Submitted successfully ({lastSubmitted.length} fields)
+                                Submitted successfully (
+                                {lastSubmitted.length} fields)
                             </AlertBar>
                         </AlertStack>
                     )}
 
-                    {error && <AlertBar critical>{error.message || 'Unexpected error'}</AlertBar>}
+                    {error && (
+                        <AlertBar critical>
+                            {error.message || 'Unexpected error'}
+                        </AlertBar>
+                    )}
                 </>
             )}
         </div>

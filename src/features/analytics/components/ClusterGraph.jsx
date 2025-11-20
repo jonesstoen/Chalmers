@@ -24,14 +24,14 @@ ChartJS.register(
 )
 
 export default function ClusterGraph({
-  OrgId,
+  schoolId,
   dataElements = [],
   label = 'Value',
   startDate = '2024-01-01',
   endDate = new Date().toISOString().split('T')[0],
 }) {
   const { timeSeries, loading, error } = useAggregatedSchoolAnalytics({
-    OrgId,
+    schoolId,
     dataElementIds: dataElements,
     startDate,
     endDate,
@@ -40,7 +40,7 @@ export default function ClusterGraph({
   const [showRegression, setShowRegression] = useState(false)
 
   if (loading) return <p>Loading…</p>
-  if (error) return <p>Error: {error.message}</p>
+  if (error) return <p>Error {schoolId}: {error.message}</p>
   if (!timeSeries?.length) return <p>No data available.</p>
 
   // Extract values

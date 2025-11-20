@@ -15,6 +15,7 @@ import {
     FACILITY_IDS,
     CAPACITY_IDS,
     SANITATION_IDS,
+    TOTAL_TOILETS_ID,
 } from '../configs/schoolInspectionConfig'
 import {
     computeTotalToilets,
@@ -76,7 +77,7 @@ const numberInputStyle = {
 const numberInputFocusStyle = {
     ...numberInputStyle,
     border: '1px solid #2563eb',
-    boxShadow: '0 0 0 1px rgba(37,99,235,0.2)',
+    boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.2)',
 }
 
 function NumberField({ label, value = '', onChange, error }) {
@@ -119,7 +120,10 @@ export default function EditInspectionForm({
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSaved, setLastSaved] = useState(null)
-    const [isFormValid, setIsFormValid] = useState(false)
+
+    // ny state for popup + liste over manglende felter
+    const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
+    const [showMissingPopup, setShowMissingPopup] = useState(false)
 
     const [updateEvent, { loading: saving, error: saveError }] =
         useUpdateSchoolInspectionEvent()
@@ -166,6 +170,8 @@ export default function EditInspectionForm({
         setFormState(next)
         setErrors({})
         setLastSaved(null)
+        setMissingRequiredLabels([])
+        setShowMissingPopup(false)
     }, [event])
 
     if (!event) {
@@ -193,17 +199,66 @@ export default function EditInspectionForm({
     const totalToilets = computeTotalToilets(formState)
 
     const validateForm = () => {
-        const newErrors = validateSchoolInspection(formState)
+        // start med domenespesifikk validering (f.eks. range checks)
+        const newErrors = validateSchoolInspection(formState) || {}
+        const isEmpty = v => v === undefined || v === null || v === ''
+
+        // legg på "Required" for tomme felter (bortsett fra total toilets)
+        SCHOOL_INSPECTION_FIELDS.forEach(field => {
+            const id = field.id
+
+            // ikke krev total toilets, den er auto-beregnet
+            if (id === TOTAL_TOILETS_ID) return
+
+            if (field.type === 'BOOLEAN') {
+                const value = formState[id]
+                if (isEmpty(value) && !newErrors[id]) {
+                    newErrors[id] = 'Required'
+                }
+
+                if (field.child_query) {
+                    const childId = field.child_query.id
+                    const childValue = formState[childId]
+                    const isTrue = value === true || value === 'true'
+
+                    if (
+                        isTrue &&
+                        isEmpty(childValue) &&
+                        !newErrors[childId]
+                    ) {
+                        newErrors[childId] = 'Required'
+                    }
+                }
+            } else {
+                const value = formState[id]
+                if (isEmpty(value) && !newErrors[id]) {
+                    newErrors[id] = 'Required'
+                }
+            }
+        })
+
         setErrors(newErrors)
+
+        // bygg liste med labels til popup
+        const missingLabels = []
+        SCHOOL_INSPECTION_FIELDS.forEach(field => {
+            if (field.id === TOTAL_TOILETS_ID) return
+
+            if (newErrors[field.id] === 'Required') {
+                missingLabels.push(field.label)
+            }
+            if (
+                field.child_query &&
+                newErrors[field.child_query.id] === 'Required'
+            ) {
+                missingLabels.push(field.child_query.label)
+            }
+        })
+        setMissingRequiredLabels(missingLabels)
+
         const ok = Object.keys(newErrors).length === 0
-        setIsFormValid(ok)
         return ok
     }
-
-    // live validering for å enable/disable Save-knapp
-    useEffect(() => {
-        validateForm()
-    }, [formState])
 
     const handleSave = async () => {
         if (!eventId) {
@@ -215,12 +270,22 @@ export default function EditInspectionForm({
             return
         }
 
-        if (!validateForm()) return
+        const ok = validateForm()
+        if (!ok) {
+            setShowMissingPopup(true)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            return
+        }
 
         const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce(
             (acc, field) => {
                 const parentId = field.id
                 const parentValue = formState[parentId]
+
+                // ikke send total-toilets her, vi overstyrer senere
+                if (parentId === TOTAL_TOILETS_ID) {
+                    return acc
+                }
 
                 if (
                     parentValue === undefined ||
@@ -263,9 +328,9 @@ export default function EditInspectionForm({
             []
         )
 
-        // Overstyr total toilets
+        // Overstyr total toilets (auto-beregnet)
         dataValuesArray.push({
-            dataElement: 'iytoDmoTUWY',
+            dataElement: TOTAL_TOILETS_ID,
             value: totalToilets,
         })
 
@@ -414,6 +479,34 @@ export default function EditInspectionForm({
                 position: 'relative',
             }}
         >
+            {/* Popup med liste over manglende felt */}
+            {showMissingPopup && missingRequiredLabels.length > 0 && (
+                <AlertStack>
+                    <AlertBar
+                        warning
+                        duration={8000}
+                        onHidden={() => setShowMissingPopup(false)}
+                    >
+                        <div>
+                            <strong>
+                                Please fill in the required fields before
+                                saving:
+                            </strong>
+                            <ul
+                                style={{
+                                    margin: '4px 0 0 18px',
+                                    padding: 0,
+                                }}
+                            >
+                                {missingRequiredLabels.map(label => (
+                                    <li key={label}>{label}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </AlertBar>
+                </AlertStack>
+            )}
+
             {/* Header */}
             <div
                 style={{
@@ -608,11 +701,7 @@ export default function EditInspectionForm({
                                 <Button
                                     primary
                                     onClick={handleSave}
-                                    disabled={
-                                        saving ||
-                                        deleting ||
-                                        !isFormValid
-                                    }
+                                    disabled={saving || deleting}
                                     style={{ minWidth: 140 }}
                                 >
                                     {saving ? 'Saving…' : 'Save changes'}

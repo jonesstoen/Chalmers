@@ -10,7 +10,8 @@ const buildQuery = (regionIds) => {
             resource: 'organisationUnits',
             id,
             params: {
-                fields: 'id,displayName,level,children[id]',
+
+fields: 'id,displayName,level,children[id],path',
             },
         }
 
@@ -19,7 +20,8 @@ const buildQuery = (regionIds) => {
             resource: 'organisationUnits',
             params: {
                 filter: [`path:like:${id}`],
-                fields: 'id,displayName,level,children[id]',
+
+fields: 'id,displayName,level,children[id],path',
                 paging: false,
             },
         }
@@ -49,9 +51,12 @@ export function useSchoolsByRegions(regionIds = []) {
         }))
 
     // ---- Extract descendants ----
-    const descendants = Object.keys(data)
-        .filter(k => k.startsWith('desc_'))
-        .flatMap(k => data[k].organisationUnits || [])
+
+  // Remove descendants that ARE already roots
+const descendants = Object.keys(data)
+    .filter(k => k.startsWith('desc_'))
+    .flatMap(k => data[k].organisationUnits || [])
+    .filter(u => !regionIds.includes(u.id))
 
     // ---- Tag clusters & schools ----
     const taggedDescendants = descendants.map(u => ({

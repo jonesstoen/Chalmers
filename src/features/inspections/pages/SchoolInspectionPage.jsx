@@ -264,8 +264,9 @@ export default function SchoolInspectionPage() {
                     </NoticeBox>
                 )}
 
+
                 {selectedId && isAggregate && (
-                    <AggregatedAnalyticsPanel OrgId={orgUnitId} />
+                    <AggregatedAnalyticsPanel data={data} />
                 )}
 
                 {selectedId && !isAggregate && (

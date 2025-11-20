@@ -1,4 +1,4 @@
-// features/inspections/config/schoolInspectionConfig.js
+// features/inspections/configs/schoolInspectionConfig.js
 
 export const SCHOOL_INSPECTION_FIELDS = [
     {
@@ -57,12 +57,33 @@ export const SCHOOL_INSPECTION_FIELDS = [
         label: 'Number of clean and secure classrooms',
         type: 'NUMBER',
     },
-    { id: 'I13NTyLrHBm', label: 'Toilets for teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
+    {
+        id: 'I13NTyLrHBm',
+        label: 'Toilets for teachers',
+        type: 'INTEGER_ZERO_OR_POSITIVE',
+    },
     { id: 'QXcKg7GSr4e', label: 'Toilets for boys', type: 'NUMBER' },
     { id: 'OGmIo4kFUYr', label: 'Toilets for girls', type: 'NUMBER' },
-    { id: 'DO0LBJfXY00', label: 'Learners (students)', type: 'INTEGER_ZERO_OR_POSITIVE' },
-    { id: 'jcC1uz56IpY', label: 'Number of seats', type: 'INTEGER_ZERO_OR_POSITIVE' },
-    { id: 'LME331J5aev', label: 'Number of teachers', type: 'INTEGER_ZERO_OR_POSITIVE' },
+    {
+        id: 'DO0LBJfXY00',
+        label: 'Learners (students)',
+        type: 'INTEGER_ZERO_OR_POSITIVE',
+    },
+    {
+        id: 'jcC1uz56IpY',
+        label: 'Number of seats',
+        type: 'INTEGER_ZERO_OR_POSITIVE',
+    },
+    {
+        id: 'LME331J5aev',
+        label: 'Number of teachers',
+        type: 'INTEGER_ZERO_OR_POSITIVE',
+    },
+    {
+        id: 'iytoDmoTUWY',
+        label: 'Total toilets',
+        type: 'INTEGER_ZERO_OR_POSITIVE',
+    },
 ]
 
 export const FACILITY_IDS = [
@@ -86,6 +107,8 @@ export const SANITATION_IDS = [
     'QXcKg7GSr4e',
     'OGmIo4kFUYr',
 ]
+
+export const TOTAL_TOILETS_ID = 'iytoDmoTUWY'
 
 export const CHILD_FIELD_IDS = [
     'gzhjCMe7OyS',
