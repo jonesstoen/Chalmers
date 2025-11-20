@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Input, CircularLoader, NoticeBox, IconApps16 } from '@dhis2/ui'
+import { Input, CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useSchoolsByRegions } from '../../inspections/hooks/useSchoolsAPi'
 import {
     IconWorld16,
@@ -7,7 +7,8 @@ import {
     IconHome16
 } from '@dhis2/ui'
 
-export default function SchoolSearchBar({ onSelect }) {
+
+export default function SchoolSearchBar({ onSelect}) {
     const regionIds = useMemo(() => ['RlPlK44dtoo', 'Bp3y61WbHwn'], [])
 
     const { schools, loading, error } = useSchoolsByRegions(regionIds)
@@ -100,6 +101,7 @@ const getIcon = type => {
                     <li
                         key={s.id}
                         onClick={() => onSelect?.(s)}
+
                         style={{
                             padding: '8px 8px',
                             cursor: 'pointer',
