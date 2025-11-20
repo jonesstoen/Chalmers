@@ -1,62 +1,102 @@
-import {useEffect} from 'react'
-import {
-    useCacheableSection,
-    CacheableSection,
-    useDhis2ConnectionStatus,
-    useDataQuery,
-} from "@dhis2/app-runtime"
+import { useEffect, useMemo, useState } from "react";
+import { useDataQuery } from "@dhis2/app-runtime";
+import {dataCache, outboxCache} from "./config";
 
-// 18 hours in milliseconds
-const HOURS_18 = 18 * 60 * 60 * 1000
+export function useCacheableQuery(cacheKey, dataKey, query, variables = {}) {
+    const cacheMap = {
+        data: dataCache,
+        outbox: outboxCache,
+    }
 
-export function useCacheableQuery(sectionName, query, options = {}) {
-    const {isConnected} = useDhis2ConnectionStatus()
-    const {
-        startRecording,
-        isRecording,
-        isCached,
-        lastUpdated
-    } = useCacheableSection(sectionName)
+    // Stable cache instance
+    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey])
 
-    // compares lastUpdated to now, and checks if the difference is larger than 18 hours or not
-    const isCacheFresh = (() => {
-        if (!lastUpdated) return false
-        const ageMs = Date.now() - new Date(lastUpdated).getTime()
-        return ageMs <= HOURS_18
-    })()
+    const [cachedData, setCachedData] = useState(null)
+    const [cacheStatus, setCacheStatus] = useState("none")
+    // "none" | "cache" | "stale-cache" | "network"
 
+    // ---- 1. Load cache when dataKey changes ----
     useEffect(() => {
-        if (isConnected && (!isCached || !isCacheFresh) && !isRecording) {
-            void startRecording()
+        let cancelled = false
+
+        ;(async () => {
+            const item = await cache.getItem(dataKey)
+
+            if (cancelled) return
+
+            if (item) {
+                const stale = isCacheStale(item.timestamp)
+                setCachedData(item.value)
+                setCacheStatus(stale ? "stale-cache" : "cache")
+            } else {
+                setCachedData(null)
+                setCacheStatus("none")
+            }
+        })()
+
+        return () => {
+            cancelled = true
         }
-    }, [isConnected, isCached, isRecording, isCacheFresh, startRecording])
+    }, [dataKey, cache])
 
-    // Only fetch online if cache is stale or missing
-    const shouldFetchOnline = isConnected && (!isCacheFresh || !isCached)
+    // Should we query the network?
+    const shouldFetch = cacheStatus === "none" || cacheStatus === "stale-cache"
 
-    const queryState = useDataQuery(query, {
-        ...options,
-        lazy: !shouldFetchOnline, // prevent auto-fetch if cache is fresh
+    // ---- 2. DHIS2 network query ----
+    const {
+        data: networkData,
+        loading,
+        error,
+    } = useDataQuery(query, {
+        variables,
+        lazy: !shouldFetch,
     })
 
-    // If we’re using cached data, trigger refetch to load it from the service worker
+    // ---- 3. When network returns valid data, update cache ----
     useEffect(() => {
-        if (!shouldFetchOnline && queryState.refetch) {
-            void queryState.refetch()
+        if (!networkData) return
+
+        let cancelled = false
+
+        ;(async () => {
+            if (!deepEqual(networkData, cachedData)) {
+                await cache.setItem(dataKey, {
+                    value: networkData,
+                    timestamp: Date.now(),
+                })
+            }
+
+            if (cancelled) return
+
+            setCachedData(networkData)
+            setCacheStatus("network")
+        })()
+
+        return () => {
+            cancelled = true
         }
-    }, [shouldFetchOnline])
+    }, [networkData, dataKey, cache]) // <-- NOTICE: cachedData removed
+
+    // ---- 4. Choose final result ----
+    const finalData = networkData || cachedData
 
     return {
-        ...queryState,
-        isConnected,
-        isCached,
-        lastUpdated,
-        sectionName
+        data: finalData,
+        loading,
+        error,
+        source: cacheStatus,
     }
 }
 
-export const CacheableQuerySection = ({ id, children, loadingMask }) => (
-    <CacheableSection id={id} loadingMask={loadingMask}>
-        {children}
-    </CacheableSection>
-)
+// ~16 hours stale
+function isCacheStale(timestamp) {
+    return Date.now() - timestamp > 16 * 60 * 60 * 1000
+}
+
+function deepEqual(a, b) {
+    try {
+        return JSON.stringify(a) === JSON.stringify(b)
+    } catch {
+        return false
+    }
+}

@@ -1,19 +1,9 @@
-import { useDhis2ConnectionStatus } from "@dhis2/app-runtime"
 import useFetchOrgUnits from "../../features/org-units/api/organisationAPI"
 
 function useOrgIds(ordID_array){
-    const { isConnected, isDisconnected, lastConnected } = useDhis2ConnectionStatus()
-    const online = useFetchOrgUnits(ordID_array)
-    const offline = useOfflineFetchOrgUnits(ordID_array)
+    const orgUnits = useFetchOrgUnits(ordID_array)
 
-    if(isDisconnected){
-        return offline
-    }else{
-
-        // Caching policy here
-        
-        return online
-    }
+    return orgUnits
 }
 
 export default useOrgIds

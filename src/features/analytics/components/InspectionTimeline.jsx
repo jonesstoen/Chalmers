@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react'
 import { CircularLoader, NoticeBox } from '@dhis2/ui'
 import { useDataQuery } from '@dhis2/app-runtime'
-import useSchoolAnalyticsWrapper from '../hooks/useSchoolEvents'
 import classes from './InspectionTimeline.module.css'
+import {useCacheableQuery} from '../../../shared/cache/cacheableQuery'
+import {useSchoolAnalyticsView} from '../hooks/useSchoolEvents'
 
 const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },
@@ -73,9 +74,9 @@ function toBool(v) {
 
 export default function InspectionTimeline({ schoolId, onSelect }) {
     // Hooks først
-    const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
+    const { events, loading, error } = useSchoolAnalyticsView(schoolId)
     const ouVars = useMemo(() => ({ id: schoolId || '' }), [schoolId])
-    const { data: ouData } = useDataQuery(ouQuery, { variables: ouVars, lazy: !schoolId })
+    const { data: ouData } = useCacheableQuery('events', 'TEST1', ouQuery, { variables: ouVars, lazy: !schoolId })
     const schoolName = ouData?.ou?.displayName || ouData?.ou?.name || schoolId
 
     const [sortKey, setSortKey] = useState('eventdate')
