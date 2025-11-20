@@ -156,6 +156,7 @@ function InspectionPanel({
                 </Tab>
             </TabBar>
 
+
             <div style={{ marginTop: 16 }}>
                 {activeTab === 'submit' && (
                     <SchoolInspectionForm

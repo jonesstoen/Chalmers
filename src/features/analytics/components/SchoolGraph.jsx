@@ -62,7 +62,7 @@ export default function SchoolGraph({
 
   if (loading) return <p>Loading…</p>
   if (error) return <p>Error: {error.message}</p>
-  if (!mergedData?.length) return <p>No data available.</p>
+  // if (!mergedData?.length) return <p>No data available.</p>
 
   const labels = mergedData.map(d => d.label)
   const values = mergedData.map(d => Math.max(0, d.value))

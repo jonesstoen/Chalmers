@@ -19,12 +19,15 @@ export default function useFetchAggregatedAnalytics(
     const dimensions = useMemo(() => {
         const d = []
         if (orgIds?.length) d.push(`ou:${orgIds.join(';')}`)
+
         for (const f of filter) {
             if (f?.itemid && f?.operator && f?.filter != null) {
                 d.push(`${f.itemid}:${f.operator}:${f.filter}`)
             }
         }
+
         if (extraDimensions?.length) d.push(...extraDimensions)
+
         return d
     }, [orgIds, JSON.stringify(filter), JSON.stringify(extraDimensions)])
 
@@ -37,7 +40,7 @@ export default function useFetchAggregatedAnalytics(
             startDate,
             endDate,
             paging,
-...(dimensions?.length ? { dimension: [...dimensions] } : {}),
+            ...(dimensions?.length ? { dimension: [...dimensions] } : {}),
             ...(descendants ? { ouMode: 'DESCENDANTS' } : {}),
         }
 
@@ -45,23 +48,43 @@ export default function useFetchAggregatedAnalytics(
 
         const query = {
             analytics: {
-resource: `analytics/events/query/${programId}`,
+                resource: `analytics/events/query/${programId}`,
                 params,
             },
         }
-console.log('Params sent:', query.analytics.params)
 
-       engine
-    .query(query)
-    .then(res => {
-        const analytics = res?.analytics ?? res
-        console.log('Analytics query result:', analytics)
-        setState({ loading: false, error: null, data: analytics })
-    })
-    .catch(error => {
-        console.error('Analytics fetch failed:', error)
-        setState({ loading: false, error, data: null })
-    })
+        console.log('Params sent:', query.analytics.params)
+
+        engine
+            .query(query)
+            .then(res => {
+                const analytics = res?.analytics ?? res
+                console.log('Analytics query result:', analytics)
+
+                // -------------------------------
+                // Convert analytics rows → events
+                // -------------------------------
+                const events = analytics.rows.map(row => {
+                    const ev = {}
+                    analytics.headers.forEach((h, idx) => {
+                        ev[h.name] = row[idx]
+                    })
+                    return ev
+                })
+
+                setState({
+                    loading: false,
+                    error: null,
+                    data: {
+                        ...analytics,
+                        events,          // NEW — what cluster heatmap needs
+                    }
+                })
+            })
+            .catch(error => {
+                console.error('Analytics fetch failed:', error)
+                setState({ loading: false, error, data: null })
+            })
 
     }, [engine, programId, stage, startDate, endDate, JSON.stringify(dimensions), descendants, paging])
 
