@@ -29,7 +29,7 @@ import ConditionRatingField from './ConditionRatingField'
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 
-// --- shared styles with inspection---
+// shared styles with inspection
 
 const sectionBoxStyle = {
     background: '#fafafa',
@@ -79,7 +79,7 @@ const numberInputFocusStyle = {
     boxShadow: '0 0 0 1px rgba(37,99,235,0.2)',
 }
 
-function NumberField({ label, value, onChange, error }) {
+function NumberField({ label, value = '', onChange, error }) {
     const [isFocused, setIsFocused] = React.useState(false)
 
     return (
@@ -136,27 +136,28 @@ export default function EditInspectionForm({
             const raw = event[field.id]
 
             if (field.type === 'BOOLEAN') {
-                // Robust normalisering av booleans fra event:
                 if (raw === undefined || raw === null || raw === '') {
-                    // ikke utfylt tidligere
                     next[field.id] = null
                 } else if (raw === true || raw === 'true') {
                     next[field.id] = true
                 } else if (raw === false || raw === 'false') {
                     next[field.id] = false
                 } else {
-                    // f.eks. "1" / "0" eller 1 / 0
                     const n = Number(raw)
                     next[field.id] = !Number.isNaN(n) ? n > 0 : null
                 }
             } else {
-                // tall / condition osv.
-                next[field.id] = raw === undefined || raw === null ? '' : raw
+                next[field.id] =
+                    raw === undefined || raw === null ? '' : raw
             }
 
             if (field.child_query) {
                 const childRaw = event[field.child_query.id]
-                if (childRaw !== undefined && childRaw !== null && childRaw !== '') {
+                if (
+                    childRaw !== undefined &&
+                    childRaw !== null &&
+                    childRaw !== ''
+                ) {
                     next[field.child_query.id] = childRaw
                 }
             }
@@ -202,7 +203,6 @@ export default function EditInspectionForm({
     // live validering for å enable/disable Save-knapp
     useEffect(() => {
         validateForm()
-
     }, [formState])
 
     const handleSave = async () => {
@@ -217,45 +217,51 @@ export default function EditInspectionForm({
 
         if (!validateForm()) return
 
-        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
-            const parentId = field.id
-            const parentValue = formState[parentId]
-
-            if (parentValue === undefined || parentValue === null) {
-                return acc
-            }
-
-            if (field.type === 'BOOLEAN') {
-                acc.push({
-                    dataElement: parentId,
-                    value: !!parentValue,
-                })
-            } else {
-                acc.push({
-                    dataElement: parentId,
-                    value: parentValue,
-                })
-            }
-
-            if (field.child_query) {
-                const childId = field.child_query.id
-                const childValue = formState[childId]
+        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce(
+            (acc, field) => {
+                const parentId = field.id
+                const parentValue = formState[parentId]
 
                 if (
-                    parentValue === true &&
-                    childValue !== undefined &&
-                    childValue !== null &&
-                    childValue !== ''
+                    parentValue === undefined ||
+                    parentValue === null
                 ) {
+                    return acc
+                }
+
+                if (field.type === 'BOOLEAN') {
                     acc.push({
-                        dataElement: childId,
-                        value: childValue,
+                        dataElement: parentId,
+                        value: !!parentValue,
+                    })
+                } else {
+                    acc.push({
+                        dataElement: parentId,
+                        value: parentValue,
                     })
                 }
-            }
 
-            return acc
-        }, [])
+                if (field.child_query) {
+                    const childId = field.child_query.id
+                    const childValue = formState[childId]
+
+                    if (
+                        parentValue === true &&
+                        childValue !== undefined &&
+                        childValue !== null &&
+                        childValue !== ''
+                    ) {
+                        acc.push({
+                            dataElement: childId,
+                            value: childValue,
+                        })
+                    }
+                }
+
+                return acc
+            },
+            []
+        )
 
         // Overstyr total toilets
         dataValuesArray.push({
@@ -288,7 +294,12 @@ export default function EditInspectionForm({
             alert('Missing eventId for delete')
             return
         }
-        if (!window.confirm(`Delete event ${eventId}? This cannot be undone.`)) return
+        if (
+            !window.confirm(
+                `Delete event ${eventId}? This cannot be undone.`
+            )
+        )
+            return
 
         await deleteEvent({ eventId })
         alert('Event deleted.')
@@ -305,23 +316,30 @@ export default function EditInspectionForm({
         const childId = child_query?.id
         const childValue = childId ? formState[childId] : null
         const numericChildValue =
-            childValue !== undefined && childValue !== null && childValue !== ''
+            childValue !== undefined &&
+            childValue !== null &&
+            childValue !== ''
                 ? Number(childValue)
                 : null
 
         const isTrue = value === true || value === 'true'
 
-        // BOOLEAN  condition-rating
+        // BOOLEAN + condition-rating
         if (type === 'BOOLEAN' && hasChild) {
             return (
                 <div key={id} style={{ marginBottom: '1.25rem' }}>
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            flexWrap: 'wrap',
+                        }}
+                    >
                         <BooleanChoiceField
                             label={label}
                             value={value}
                             onChange={v => {
                                 handleChange(id, v)
-                                // hvis man endrer til "Not available" → nullstill condition
                                 if (v === false || v === 'false') {
                                     handleChange(childId, null)
                                 }
@@ -334,7 +352,9 @@ export default function EditInspectionForm({
                         <ConditionRatingField
                             label={child_query.label}
                             value={numericChildValue}
-                            onChange={num => handleChange(childId, num)}
+                            onChange={num =>
+                                handleChange(childId, num)
+                            }
                             disabled={!isTrue}
                             error={errors[childId]}
                         />
@@ -370,9 +390,15 @@ export default function EditInspectionForm({
         )
     }
 
-    const facilities = SCHOOL_INSPECTION_FIELDS.filter(f => FACILITY_IDS.includes(f.id))
-    const capacity = SCHOOL_INSPECTION_FIELDS.filter(f => CAPACITY_IDS.includes(f.id))
-    const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f => SANITATION_IDS.includes(f.id))
+    const facilities = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        FACILITY_IDS.includes(f.id)
+    )
+    const capacity = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        CAPACITY_IDS.includes(f.id)
+    )
+    const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        SANITATION_IDS.includes(f.id)
+    )
 
     const isBusy = saving || deleting
 
@@ -403,17 +429,29 @@ export default function EditInspectionForm({
                     <h3 style={{ margin: 0 }}>
                         Edit inspection – {orgUnitName || effectiveOrgUnit}
                     </h3>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                    <p
+                        style={{
+                            margin: 0,
+                            fontSize: 12,
+                            color: '#64748b',
+                        }}
+                    >
                         <strong>Date:</strong> {inspectionDateLabel}
                     </p>
-                    <p style={{ margin: 0, fontSize: 11, color: '#94a3b8' }}>
+                    <p
+                        style={{
+                            margin: 0,
+                            fontSize: 11,
+                            color: '#94a3b8',
+                        }}
+                    >
                         <strong>Event ID:</strong> {eventId}
                     </p>
                 </div>
 
-                <div style={{ fontSize: 12, color: '#64748b' }}>
-                    {filledCount} of {totalCount} fields completed
-                </div>
+                <div
+                    style={{ fontSize: 12, color: '#64748b' }}
+                >{`${filledCount} of ${totalCount} fields completed`}</div>
             </div>
 
             {/* progress bar */}
@@ -433,7 +471,9 @@ export default function EditInspectionForm({
                             borderRadius: 999,
                             transition: 'width 0.2s ease-out',
                             background:
-                                progressPct === 100 ? '#16a34a' : '#2563eb',
+                                progressPct === 100
+                                    ? '#16a34a'
+                                    : '#2563eb',
                         }}
                     />
                 </div>
@@ -465,8 +505,8 @@ export default function EditInspectionForm({
                                 color: '#64748b',
                             }}
                         >
-                            Edit which facilities are available and adjust their condition if
-                            needed.
+                            Edit which facilities are available and adjust
+                            their condition if needed.
                         </p>
                         {facilities.map(renderField)}
                     </details>
@@ -493,10 +533,13 @@ export default function EditInspectionForm({
                                 color: '#64748b',
                             }}
                         >
-                            Update numbers for classrooms, learners, seats and teachers.
+                            Update numbers for classrooms, learners, seats and
+                            teachers.
                         </p>
 
-                        <div style={sectionGridStyle}>{capacity.map(renderField)}</div>
+                        <div style={sectionGridStyle}>
+                            {capacity.map(renderField)}
+                        </div>
                     </details>
 
                     {/* Sanitation & staffing */}
@@ -521,13 +564,20 @@ export default function EditInspectionForm({
                                 color: '#64748b',
                             }}
                         >
-                            Adjust toilets per group. Total toilets is recalculated
-                            automatically.
+                            Adjust toilets per group. Total toilets is
+                            recalculated automatically.
                         </p>
 
-                        <div style={sectionGridStyle}>{sanitation.map(renderField)}</div>
+                        <div style={sectionGridStyle}>
+                            {sanitation.map(renderField)}
+                        </div>
 
-                        <div style={{ marginTop: '0.75rem', marginBottom: '0.5rem' }}>
+                        <div
+                            style={{
+                                marginTop: '0.75rem',
+                                marginBottom: '0.5rem',
+                            }}
+                        >
                             <strong>Total toilets: {totalToilets}</strong>
                         </div>
                     </details>
@@ -558,7 +608,11 @@ export default function EditInspectionForm({
                                 <Button
                                     primary
                                     onClick={handleSave}
-                                    disabled={saving || deleting || !isFormValid}
+                                    disabled={
+                                        saving ||
+                                        deleting ||
+                                        !isFormValid
+                                    }
                                     style={{ minWidth: 140 }}
                                 >
                                     {saving ? 'Saving…' : 'Save changes'}
@@ -586,19 +640,31 @@ export default function EditInspectionForm({
                     )}
 
                     {saveError && (
-                        <div style={{ color: 'crimson', marginTop: '1rem' }}>
+                        <div
+                            style={{
+                                color: 'crimson',
+                                marginTop: '1rem',
+                            }}
+                        >
                             <p>
                                 <strong>Error saving:</strong>{' '}
-                                {saveError.message || 'An unexpected error occurred'}
+                                {saveError.message ||
+                                    'An unexpected error occurred'}
                             </p>
                         </div>
                     )}
 
                     {deleteError && (
-                        <div style={{ color: 'crimson', marginTop: '0.5rem' }}>
+                        <div
+                            style={{
+                                color: 'crimson',
+                                marginTop: '0.5rem',
+                            }}
+                        >
                             <p>
                                 <strong>Error deleting:</strong>{' '}
-                                {deleteError.message || 'An unexpected error occurred'}
+                                {deleteError.message ||
+                                    'An unexpected error occurred'}
                             </p>
                         </div>
                     )}

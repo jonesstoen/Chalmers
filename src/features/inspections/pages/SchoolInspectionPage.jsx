@@ -110,12 +110,7 @@ function InspectionPanel({selected, activeTab, setActiveTab, selectedEvent, setS
                             >
                                 {i18n.t('Edit inspections')}
                             </Tab>
-                            <Tab
-                                selected={activeTab === 'delete'}
-                                onClick={() => setActiveTab('delete')}
-                            >
-                                {i18n.t('Delete inspection')}
-                            </Tab>
+
                             <Tab
                                 selected={activeTab === 'tldr'}
                                 onClick={() => setActiveTab('tldr')}
@@ -265,7 +260,7 @@ export default function SchoolInspectionPage() {
 
                 {!selectedId && (
                     <NoticeBox title={i18n.t('Pick a School or Cluster')}>
-                        {i18n.t('Select a node in the tree to continue.')}
+                        {i18n.t('Search for a school in the searchbar or Select a node in the tree to continue.')}
                     </NoticeBox>
                 )}
 
