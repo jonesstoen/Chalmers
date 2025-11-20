@@ -354,14 +354,17 @@ export default function LandingPage() {
                     <MetricTile
                         title="📊 Inspections this month"
                         value={loading ? '…' : String(inspectionsThisMonth)}
+                        subtitle="Across Kanifing and Banjul"
                     />
                     <MetricTile
                         title="🔄 Pending sync"
                         value={String(pendingSync)}
+                        subtitle="Waiting to be sent when online"
                     />
                     <MetricTile
                         title="⚠️ Schools needing follow-up"
                         value={loading ? '…' : String(ouList.length)}
+                        subtitle="Based on seat-to-learner ratio"
                     />
                 </section>
 
