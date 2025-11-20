@@ -15,6 +15,7 @@ import {
     FACILITY_IDS,
     CAPACITY_IDS,
     SANITATION_IDS,
+    TOTAL_TOILETS_ID,
 } from '../configs/schoolInspectionConfig'
 import {
     computeTotalToilets,
@@ -84,7 +85,7 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
         }, [])
 
         dataValuesArray.push({
-            dataElement: 'iytoDmoTUWY',
+            dataElement: TOTAL_TOILETS_ID,
             value: totalToilets,
         })
 

@@ -235,7 +235,7 @@ export default function SchoolInspectionPage() {
                         {i18n.t('Select a node in the tree to continue.')}
                     </NoticeBox>
                 )}
-                {selectedId && isAggregate && <AggregatedAnalyticsPanel OrgId={orgUnitId}/>}
+                {selectedId && isAggregate && <AggregatedAnalyticsPanel data={data}/>}
                 {selectedId &&  !isAggregate && <InspectionPanel  selected={selected} activeTab={activeTab} setActiveTab={setActiveTab} selectedEvent={selectedEvent} setSelectedEvent={setSelectedEvent}  data={data} />}
             </main>
         </div>
