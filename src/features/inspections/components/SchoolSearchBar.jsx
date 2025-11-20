@@ -7,7 +7,7 @@ import {
     IconHome16
 } from '@dhis2/ui'
 
-export default function SchoolSearchBar({ onSelect }) {
+export default function SchoolSearchBar({ onSelect ,onDone}) {
     const regionIds = useMemo(() => ['RlPlK44dtoo', 'Bp3y61WbHwn'], [])
 
     const { schools, loading, error } = useSchoolsByRegions(regionIds)
@@ -98,8 +98,10 @@ const getIcon = type => {
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {filtered.slice(0, 50).map(s => (
                     <li
-                        key={s.id}
-                        onClick={() => onSelect?.(s)}
+    key={s.id}
+    onClick={() => {
+        onSelect?.(s)
+    }}
                         style={{
                             padding: '8px 8px',
                             cursor: 'pointer',
