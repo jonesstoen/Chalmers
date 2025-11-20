@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from 'react'
 import {
     Button,
-    InputField,
-    CheckboxField,
     CircularLoader,
     NoticeBox,
     AlertStack,
@@ -25,20 +23,110 @@ import {
     normalizeChange,
 } from '../configs/inspectionFormUtils'
 
-const PROGRAM_ID = 'UxK2o06ScIe'
-const STAGE_ID   = 'eJiBjm9Rl7E'
+import BooleanChoiceField from './BooleanChoiceField'
+import ConditionRatingField from './ConditionRatingField'
 
-export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDeleted }) {
+const PROGRAM_ID = 'UxK2o06ScIe'
+const STAGE_ID = 'eJiBjm9Rl7E'
+
+// --- shared styles with inspection---
+
+const sectionBoxStyle = {
+    background: '#fafafa',
+    padding: 16,
+    borderRadius: 10,
+    border: '1px solid #e5e7eb',
+    marginBottom: '1.5rem',
+}
+
+const sectionGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    gap: 20,
+    alignItems: 'flex-start',
+    maxWidth: 960,
+    marginInline: 'auto',
+}
+
+const numberFieldContainerStyle = {
+    marginBottom: '1rem',
+    maxWidth: 320,
+    width: '100%',
+}
+
+const numberLabelStyle = {
+    display: 'block',
+    marginBottom: 4,
+    fontSize: 13,
+    fontWeight: 500,
+    color: '#0f172a',
+    minHeight: 32,
+}
+
+const numberInputStyle = {
+    width: '100%',
+    padding: '6px 10px',
+    borderRadius: 8,
+    border: '1px solid #cbd5e1',
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box',
+}
+
+const numberInputFocusStyle = {
+    ...numberInputStyle,
+    border: '1px solid #2563eb',
+    boxShadow: '0 0 0 1px rgba(37,99,235,0.2)',
+}
+
+function NumberField({ label, value, onChange, error }) {
+    const [isFocused, setIsFocused] = React.useState(false)
+
+    return (
+        <div style={numberFieldContainerStyle}>
+            <label style={numberLabelStyle}>{label}</label>
+            <input
+                type="number"
+                min="0"
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                style={isFocused ? numberInputFocusStyle : numberInputStyle}
+            />
+            {error && (
+                <p
+                    style={{
+                        marginTop: 4,
+                        marginBottom: 0,
+                        fontSize: 12,
+                        color: '#b91c1c',
+                    }}
+                >
+                    {error}
+                </p>
+            )}
+        </div>
+    )
+}
+
+export default function EditInspectionForm({
+                                               event,
+                                               orgUnitId,
+                                               orgUnitName,
+                                               onDeleted,
+                                           }) {
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSaved, setLastSaved] = useState(null)
+    const [isFormValid, setIsFormValid] = useState(false)
 
     const [updateEvent, { loading: saving, error: saveError }] =
         useUpdateSchoolInspectionEvent()
     const [deleteEvent, { loading: deleting, error: deleteError }] =
         useDeleteSchoolInspectionEvent()
 
-    // Når valgt event endres → populér formState
+    // Når valgt event endres, populer formState
     useEffect(() => {
         if (!event) return
 
@@ -48,14 +136,27 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
             const raw = event[field.id]
 
             if (field.type === 'BOOLEAN') {
-                next[field.id] = raw === true || raw === 'true'
+                // Robust normalisering av booleans fra event:
+                if (raw === undefined || raw === null || raw === '') {
+                    // ikke utfylt tidligere
+                    next[field.id] = null
+                } else if (raw === true || raw === 'true') {
+                    next[field.id] = true
+                } else if (raw === false || raw === 'false') {
+                    next[field.id] = false
+                } else {
+                    // f.eks. "1" / "0" eller 1 / 0
+                    const n = Number(raw)
+                    next[field.id] = !Number.isNaN(n) ? n > 0 : null
+                }
             } else {
+                // tall / condition osv.
                 next[field.id] = raw === undefined || raw === null ? '' : raw
             }
 
             if (field.child_query) {
                 const childRaw = event[field.child_query.id]
-                if (childRaw !== undefined && childRaw !== null) {
+                if (childRaw !== undefined && childRaw !== null && childRaw !== '') {
                     next[field.child_query.id] = childRaw
                 }
             }
@@ -79,6 +180,7 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
     const inspectionDateLabel = event?.eventdate
         ? new Date(event.eventdate).toLocaleDateString()
         : 'Not set'
+
     const handleChange = (id, value) => {
         const newValue = normalizeChange(id, value)
         setFormState(prev => ({
@@ -92,8 +194,16 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
     const validateForm = () => {
         const newErrors = validateSchoolInspection(formState)
         setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
+        const ok = Object.keys(newErrors).length === 0
+        setIsFormValid(ok)
+        return ok
     }
+
+    // live validering for å enable/disable Save-knapp
+    useEffect(() => {
+        validateForm()
+
+    }, [formState])
 
     const handleSave = async () => {
         if (!eventId) {
@@ -188,45 +298,77 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
 
-    const renderField = ({ id, label, type, child_query }) => (
-        <div key={id} style={{ marginBottom: '0.75rem' }}>
-            {type === 'BOOLEAN' ? (
-                <CheckboxField
-                    label={label}
-                    checked={formState[id] === true || formState[id] === 'true'}
-                    onChange={() =>
-                        handleChange(
-                            id,
-                            !(formState[id] === true || formState[id] === 'true')
-                        )
-                    }
-                />
-            ) : (
-                <InputField
-                    label={label}
-                    type="number"
-                    min="0"
-                    value={formState[id] ?? ''}
-                    onChange={({ value }) => handleChange(id, value)}
-                    error={errors[id]}
-                />
-            )}
+    const renderField = ({ id, label, type, child_query }) => {
+        const value = formState[id]
+        const hasChild = !!child_query
 
-            {child_query && formState[id] === true && (
-                <div style={{ marginLeft: '1.75rem', marginTop: '0.35rem' }}>
-                    <InputField
-                        label={child_query.label}
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={formState[child_query.id] ?? ''}
-                        onChange={({ value }) => handleChange(child_query.id, value)}
-                        error={errors[child_query.id]}
+        const childId = child_query?.id
+        const childValue = childId ? formState[childId] : null
+        const numericChildValue =
+            childValue !== undefined && childValue !== null && childValue !== ''
+                ? Number(childValue)
+                : null
+
+        const isTrue = value === true || value === 'true'
+
+        // BOOLEAN  condition-rating
+        if (type === 'BOOLEAN' && hasChild) {
+            return (
+                <div key={id} style={{ marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <BooleanChoiceField
+                            label={label}
+                            value={value}
+                            onChange={v => {
+                                handleChange(id, v)
+                                // hvis man endrer til "Not available" → nullstill condition
+                                if (v === false || v === 'false') {
+                                    handleChange(childId, null)
+                                }
+                            }}
+                            error={errors[id]}
+                            trueLabel="Available"
+                            falseLabel="Not available"
+                        />
+
+                        <ConditionRatingField
+                            label={child_query.label}
+                            value={numericChildValue}
+                            onChange={num => handleChange(childId, num)}
+                            disabled={!isTrue}
+                            error={errors[childId]}
+                        />
+                    </div>
+                </div>
+            )
+        }
+
+        // Ren BOOLEAN
+        if (type === 'BOOLEAN') {
+            return (
+                <div key={id} style={{ marginBottom: '1rem' }}>
+                    <BooleanChoiceField
+                        label={label}
+                        value={value}
+                        onChange={v => handleChange(id, v)}
+                        error={errors[id]}
                     />
                 </div>
-            )}
-        </div>
-    )
+            )
+        }
+
+        // Numeric field
+        const numericValue = formState[id] ?? ''
+        return (
+            <NumberField
+                key={id}
+                label={label}
+                value={numericValue}
+                onChange={val => handleChange(id, val)}
+                error={errors[id]}
+            />
+        )
+    }
 
     const facilities = SCHOOL_INSPECTION_FIELDS.filter(f => FACILITY_IDS.includes(f.id))
     const capacity = SCHOOL_INSPECTION_FIELDS.filter(f => CAPACITY_IDS.includes(f.id))
@@ -302,7 +444,7 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
             {!isBusy && (
                 <>
                     {/* Facilities */}
-                    <details open style={{ marginBottom: '1rem' }}>
+                    <details open style={sectionBoxStyle}>
                         <summary
                             style={{
                                 cursor: 'pointer',
@@ -330,7 +472,7 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
                     </details>
 
                     {/* Capacity */}
-                    <details open style={{ marginBottom: '1rem' }}>
+                    <details open style={sectionBoxStyle}>
                         <summary
                             style={{
                                 cursor: 'pointer',
@@ -354,19 +496,11 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
                             Update numbers for classrooms, learners, seats and teachers.
                         </p>
 
-                        <div
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr',
-                                gap: 16,
-                            }}
-                        >
-                            {capacity.map(renderField)}
-                        </div>
+                        <div style={sectionGridStyle}>{capacity.map(renderField)}</div>
                     </details>
 
                     {/* Sanitation & staffing */}
-                    <details open style={{ marginBottom: '4rem' }}>
+                    <details open style={sectionBoxStyle}>
                         <summary
                             style={{
                                 cursor: 'pointer',
@@ -387,18 +521,11 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
                                 color: '#64748b',
                             }}
                         >
-                            Adjust toilets per group. Total toilets is recalculated automatically.
+                            Adjust toilets per group. Total toilets is recalculated
+                            automatically.
                         </p>
 
-                        <div
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr',
-                                gap: 16,
-                            }}
-                        >
-                            {sanitation.map(renderField)}
-                        </div>
+                        <div style={sectionGridStyle}>{sanitation.map(renderField)}</div>
 
                         <div style={{ marginTop: '0.75rem', marginBottom: '0.5rem' }}>
                             <strong>Total toilets: {totalToilets}</strong>
@@ -421,25 +548,17 @@ export default function EditInspectionForm({ event, orgUnitId, orgUnitName, onDe
                         <div
                             style={{
                                 display: 'flex',
-                                justifyContent: 'space-between',
+                                justifyContent: 'flex-end',
                                 alignItems: 'center',
                                 gap: 8,
                                 flexWrap: 'wrap',
                             }}
                         >
-                            <span
-                                style={{
-                                    fontSize: 12,
-                                    color: '#64748b',
-                                }}
-                            >
-                                {filledCount} of {totalCount} fields completed
-                            </span>
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <Button
                                     primary
                                     onClick={handleSave}
-                                    disabled={saving || deleting}
+                                    disabled={saving || deleting || !isFormValid}
                                     style={{ minWidth: 140 }}
                                 >
                                     {saving ? 'Saving…' : 'Save changes'}

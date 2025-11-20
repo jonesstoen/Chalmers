@@ -39,6 +39,14 @@
     vertical-align: middle;
 }
 
+.summaryRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 6px;
+}
 .tdNum {
     composes: td;
     text-align: right;

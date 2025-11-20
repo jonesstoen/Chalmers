@@ -5,14 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-19T16:12:23.945Z\n"
-"PO-Revision-Date: 2025-11-19T16:12:23.945Z\n"
-
-msgid "Select a school"
-msgstr "Select a school"
-
-msgid "Pick a node in the tree to see details."
-msgstr "Pick a node in the tree to see details."
+"POT-Creation-Date: 2025-11-20T12:24:28.448Z\n"
+"PO-Revision-Date: 2025-11-20T12:24:28.448Z\n"
 
 msgid "Selected event"
 msgstr "Selected event"
@@ -47,14 +41,14 @@ msgstr "Pick an event in the table above to edit."
 msgid "Pick an event in the table above to delete."
 msgstr "Pick an event in the table above to delete."
 
+msgid "Organisation units"
+msgstr "Organisation units"
+
 msgid "Pick a School or Cluster"
 msgstr "Pick a School or Cluster"
 
 msgid "Select a node in the tree to continue."
 msgstr "Select a node in the tree to continue."
-
-msgid "Organisation units"
-msgstr "Organisation units"
 
 msgid "No roots available"
 msgstr "No roots available"
