@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useDhis2ConnectionStatus, useDataQuery } from "@dhis2/app-runtime";
-import { aggregatedCache, eventsCache, outboxCache } from "./config";
+import { useDataQuery } from "@dhis2/app-runtime";
+import {dataCache, outboxCache} from "./config";
 
 export function useCacheableQuery(cacheKey, dataKey, query, variables = {}) {
     const cacheMap = {
-        events: eventsCache,
-        aggregated: aggregatedCache,
+        data: dataCache,
         outbox: outboxCache,
     }
 

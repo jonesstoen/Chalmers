@@ -9,14 +9,9 @@ localforage.config({
 })
 
 // You can also make specific instances if you prefer:
-export const aggregatedCache = localforage.createInstance({
+export const dataCache = localforage.createInstance({
     name: 'chalmers',
-    storeName: 'aggregated_cache',
-})
-
-export const eventsCache = localforage.createInstance({
-    name: 'chalmers',
-    storeName: 'events_cache',
+    storeName: 'data_cache',
 })
 
 export const outboxCache = localforage.createInstance({

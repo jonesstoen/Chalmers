@@ -1,26 +1,60 @@
-import { useDataQuery } from '@dhis2/app-runtime'
+import { useMemo } from "react"
+import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
 
+export default function useFetchOrgUnits(orgIds = []) {
 
-// https://research.im.dhis2.org/in5320g09/api/organisationUnits.json?filter=path:like:<CLUSTER_ID>&filter=organisationUnitGroups.id:eq:<UNIT_GROUP_ID>&fields=id,name,level,parent[id,name,level]&paging=false
-function useFetchOrgUnits(org_id_array){
+    // ---- 1. Stable dataKey (OU list only, sorted for stability) ----
+    const dataKey = useMemo(() => {
+        const sorted = [...orgIds].sort()
+        return JSON.stringify({
+            type: "orgUnits",
+            orgIds: sorted,
+        })
+    }, [orgIds])
 
-const query = org_id_array.reduce(
-
-    (acc,org_id) => {
-    acc[org_id] = {
-            resource: `organisationUnits/${org_id}`,
-            params: {
-                fields: ['children[name,id]','parents[name,id]','name','id','programs[name,id]','dataSets[name,id]']
-            }
+    // ---- 2. Stable variables for the query ----
+    // Each key becomes a sub-query in useDataQuery
+    const variables = useMemo(() => {
+        const vars = {}
+        for (const id of orgIds) {
+            vars[id] = { id }
         }
-        return acc
-    }
-    ,{}) 
+        return vars
+    }, [orgIds])
 
-return useDataQuery(query)
+    // ---- 3. Stable query object (memoized once) ----
+    // DHIS2 `useDataQuery` supports MULTI-QUERY style:
+    // query = { ou1: { resource, id, params }, ou2: { ... } }
+    const query = useMemo(() => ({
+        // We dynamically build subqueries based on variables
+        ...Object.fromEntries(
+            Object.keys(variables).map(id => [
+                id,
+                {
+                    resource: "organisationUnits",
+                    id: ({ id }) => id,           // → /organisationUnits/{id}
+                    params: () => ({
+                        fields: [
+                            "children[name,id]",
+                            "parents[name,id]",
+                            "name",
+                            "id",
+                            "programs[name,id]",
+                            "dataSets[name,id]"
+                        ],
+                        paging: false,
+                    })
+                }
+            ])
+        )
+        // IMPORTANT: query must NOT depend on variables (shape only)
+    }), [])
+
+    // ---- 4. Run cacheable query ----
+    return useCacheableQuery(
+        "data",     // <-- ALWAYS "data"
+        dataKey,
+        query,
+        variables
+    )
 }
-
-
- 
-
-export default useFetchOrgUnits

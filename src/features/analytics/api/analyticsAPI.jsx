@@ -34,14 +34,13 @@ export default function useFetchAnalytics(
                 programId,
                 orgIds,
                 startDate,
-                endDate,
                 stage,
                 filter,
                 descendants,
                 paging,
                 dimensions,
             }),
-        [programId, orgIds, startDate, endDate, stage, filter, descendants, paging, dimensions]
+        [programId, orgIds, startDate, stage, filter, descendants, paging, dimensions]
     )
 
     // Memoizing query object
@@ -68,7 +67,7 @@ export default function useFetchAnalytics(
 
     // ---- 4. Use cacheable query ----
     return useCacheableQuery(
-        'events',
+        'data',
         dataKey,
         query,
         {
