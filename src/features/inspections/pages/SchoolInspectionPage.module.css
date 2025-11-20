@@ -1,0 +1,22 @@
+/* src/features/inspections/pages/SchoolInspectionPage.module.css */
+
+.backButton {
+    background: transparent;
+    border: none;
+    color: #475569;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+}
+
+.backButton:hover {
+    background: #f1f5f9;
+}
+
+.backButton:active {
+    background: #e2e8f0;
+}

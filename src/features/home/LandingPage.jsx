@@ -25,12 +25,23 @@ function monthRangeISO(d = new Date()) {
 
 export default function LandingPage() {
     const navigate = useNavigate()
-    const openSchool = useCallback((ouId) => navigate(`/inspect?ou=${ouId}`), [navigate])
-    // const openRoot = useCallback((rootId) => navigate(`/inspect?root=${rootId}`), [navigate])
-    const openInspector = useCallback(() => navigate('/inspect'), [navigate])
-    const openSchoolInspection = useCallback(() => navigate('/school-inspection'), [navigate])
 
-    const lastOu = typeof window !== 'undefined' ? window.localStorage.getItem('lastOu') : null
+    // Åpne inspektør for en gitt skole (bruker ?ou= og /school-inspection)
+    const openSchool = useCallback(
+        ouId => navigate(`/school-inspection?ou=${ouId}`),
+        [navigate]
+    )
+
+    const openSchoolInspection = useCallback(
+        () => navigate('/school-inspection'),
+        [navigate]
+    )
+
+    const lastOu =
+        typeof window !== 'undefined'
+            ? window.localStorage.getItem('lastOu')
+            : null
+
     const { startDate, endDate } = useMemo(() => monthRangeISO(), [])
 
     const { data, loading, error } = useFetchAnalytics(
@@ -49,10 +60,14 @@ export default function LandingPage() {
 
     useEffect(() => {
         if (!rows.length || !headers.length) return setPriorityOuIds([])
+
         const ouIdx = headers.findIndex(h => h.name === 'ou')
         const learnersIdx = headers.findIndex(h => h.name === 'DO0LBJfXY00')
         const seatsIdx = headers.findIndex(h => h.name === 'jcC1uz56IpY')
-        if (ouIdx < 0 || learnersIdx < 0 || seatsIdx < 0) return setPriorityOuIds([])
+
+        if (ouIdx < 0 || learnersIdx < 0 || seatsIdx < 0) {
+            return setPriorityOuIds([])
+        }
 
         const byOu = new Map()
         for (const r of rows) {
@@ -71,21 +86,27 @@ export default function LandingPage() {
                 bad.push({ ou, ratio: seats / learners })
             }
         }
+
         bad.sort((a, b) => a.ratio - b.ratio)
         setPriorityOuIds(bad.slice(0, 8).map(x => x.ou))
     }, [rows, headers])
 
-    // ✅ ÉN stabil query for batchede OU-opplysninger
-    const OU_BATCH_QUERY = useMemo(() => ({
-        ous: {
-            resource: 'organisationUnits',
-            params: ({ ids }) => ({
-                ...(ids?.length ? { filter: `id:in:[${ids.join(',')}]` } : {}),
-                fields: 'id,name,displayName,parent[name]',
-                paging: false,
-            }),
-        },
-    }), [])
+    // Batch henting av OU-data
+    const OU_BATCH_QUERY = useMemo(
+        () => ({
+            ous: {
+                resource: 'organisationUnits',
+                params: ({ ids }) => ({
+                    ...(ids?.length
+                        ? { filter: `id:in:[${ids.join(',')}]` }
+                        : {}),
+                    fields: 'id,name,displayName,parent[name]',
+                    paging: false,
+                }),
+            },
+        }),
+        []
+    )
 
     const { data: ouResp } = useDataQuery(OU_BATCH_QUERY, {
         variables: { ids: priorityOuIds },
@@ -97,6 +118,7 @@ export default function LandingPage() {
 
     return (
         <div style={{ padding: 16 }}>
+            {/* Demo / eksempel-timeline – kan evt fjernes senere */}
             <InspectionTimeline schoolId={'k6MLijE92iz'} />
 
             <h2 style={{ marginBottom: 8 }}>Overview</h2>
@@ -114,18 +136,32 @@ export default function LandingPage() {
                     display: 'grid',
                     gridTemplateColumns: '1.2fr 1fr',
                     gap: 16,
-                    alignItems: 'center'
+                    alignItems: 'center',
                 }}
             >
                 <div>
-                    <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
+                    <div
+                        style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginBottom: 6,
+                        }}
+                    >
                         Welcome — key metrics and quick links to get you started.
                     </div>
                     <p style={{ margin: 0, color: '#475569' }}>
-                        Go to the inspection module to browse organisation trees, open your school's form, and submit data.
+                        Go to the inspection module to browse organisation trees,
+                        open your school's form, and submit data.
                     </p>
                 </div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: 8,
+                        justifyContent: 'flex-end',
+                        flexWrap: 'wrap',
+                    }}
+                >
                     <button
                         onClick={openSchoolInspection}
                         style={{
@@ -135,12 +171,13 @@ export default function LandingPage() {
                             background: '#2563eb',
                             color: '#fff',
                             fontWeight: 600,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                         }}
                         aria-label="Open Inspector"
                     >
                         Open inspector
                     </button>
+
                     {lastOu && (
                         <button
                             onClick={() => openSchool(lastOu)}
@@ -149,7 +186,7 @@ export default function LandingPage() {
                                 borderRadius: 10,
                                 border: '1px dashed #e5e7eb',
                                 background: '#fff',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
                             }}
                             title="Open your last visited school"
                         >
@@ -163,9 +200,10 @@ export default function LandingPage() {
             <section
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))',
+                    gridTemplateColumns:
+                        'repeat(auto-fit, minmax(220px,1fr))',
                     gap: 12,
-                    marginTop: 16
+                    marginTop: 16,
                 }}
             >
                 <MetricTile
@@ -196,8 +234,9 @@ export default function LandingPage() {
                 <div
                     style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
-                        gap: 12
+                        gridTemplateColumns:
+                            'repeat(auto-fit,minmax(280px,1fr))',
+                        gap: 12,
                     }}
                 >
                     {ouList.map(ou => (

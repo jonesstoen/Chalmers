@@ -25,6 +25,47 @@ import {
 import BooleanChoiceField from './BooleanChoiceField'
 import ConditionRatingField from './ConditionRatingField'
 
+const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
+
+const getDraftKey = orgUnitId =>
+    orgUnitId ? `${DRAFT_KEY_PREFIX}${orgUnitId}` : null
+
+const loadDraft = orgUnitId => {
+    if (typeof window === 'undefined') return null
+    const key = getDraftKey(orgUnitId)
+    if (!key) return null
+    try {
+        const raw = window.localStorage.getItem(key)
+        return raw ? JSON.parse(raw) : null
+    } catch (e) {
+        console.warn('Failed to load draft form state', e)
+        return null
+    }
+}
+
+const saveDraft = (orgUnitId, state) => {
+    if (typeof window === 'undefined') return
+    const key = getDraftKey(orgUnitId)
+    if (!key) return
+    try {
+        window.localStorage.setItem(key, JSON.stringify(state))
+    } catch (e) {
+        console.warn('Failed to save draft form state', e)
+    }
+}
+
+ // not used atm
+const clearDraft = orgUnitId => {
+    if (typeof window === 'undefined') return
+    const key = getDraftKey(orgUnitId)
+    if (!key) return
+    try {
+        window.localStorage.removeItem(key)
+    } catch (e) {
+        console.warn('Failed to clear draft form state', e)
+    }
+}
+
 // --- layout styles ---
 const sectionBoxStyle = {
     background: '#fafafa',
@@ -126,10 +167,31 @@ export default function SchoolInspectionForm({
 
     const inspectionDateLabel = new Date().toLocaleDateString()
 
-    // reset when submitted
+
+    useEffect(() => {
+        if (!orgUnitId) {
+            setFormState({})
+            setErrors({})
+            setMissingRequiredLabels([])
+            setShowMissingPopup(false)
+            return
+        }
+
+        const draft = loadDraft(orgUnitId)
+        if (draft && typeof draft === 'object') {
+            setFormState(draft)
+        } else {
+            setFormState({})
+        }
+        setErrors({})
+        setMissingRequiredLabels([])
+        setShowMissingPopup(false)
+    }, [orgUnitId])
+
+
     useEffect(() => {
         if (data) {
-            setFormState({})
+            // beholder formState + draft som det er
             setErrors({})
             setMissingRequiredLabels([])
             setShowMissingPopup(false)
@@ -137,7 +199,13 @@ export default function SchoolInspectionForm({
     }, [data])
 
     const handleChange = (id, value) => {
-        setFormState(prev => ({ ...prev, [id]: value }))
+        setFormState(prev => {
+            const next = { ...prev, [id]: value }
+            if (orgUnitId) {
+                saveDraft(orgUnitId, next)
+            }
+            return next
+        })
     }
 
     const totalToilets = computeTotalToilets(formState)
@@ -167,7 +235,7 @@ export default function SchoolInspectionForm({
         SCHOOL_INSPECTION_FIELDS.forEach(field => {
             const id = field.id
 
-            // ❗ Ikke krev Total toilets – den er auto-beregnet
+            // skip auto-calculated field that is not user-input
             if (id === TOTAL_TOILETS_ID) {
                 return
             }
@@ -201,7 +269,6 @@ export default function SchoolInspectionForm({
 
         const missingLabels = []
         SCHOOL_INSPECTION_FIELDS.forEach(field => {
-            // ikke ta med total-toilets i popup-listen heller
             if (field.id === TOTAL_TOILETS_ID) return
 
             if (errorsFound[field.id] === 'Required') {
@@ -253,7 +320,7 @@ export default function SchoolInspectionForm({
             []
         )
 
-        // auto computed toilets – fortsatt sendt til DHIS2
+        // auto computed toilets
         dataValuesArray.push({
             dataElement: TOTAL_TOILETS_ID,
             value: totalToilets,
@@ -269,6 +336,7 @@ export default function SchoolInspectionForm({
             orgUnit_id: orgUnitId,
             dataValues: dataValuesArray,
         })
+
 
         if (setActiveTab) setActiveTab('tldr')
     }
@@ -299,7 +367,9 @@ export default function SchoolInspectionForm({
                             value={value}
                             onChange={v => {
                                 handleChange(id, v)
-                                if (!v) handleChange(child_query.id, null)
+                                if (!v) {
+                                    handleChange(child_query.id, null)
+                                }
                             }}
                             error={errors[id]}
                             trueLabel="Available"

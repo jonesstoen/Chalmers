@@ -1,8 +1,16 @@
 // features/inspections/pages/SchoolInspectionPage.jsx
-import React, { useMemo, useState, useCallback, useContext } from 'react'
+import React, {
+    useMemo,
+    useState,
+    useCallback,
+    useContext,
+    useEffect,
+} from 'react'
 import i18n from '@dhis2/d2-i18n'
 import { TabBar, Tab, NoticeBox, Tag } from '@dhis2/ui'
+import { useNavigate, useLocation } from 'react-router-dom'
 import classes from '../../../App/App.module.css'
+import pageClasses from './SchoolInspectionPage.module.css'
 import OrgTreePanel from '../../org-units/components/OrgTreePanel'
 import SchoolInspectionForm from '../components/SchoolInspectionForm'
 import EditInspectionForm from '../components/EditInspectionForm'
@@ -31,9 +39,13 @@ function EventSummary({ event }) {
                 flexWrap: 'wrap',
             }}
         >
-            <strong style={{ marginRight: 8 }}>{i18n.t('Selected event')}</strong>
+            <strong style={{ marginRight: 8 }}>
+                {i18n.t('Selected event')}
+            </strong>
             <Tag positive>{date.toLocaleDateString()}</Tag>
-            <Tag>{i18n.t('Status')}: {event.eventstatus}</Tag>
+            <Tag>
+                {i18n.t('Status')}: {event.eventstatus}
+            </Tag>
             {'DO0LBJfXY00' in event && (
                 <Tag>
                     {i18n.t('Learners')}: {event.DO0LBJfXY00 ?? '–'}
@@ -44,17 +56,15 @@ function EventSummary({ event }) {
                     {i18n.t('Seats')}: {event.jcC1uz56IpY ?? '–'}
                 </Tag>
             )}
-            <span style={{ marginLeft: 'auto', color: '#64748b' }}>ID: {event.psi}</span>
+            <span style={{ marginLeft: 'auto', color: '#64748b' }}>
+                ID: {event.psi}
+            </span>
         </div>
     )
 }
 
-
-
-
-function Header({isCluster, data}){
-
-    const inspection ='School Inspection'
+function Header({ isCluster, data, onBack }) {
+    const inspection = 'School Inspection'
     const analytics = 'Analytics'
 
     const ou = data?.ou
@@ -64,129 +74,152 @@ function Header({isCluster, data}){
         <div
             style={{
                 display: 'flex',
-                alignItems: 'baseline',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 gap: 12,
                 marginBottom: 10,
             }}
         >
-            <h2 style={{ margin: 0 }}>
-                {i18n.t(isCluster ? analytics: inspection)}
-            </h2>
-            {orgUnitId && (
-                <>
-                    <span style={{ color: '#64748b' }}>•</span>
-                    <div style={{ color: '#334155' }}>
-                        <strong>{ou?.displayName || ou?.name}</strong>
-                        <span style={{ marginLeft: 8, color: '#64748b' }}>({orgUnitId})</span>
-                    </div>
-                </>
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: 12,
+                }}
+            >
+                <h2 style={{ margin: 0 }}>
+                    {i18n.t(isCluster ? analytics : inspection)}
+                </h2>
+                {orgUnitId && (
+                    <>
+                        <span style={{ color: '#64748b' }}>•</span>
+                        <div style={{ color: '#334155' }}>
+                            <strong>{ou?.displayName || ou?.name}</strong>
+                            <span
+                                style={{
+                                    marginLeft: 8,
+                                    color: '#64748b',
+                                }}
+                            >
+                                ({orgUnitId})
+                            </span>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {onBack && (
+                <button
+                    type="button"
+                    className={pageClasses.backButton}
+                    onClick={onBack}
+                >
+                    ← {i18n.t('Back to overview')}
+                </button>
             )}
         </div>
     )
 }
 
-
-
-function InspectionPanel({selected, activeTab, setActiveTab, selectedEvent, setSelectedEvent, data}){
-
+function InspectionPanel({
+                             selected,
+                             activeTab,
+                             setActiveTab,
+                             selectedEvent,
+                             setSelectedEvent,
+                             data,
+                         }) {
     const ou = data?.ou
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
-
     return (
+        <>
+            <TabBar>
+                <Tab
+                    selected={activeTab === 'submit'}
+                    onClick={() => setActiveTab('submit')}
+                >
+                    {i18n.t('New inspection')}
+                </Tab>
+                <Tab
+                    selected={activeTab === 'edit'}
+                    onClick={() => setActiveTab('edit')}
+                >
+                    {i18n.t('Edit inspections')}
+                </Tab>
+                <Tab
+                    selected={activeTab === 'tldr'}
+                    onClick={() => setActiveTab('tldr')}
+                >
+                    {i18n.t('History')}
+                </Tab>
+            </TabBar>
+
+            <div style={{ marginTop: 16 }}>
+                {activeTab === 'submit' && (
+                    <SchoolInspectionForm
+                        orgUnitId={orgUnitId}
+                        orgUnitName={orgUnitName}
+                        setActiveTab={setActiveTab}
+                    />
+                )}
+
+                {activeTab !== 'submit' && activeTab !== 'tldr' && (
                     <>
-                        {/* Tabs */}
-                        <TabBar>
-                            <Tab
-                                selected={activeTab === 'submit'}
-                                onClick={() => setActiveTab('submit')}
-                            >
-                                {i18n.t('New inspection')}
-                            </Tab>
-                            <Tab
-                                selected={activeTab === 'edit'}
-                                onClick={() => setActiveTab('edit')}
-                            >
-                                {i18n.t('Edit inspections')}
-                            </Tab>
-
-                            <Tab
-                                selected={activeTab === 'tldr'}
-                                onClick={() => setActiveTab('tldr')}
-                            >
-                                {i18n.t('History')}
-                            </Tab>
-                        </TabBar>
-
-                        {/* Content per tab */}
-                        <div style={{ marginTop: 16 }}>
-                            {activeTab === 'submit' && (
-                                <div>
-                                    <SchoolInspectionForm
-                                        orgUnitId={orgUnitId}
-                                        orgUnitName={orgUnitName}
-                                        setActiveTab={setActiveTab}
-                                    />
-                                </div>
-                            )}
-
-                            {activeTab !== 'submit' && activeTab !== 'tldr' && (
-                                <>
-                                    <div style={{ marginBottom: 12 }}>
-                                        <InspectionTimeline
-                                            key={orgUnitId}
-                                            schoolId={orgUnitId}
-                                            onSelect={ev => setSelectedEvent(ev)}
-                                        />
-                                    </div>
-
-                                    <EventSummary event={selectedEvent} />
-
-                                    {activeTab === 'edit' && (
-                                        selectedEvent ? (
-                                            <EditInspectionForm
-                                                event={selectedEvent}
-                                                orgUnitId={orgUnitId}
-                                                orgUnitName={orgUnitName}
-                                                onDeleted={() => setSelectedEvent(null)}
-                                            />
-                                        ) : (
-                                            <NoticeBox title={i18n.t('Select an event')}>
-                                                {i18n.t('Pick an event in the table above to edit.')}
-                                            </NoticeBox>
-                                        )
-                                    )}
-
-                                    {activeTab === 'delete' && (
-                                        selectedEvent
-                                            ? (
-                                                <DeleteInspectionPanel event={selectedEvent} />
-                                            ) : (
-                                                <NoticeBox title={i18n.t('Select an event')}>
-                                                    {i18n.t('Pick an event in the table above to delete.')}
-                                                </NoticeBox>
-                                            )
-                                    )}
-                                </>
-                            )}
-
-                            {activeTab === 'tldr' && (
-                                <Result OrgId={selected} />
-                            )}
+                        <div style={{ marginBottom: 12 }}>
+                            <InspectionTimeline
+                                key={orgUnitId}
+                                schoolId={orgUnitId}
+                                onSelect={ev => setSelectedEvent(ev)}
+                            />
                         </div>
+
+                        <EventSummary event={selectedEvent} />
+
+                        {activeTab === 'edit' &&
+                            (selectedEvent ? (
+                                <EditInspectionForm
+                                    event={selectedEvent}
+                                    orgUnitId={orgUnitId}
+                                    orgUnitName={orgUnitName}
+                                    onDeleted={() => setSelectedEvent(null)}
+                                />
+                            ) : (
+                                <NoticeBox title={i18n.t('Select an event')}>
+                                    {i18n.t(
+                                        'Pick an event in the table above to edit.'
+                                    )}
+                                </NoticeBox>
+                            ))}
+
+                        {activeTab === 'delete' &&
+                            (selectedEvent ? (
+                                <DeleteInspectionPanel event={selectedEvent} />
+                            ) : (
+                                <NoticeBox title={i18n.t('Select an event')}>
+                                    {i18n.t(
+                                        'Pick an event in the table above to delete.'
+                                    )}
+                                </NoticeBox>
+                            ))}
                     </>
-                )
+                )}
+
+                {activeTab === 'tldr' && <Result OrgId={selected} />}
+            </div>
+        </>
+    )
 }
 
-
-
-
 export default function SchoolInspectionPage() {
-    const ROOTS = useMemo(() => [
-        { id: 'Bp3y61WbHwn', label: 'Kanifing' },
-        { id: 'RlPlK44dtoo', label: 'Banjul' },
-    ], [])
+    const ROOTS = useMemo(
+        () => [
+            { id: 'Bp3y61WbHwn', label: 'Kanifing' },
+            { id: 'RlPlK44dtoo', label: 'Banjul' },
+        ],
+        []
+    )
 
     const [selected, setSelected] = useState([])
     const [activeTab, setActiveTab] = useState('submit')
@@ -196,29 +229,57 @@ export default function SchoolInspectionPage() {
     const { data, selectedId } = useFetchOrgUnits(selected)
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
 
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const searchParams = useMemo(
+        () => new URLSearchParams(location.search),
+        [location.search]
+    )
+    const initialOuFromQuery = searchParams.get('ou')
+
+    useEffect(() => {
+        if (initialOuFromQuery && selected.length === 0) {
+            setSelected([initialOuFromQuery])
+            setActiveTab('submit')
+            setSelectedEvent(null)
+        }
+    }, [initialOuFromQuery, selected.length])
+
+    // Hver gang en skole er valgt, lagre lastOu automatisk
+    useEffect(() => {
+        if (!selectedId || !data?.ou) return
+        const ou = data.ou
+        const isAggregate = ou.children && ou.children.length > 0
+        if (!isAggregate && typeof window !== 'undefined') {
+            window.localStorage.setItem('lastOu', selectedId)
+        }
+    }, [selectedId, data])
+
     const handleRootChange = useCallback(() => {
         setSelected([])
         setSelectedEvent(null)
         setActiveTab('submit')
     }, [])
 
-    const handleSelect = useCallback((ids) => {
+    const handleSelect = useCallback(ids => {
         setSelected(ids)
         setActiveTab('submit')
         setSelectedEvent(null)
-        // lukk panel på mobil når man har valgt en skole
         setMobileSidebarOpen(false)
     }, [])
 
     const ou = data?.ou
-    const orgUnitId = ou?.id
-    const isAggregate = ou?.children && data.ou.children.length > 0
+    const isAggregate = ou?.children && data?.ou?.children?.length > 0
+
+    const handleBackToLanding = useCallback(() => {
+        navigate('/')
+    }, [navigate])
 
     return (
         <div className={classes.container}>
             {/* Sidebar / org tree */}
             <aside className={classes.sidebar}>
-                {/* Desktop-versjon: alltid synlig */}
                 <div className={classes.sidebarDesktop}>
                     <OrgTreePanel
                         roots={ROOTS}
@@ -228,14 +289,11 @@ export default function SchoolInspectionPage() {
                     />
                 </div>
 
-                {/* Mobil-versjon: kollapsbar */}
                 <div className={classes.sidebarMobile}>
                     <button
                         type="button"
                         className={classes.sidebarMobileToggle}
-                        onClick={() =>
-                            setMobileSidebarOpen((open) => !open)
-                        }
+                        onClick={() => setMobileSidebarOpen(open => !open)}
                     >
                         <span>{i18n.t('Organisation units')}</span>
                         <span>{mobileSidebarOpen ? '▲' : '▼'}</span>
@@ -256,14 +314,19 @@ export default function SchoolInspectionPage() {
 
             {/* Main content */}
             <main className={classes.content}>
-                <Header isCluster={isAggregate} data={data} />
+                <Header
+                    isCluster={isAggregate}
+                    data={data}
+                    onBack={handleBackToLanding}
+                />
 
                 {!selectedId && (
                     <NoticeBox title={i18n.t('Pick a School or Cluster')}>
-                        {i18n.t('Search for a school in the searchbar or Select a node in the tree to continue.')}
+                        {i18n.t(
+                            'Search for a school in the searchbar or Select a node in the tree to continue.'
+                        )}
                     </NoticeBox>
                 )}
-
 
                 {selectedId && isAggregate && (
                     <AggregatedAnalyticsPanel data={data} />
