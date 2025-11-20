@@ -6,7 +6,7 @@ import useFetchAnalytics from '../analytics/api/analyticsAPI'
 import SyncBanner from './SyncBanner'
 import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
-import InspectionTimeline from '../analytics/components/InspectionTimeline'
+import SchoolSearchBar from '../inspections/components/SchoolSearchBar'
 
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
@@ -15,6 +15,7 @@ const ROOTS = [
     { id: 'RlPlK44dtoo', label: 'Banjul' },
 ]
 const RATIO_THRESHOLD = 0.7
+const MONTHLY_INSPECTION_TARGET = 2500
 
 function monthRangeISO(d = new Date()) {
     const start = new Date(d.getFullYear(), d.getMonth(), 1)
@@ -25,12 +26,22 @@ function monthRangeISO(d = new Date()) {
 
 export default function LandingPage() {
     const navigate = useNavigate()
-    const openSchool = useCallback((ouId) => navigate(`/inspect?ou=${ouId}`), [navigate])
-    const openRoot = useCallback((rootId) => navigate(`/inspect?root=${rootId}`), [navigate])
-    const openInspector = useCallback(() => navigate('/inspect'), [navigate])
-    const openSchoolInspection = useCallback(() => navigate('/school-inspection'), [navigate])
 
-    const lastOu = typeof window !== 'undefined' ? window.localStorage.getItem('lastOu') : null
+    const openSchool = useCallback(
+        ouId => navigate(`/school-inspection?ou=${ouId}`),
+        [navigate]
+    )
+
+    const openSchoolInspection = useCallback(
+        () => navigate('/school-inspection'),
+        [navigate]
+    )
+
+    const lastOu =
+        typeof window !== 'undefined'
+            ? window.localStorage.getItem('lastOu')
+            : null
+
     const { startDate, endDate } = useMemo(() => monthRangeISO(), [])
 
     const { data, loading, error } = useFetchAnalytics(
@@ -49,10 +60,14 @@ export default function LandingPage() {
 
     useEffect(() => {
         if (!rows.length || !headers.length) return setPriorityOuIds([])
+
         const ouIdx = headers.findIndex(h => h.name === 'ou')
         const learnersIdx = headers.findIndex(h => h.name === 'DO0LBJfXY00')
         const seatsIdx = headers.findIndex(h => h.name === 'jcC1uz56IpY')
-        if (ouIdx < 0 || learnersIdx < 0 || seatsIdx < 0) return setPriorityOuIds([])
+
+        if (ouIdx < 0 || learnersIdx < 0 || seatsIdx < 0) {
+            return setPriorityOuIds([])
+        }
 
         const byOu = new Map()
         for (const r of rows) {
@@ -71,172 +86,325 @@ export default function LandingPage() {
                 bad.push({ ou, ratio: seats / learners })
             }
         }
+
         bad.sort((a, b) => a.ratio - b.ratio)
         setPriorityOuIds(bad.slice(0, 8).map(x => x.ou))
     }, [rows, headers])
 
-    // ✅ ÉN stabil query for batchede OU-opplysninger
-    const OU_BATCH_QUERY = useMemo(() => ({
-        ous: {
-            resource: 'organisationUnits',
-            params: ({ ids }) => ({
-                ...(ids?.length ? { filter: `id:in:[${ids.join(',')}]` } : {}),
-                fields: 'id,name,displayName,parent[name]',
-                paging: false,
-            }),
-        },
-    }), [])
+    // OU-info for både priority schools og lastOu
+    const allOuIds = useMemo(() => {
+        const ids = [...priorityOuIds]
+        if (lastOu && !ids.includes(lastOu)) {
+            ids.push(lastOu)
+        }
+        return ids
+    }, [priorityOuIds, lastOu])
+
+    const OU_BATCH_QUERY = useMemo(
+        () => ({
+            ous: {
+                resource: 'organisationUnits',
+                params: ({ ids }) => ({
+                    ...(ids?.length
+                        ? { filter: `id:in:[${ids.join(',')}]` }
+                        : {}),
+                    fields: 'id,name,displayName,parent[name]',
+                    paging: false,
+                }),
+            },
+        }),
+        []
+    )
 
     const { data: ouResp } = useDataQuery(OU_BATCH_QUERY, {
-        variables: { ids: priorityOuIds },
-        lazy: !priorityOuIds.length,
+        variables: { ids: allOuIds },
+        lazy: !allOuIds.length,
     })
 
     const ouList = ouResp?.ous?.organisationUnits ?? []
+    const lastOuInfo = lastOu
+        ? ouList.find(ou => ou.id === lastOu) || null
+        : null
+
     const pendingSync = 0
+    const isOnline =
+        typeof navigator !== 'undefined' ? navigator.onLine : true
+
+    const progressRatio =
+        MONTHLY_INSPECTION_TARGET > 0
+            ? Math.min(1, inspectionsThisMonth / MONTHLY_INSPECTION_TARGET)
+            : 0
+    const progressPct = Math.round(progressRatio * 100)
 
     return (
-        <div style={{ padding: 16 }}>
-            <InspectionTimeline schoolId={'k6MLijE92iz'} />
-
-            <h2 style={{ marginBottom: 8 }}>Overview</h2>
-
-            <SyncBanner />
-
-            {/* HERO / PRIMARY CTA */}
-            <section
+        <div
+            style={{
+                background: '#f1f5f9',
+                minHeight: '100vh',
+            }}
+        >
+            <div
                 style={{
-                    marginTop: 16,
-                    padding: 16,
-                    border: '1px solid #e5e7eb',
-                    background: '#f8fafc',
-                    borderRadius: 12,
-                    display: 'grid',
-                    gridTemplateColumns: '1.2fr 1fr',
-                    gap: 16,
-                    alignItems: 'center'
+                    maxWidth: 1180,
+                    margin: '0 auto',
+                    padding: '16px 24px 32px',
                 }}
             >
-                <div>
-                    <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                        Welcome — key metrics and quick links to get you started.
-                    </div>
-                    <p style={{ margin: 0, color: '#475569' }}>
-                        Go to the inspection module to browse organisation trees, open your school's form, and submit data.
-                    </p>
-                </div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                    <button
-                        onClick={openSchoolInspection}
-                        style={{
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px solid #2563eb',
-                            background: '#2563eb',
-                            color: '#fff',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                        }}
-                        aria-label="Open Inspector"
-                    >
-                        Open inspector
-                    </button>
-
-
-                    <button
-                        onClick={() => openRoot('Bp3y61WbHwn')}
-                        style={{
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px solid #e5e7eb',
-                            background: '#fff',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Open Kanifing root
-                    </button>
-                    <button
-                        onClick={() => openRoot('RlPlK44dtoo')}
-                        style={{
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px solid #e5e7eb',
-                            background: '#fff',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Open Banjul root
-                    </button>
-                    {lastOu && (
-                        <button
-                            onClick={() => openSchool(lastOu)}
-                            style={{
-                                padding: '10px 14px',
-                                borderRadius: 10,
-                                border: '1px dashed #e5e7eb',
-                                background: '#fff',
-                                cursor: 'pointer'
-                            }}
-                            title="Open your last visited school"
-                        >
-                            Resume last school
-                        </button>
-                    )}
-                </div>
-            </section>
-
-            {/* KPI-er */}
-            <section
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))',
-                    gap: 12,
-                    marginTop: 16
-                }}
-            >
-                <MetricTile
-                    title="Inspections this month"
-                    value={loading ? '…' : String(inspectionsThisMonth)}
-                />
-                <MetricTile
-                    title="Pending sync"
-                    value={String(pendingSync)}
-                />
-                <MetricTile
-                    title="Schools needing follow-up"
-                    value={loading ? '…' : String(ouList.length)}
-                />
-            </section>
-
-            {/* Prioritetsliste */}
-            <section style={{ marginTop: 16 }}>
-                <h3>Priority schools</h3>
-                {error && (
-                    <p style={{ color: 'crimson' }}>
-                        Error loading analytics: {error.message}
-                    </p>
-                )}
-                {!loading && !error && ouList.length === 0 && (
-                    <p>No priority schools detected this month.</p>
-                )}
-                <div
+                <h2
                     style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
-                        gap: 12
+                        marginBottom: 8,
+                        fontSize: 20,
+                        fontWeight: 700,
+                        color: '#0f172a',
                     }}
                 >
-                    {ouList.map(ou => (
-                        <PrioritySchoolCard
-                            key={ou.id}
-                            name={ou.displayName || ou.name}
-                            district={ou.parent?.name ?? '—'}
-                            status="Low seat-to-learner ratio"
-                            onOpen={() => openSchool(ou.id)}
+                    Overview
+                </h2>
+
+                <SyncBanner />
+
+                <p
+                    style={{
+                        marginTop: 4,
+                        marginBottom: 12,
+                        fontSize: 12,
+                        color: isOnline ? '#16a34a' : '#b45309',
+                    }}
+                >
+                    {isOnline
+                        ? 'Online — changes sync automatically.'
+                        : 'Offline — changes will sync when you are back online.'}
+                </p>
+
+                {/* HERO + SEARCH I SAMME KORT */}
+                <section style={{ marginTop: 8 }}>
+                    <div
+                        style={{
+                            padding: 16,
+                            border: '1px solid #e5e7eb',
+                            background: '#ffffff',
+                            borderRadius: 12,
+                            boxShadow: '0 1px 3px rgba(15,23,42,0.06)',
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns:
+                                    'minmax(0,1.4fr) minmax(0,1fr)',
+                                gap: 16,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <div>
+                                <div
+                                    style={{
+                                        fontSize: 20,
+                                        fontWeight: 700,
+                                        marginBottom: 6,
+                                    }}
+                                >
+                                    Welcome — key metrics and quick links to get
+                                    you started.
+                                </div>
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        color: '#475569',
+                                        fontSize: 14,
+                                    }}
+                                >
+                                    Go to the inspection module to browse
+                                    organisation trees, open your school&apos;s
+                                    form, and submit data.
+                                </p>
+
+                                {lastOuInfo && (
+                                    <p
+                                        style={{
+                                            marginTop: 10,
+                                            marginBottom: 0,
+                                            fontSize: 13,
+                                            color: '#64748b',
+                                        }}
+                                    >
+                                        📍 Last visited:{' '}
+                                        <strong>
+                                            {lastOuInfo.displayName ||
+                                                lastOuInfo.name}
+                                        </strong>
+                                        {lastOuInfo.parent?.name
+                                            ? ` (${lastOuInfo.parent.name})`
+                                            : ''}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    gap: 8,
+                                    justifyContent: 'flex-end',
+                                    flexWrap: 'wrap',
+                                }}
+                            >
+                                <button
+                                    onClick={openSchoolInspection}
+                                    style={{
+                                        padding: '10px 14px',
+                                        borderRadius: 10,
+                                        border: '1px solid #2563eb',
+                                        background: '#2563eb',
+                                        color: '#fff',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                    }}
+                                    aria-label="Open Inspector"
+                                >
+                                    Open inspector
+                                </button>
+
+                                {lastOu && (
+                                    <button
+                                        onClick={() => openSchool(lastOu)}
+                                        style={{
+                                            padding: '10px 14px',
+                                            borderRadius: 10,
+                                            border: '1px dashed #e5e7eb',
+                                            background: '#fff',
+                                            cursor: 'pointer',
+                                            fontWeight: 500,
+                                        }}
+                                        title="Open your last visited school"
+                                    >
+                                        Resume last school
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* QUICK SEARCH UNDER TEKSTEN */}
+                        <div style={{ marginTop: 14 }}>
+                            <SchoolSearchBar
+                                onSelect={school => openSchool(school.id)}
+                            />
+                        </div>
+                    </div>
+                </section>
+
+                {/* MONTHLY PROGRESS */}
+                <section style={{ marginTop: 16 }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            marginBottom: 6,
+                        }}
+                    >
+                        <span
+                            style={{
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: '#0f172a',
+                            }}
+                        >
+                            Monthly inspection progress
+                        </span>
+                        <span
+                            style={{
+                                fontSize: 12,
+                                color: '#64748b',
+                            }}
+                        >
+                            {inspectionsThisMonth} / {MONTHLY_INSPECTION_TARGET}{' '}
+                            inspections ({progressPct}%)
+                        </span>
+                    </div>
+                    <div
+                        style={{
+                            height: 8,
+                            background: '#e5e7eb',
+                            borderRadius: 999,
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <div
+                            style={{
+                                height: '100%',
+                                width: `${progressPct}%`,
+                                background:
+                                    progressPct >= 100 ? '#16a34a' : '#2563eb',
+                                transition: 'width .25s ease-out',
+                            }}
                         />
-                    ))}
-                </div>
-            </section>
+                    </div>
+                </section>
+
+                {/* KPI-KORT */}
+                <section
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns:
+                            'repeat(auto-fit, minmax(220px,1fr))',
+                        gap: 12,
+                        marginTop: 16,
+                    }}
+                >
+                    <MetricTile
+                        title="📊 Inspections this month"
+                        value={loading ? '…' : String(inspectionsThisMonth)}
+                        subtitle="Across Kanifing and Banjul"
+                    />
+                    <MetricTile
+                        title="🔄 Pending sync"
+                        value={String(pendingSync)}
+                        subtitle="Waiting to be sent when online"
+                    />
+                    <MetricTile
+                        title="⚠️ Schools needing follow-up"
+                        value={loading ? '…' : String(ouList.length)}
+                        subtitle="Based on seat-to-learner ratio"
+                    />
+                </section>
+
+                {/* PRIORITY SCHOOLS */}
+                <section style={{ marginTop: 16 }}>
+                    <h3 style={{ marginBottom: 8, color: '#0f172a' }}>
+                        Priority schools
+                    </h3>
+                    {error && (
+                        <p style={{ color: 'crimson' }}>
+                            Error loading analytics: {error.message}
+                        </p>
+                    )}
+                    {!loading && !error && ouList.length === 0 && (
+                        <p style={{ fontSize: 14, color: '#64748b' }}>
+                            No priority schools detected this month.
+                        </p>
+                    )}
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns:
+                                'repeat(auto-fit,minmax(280px,1fr))',
+                            gap: 12,
+                        }}
+                    >
+                        {ouList
+                            .filter(ou => priorityOuIds.includes(ou.id))
+                            .map(ou => (
+                                <PrioritySchoolCard
+                                    key={ou.id}
+                                    name={ou.displayName || ou.name}
+                                    district={ou.parent?.name ?? '—'}
+                                    status="Low seat-to-learner ratio"
+                                    onOpen={() => openSchool(ou.id)}
+                                />
+                            ))}
+                    </div>
+                </section>
+            </div>
         </div>
     )
 }

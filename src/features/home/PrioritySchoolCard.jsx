@@ -1,15 +1,76 @@
-// home/PrioritySchoolCard.jsx
-import React from 'react'
-
-export default function PrioritySchoolCard({ name, district, status, onOpen }) {
+// features/home/PrioritySchoolCard.jsx
+export default function PrioritySchoolCard({
+                                               name,
+                                               district,
+                                               status,
+                                               onOpen,
+                                           }) {
     return (
-        <div style={{ border:'1px solid #e5e7eb', borderRadius:10, background:'#fff', padding:12 }}>
-            <div style={{ fontWeight:700 }}>{name}</div>
-            <div style={{ color:'#6b7280', fontSize:12 }}>{district}</div>
-            <div style={{ marginTop:8 }}>{status}</div>
-            <button onClick={onOpen} style={{ marginTop:10, padding:'6px 10px', borderRadius:8, border:'1px solid #e5e7eb', background:'#f9fafb', cursor:'pointer' }}>
-                Inspect →
-            </button>
+        <div
+            style={{
+                background: '#ffffff',
+                borderRadius: 12,
+                border: '1px solid #e2e8f0',
+                padding: 12,
+                boxShadow: '0 1px 2px rgba(15,23,42,0.04)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+            }}
+        >
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    gap: 8,
+                }}
+            >
+                <h4
+                    style={{
+                        margin: 0,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: '#0f172a',
+                    }}
+                >
+                    {name}
+                </h4>
+                <span
+                    style={{
+                        fontSize: 11,
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        background: '#fef3c7',
+                        color: '#92400e',
+                    }}
+                >
+                    {status}
+                </span>
+            </div>
+
+            <span style={{ fontSize: 12, color: '#64748b' }}>
+                District: {district}
+            </span>
+
+            <div style={{ marginTop: 8 }}>
+                <button
+                    type="button"
+                    onClick={onOpen}
+                    style={{
+                        padding: '6px 10px',
+                        borderRadius: 999,
+                        border: '1px solid #2563eb',
+                        background: '#2563eb',
+                        color: '#fff',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                    }}
+                >
+                    Open in inspector
+                </button>
+            </div>
         </div>
     )
 }

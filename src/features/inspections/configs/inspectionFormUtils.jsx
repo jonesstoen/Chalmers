@@ -71,3 +71,9 @@ export const normalizeChange = (id, value) => {
 
     return newValue
 }
+
+export function dataElementIdToDescription(dataElementID){
+    const object = SCHOOL_INSPECTION_FIELDS.find(item => item.id === dataElementID)
+    const description = object?.label ?? 'Undefined'
+    return description
+}

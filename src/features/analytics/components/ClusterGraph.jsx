@@ -40,7 +40,7 @@ export default function ClusterGraph({
   const [showRegression, setShowRegression] = useState(false)
 
   if (loading) return <p>Loading…</p>
-  if (error) return <p>Error: {error.message}</p>
+  if (error) return <p>Error {schoolId}: {error.message}</p>
   if (!timeSeries?.length) return <p>No data available.</p>
 
   // Extract values

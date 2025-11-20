@@ -1,9 +1,8 @@
 // features/inspections/components/SchoolInspectionForm.jsx
+
 import React, { useContext, useEffect, useState } from 'react'
 import {
     Button,
-    InputField,
-    CheckboxField,
     CircularLoader,
     AlertStack,
     AlertBar,
@@ -15,6 +14,7 @@ import {
     FACILITY_IDS,
     CAPACITY_IDS,
     SANITATION_IDS,
+    TOTAL_TOILETS_ID,
 } from '../configs/schoolInspectionConfig'
 import {
     computeTotalToilets,
@@ -22,69 +22,307 @@ import {
     computeProgress,
     normalizeChange,
 } from '../configs/inspectionFormUtils'
+import BooleanChoiceField from './BooleanChoiceField'
+import ConditionRatingField from './ConditionRatingField'
 
-export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActiveTab }) {
+const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
+
+const getDraftKey = orgUnitId =>
+    orgUnitId ? `${DRAFT_KEY_PREFIX}${orgUnitId}` : null
+
+const loadDraft = orgUnitId => {
+    if (typeof window === 'undefined') return null
+    const key = getDraftKey(orgUnitId)
+    if (!key) return null
+    try {
+        const raw = window.localStorage.getItem(key)
+        return raw ? JSON.parse(raw) : null
+    } catch (e) {
+        console.warn('Failed to load draft form state', e)
+        return null
+    }
+}
+
+const saveDraft = (orgUnitId, state) => {
+    if (typeof window === 'undefined') return
+    const key = getDraftKey(orgUnitId)
+    if (!key) return
+    try {
+        window.localStorage.setItem(key, JSON.stringify(state))
+    } catch (e) {
+        console.warn('Failed to save draft form state', e)
+    }
+}
+
+ // not used atm
+const clearDraft = orgUnitId => {
+    if (typeof window === 'undefined') return
+    const key = getDraftKey(orgUnitId)
+    if (!key) return
+    try {
+        window.localStorage.removeItem(key)
+    } catch (e) {
+        console.warn('Failed to clear draft form state', e)
+    }
+}
+
+// --- layout styles ---
+const sectionBoxStyle = {
+    background: '#fafafa',
+    padding: 16,
+    borderRadius: 10,
+    border: '1px solid #e5e7eb',
+    marginBottom: '1.5rem',
+}
+
+const sectionGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    columnGap: 16,
+    rowGap: 12,
+    gap: 20,
+    alignItems: 'flex-start',
+    maxWidth: 960,
+    marginTop: 4,
+    marginBottom: 4,
+}
+
+const numberFieldContainerStyle = {
+    marginBottom: '0.75rem',
+    maxWidth: 320,
+    width: '100%',
+}
+
+const numberLabelStyle = {
+    display: 'block',
+    marginBottom: 4,
+    fontSize: 13,
+    fontWeight: 500,
+    minHeight: 32,
+    color: '#0f172a',
+}
+
+const numberInputStyle = {
+    width: '100%',
+    padding: '6px 10px',
+    borderRadius: 8,
+    border: '1px solid #cbd5e1',
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box',
+}
+
+const numberInputFocusStyle = {
+    ...numberInputStyle,
+    border: '1px solid #2563eb',
+    boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.2)',
+}
+
+function NumberField({ label, value = '', onChange, error }) {
+    const [isFocused, setIsFocused] = React.useState(false)
+
+    return (
+        <div style={numberFieldContainerStyle}>
+            <label style={numberLabelStyle}>{label}</label>
+            <input
+                type="number"
+                min="0"
+                value={value}
+                onChange={e => onChange(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                style={isFocused ? numberInputFocusStyle : numberInputStyle}
+            />
+            {error && (
+                <p
+                    style={{
+                        marginTop: 4,
+                        marginBottom: 0,
+                        fontSize: 12,
+                        color: '#b91c1c',
+                    }}
+                >
+                    {error}
+                </p>
+            )}
+        </div>
+    )
+}
+
+export default function SchoolInspectionForm({
+                                                 orgUnitId,
+                                                 orgUnitName,
+                                                 setActiveTab,
+                                             }) {
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
-    const [submitInspection, { loading, error, data }] = usePostSchoolInspectionEvent()
+
+    const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
+    const [showMissingPopup, setShowMissingPopup] = useState(false)
+
+    const [submitInspection, { loading, error, data }] =
+        usePostSchoolInspectionEvent()
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext)
+
     const inspectionDateLabel = new Date().toLocaleDateString()
+
+
+    useEffect(() => {
+        if (!orgUnitId) {
+            setFormState({})
+            setErrors({})
+            setMissingRequiredLabels([])
+            setShowMissingPopup(false)
+            return
+        }
+
+        const draft = loadDraft(orgUnitId)
+        if (draft && typeof draft === 'object') {
+            setFormState(draft)
+        } else {
+            setFormState({})
+        }
+        setErrors({})
+        setMissingRequiredLabels([])
+        setShowMissingPopup(false)
+    }, [orgUnitId])
+
 
     useEffect(() => {
         if (data) {
-            setFormState({})
+            // beholder formState + draft som det er
             setErrors({})
+            setMissingRequiredLabels([])
+            setShowMissingPopup(false)
         }
     }, [data])
 
     const handleChange = (id, value) => {
-        const newValue = normalizeChange(id, value)
-        setFormState(prev => ({ ...prev, [id]: newValue }))
+        setFormState(prev => {
+            const next = { ...prev, [id]: value }
+            if (orgUnitId) {
+                saveDraft(orgUnitId, next)
+            }
+            return next
+        })
     }
 
     const totalToilets = computeTotalToilets(formState)
 
     const validateForm = () => {
-        const newErrors = validateSchoolInspection(formState)
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
-    }
+        const normalizedState = {}
 
-    const handleSubmit = async () => {
-        if (!validateForm()) return
-
-        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
+        SCHOOL_INSPECTION_FIELDS.forEach(field => {
             const parentId = field.id
-            const parentValue = formState[parentId]
-
-            if (parentValue === undefined || parentValue === null) return acc
-
-            if (field.type === 'BOOLEAN') {
-                acc.push({ dataElement: parentId, value: !!parentValue })
-            } else {
-                acc.push({ dataElement: parentId, value: parentValue })
-            }
+            normalizedState[parentId] = normalizeChange(
+                parentId,
+                formState[parentId]
+            )
 
             if (field.child_query) {
                 const childId = field.child_query.id
-                const childValue = formState[childId]
+                normalizedState[childId] = normalizeChange(
+                    childId,
+                    formState[childId]
+                )
+            }
+        })
 
-                if (
-                    parentValue === true &&
-                    childValue !== undefined &&
-                    childValue !== null &&
-                    childValue !== ''
-                ) {
-                    acc.push({ dataElement: childId, value: childValue })
-                }
+        const errorsFound = validateSchoolInspection(normalizedState) || {}
+        const isEmpty = v => v === undefined || v === null || v === ''
+
+        SCHOOL_INSPECTION_FIELDS.forEach(field => {
+            const id = field.id
+
+            // skip auto-calculated field that is not user-input
+            if (id === TOTAL_TOILETS_ID) {
+                return
             }
 
-            return acc
-        }, [])
+            if (field.type === 'BOOLEAN') {
+                if (isEmpty(normalizedState[id]) && !errorsFound[id]) {
+                    errorsFound[id] = 'Required'
+                }
 
+                if (field.child_query) {
+                    const childId = field.child_query.id
+                    const childValue = normalizedState[childId]
+                    const isTrue =
+                        normalizedState[id] === true ||
+                        normalizedState[id] === 'true'
+
+                    if (
+                        isTrue &&
+                        isEmpty(childValue) &&
+                        !errorsFound[childId]
+                    ) {
+                        errorsFound[childId] = 'Required'
+                    }
+                }
+            } else if (isEmpty(normalizedState[id]) && !errorsFound[id]) {
+                errorsFound[id] = 'Required'
+            }
+        })
+
+        setErrors(errorsFound)
+
+        const missingLabels = []
+        SCHOOL_INSPECTION_FIELDS.forEach(field => {
+            if (field.id === TOTAL_TOILETS_ID) return
+
+            if (errorsFound[field.id] === 'Required') {
+                missingLabels.push(field.label)
+            }
+            if (
+                field.child_query &&
+                errorsFound[field.child_query.id] === 'Required'
+            ) {
+                missingLabels.push(field.child_query.label)
+            }
+        })
+        setMissingRequiredLabels(missingLabels)
+
+        const ok = Object.keys(errorsFound).length === 0
+        return { ok, normalizedState }
+    }
+
+    const handleSubmit = async () => {
+        const { ok, normalizedState } = validateForm()
+
+        if (!ok) {
+            setShowMissingPopup(true)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+            return
+        }
+
+        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce(
+            (acc, field) => {
+                const val = normalizedState[field.id]
+                if (val !== undefined && val !== null) {
+                    acc.push({
+                        dataElement: field.id,
+                        value: field.type === 'BOOLEAN' ? !!val : val,
+                    })
+                }
+
+                if (field.child_query) {
+                    const childVal = normalizedState[field.child_query.id]
+                    if (val === true && childVal) {
+                        acc.push({
+                            dataElement: field.child_query.id,
+                            value: childVal,
+                        })
+                    }
+                }
+                return acc
+            },
+            []
+        )
+
+        // auto computed toilets
         dataValuesArray.push({
-            dataElement: 'iytoDmoTUWY',
+            dataElement: TOTAL_TOILETS_ID,
             value: totalToilets,
         })
 
@@ -99,80 +337,137 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
             dataValues: dataValuesArray,
         })
 
-        if (setActiveTab) {
-            setActiveTab('tldr')
-        }
+
+        if (setActiveTab) setActiveTab('tldr')
     }
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
 
-    const renderField = ({ id, label, type, child_query }) => (
-        <div key={id} style={{ marginBottom: '0.75rem' }}>
-            {type === 'BOOLEAN' ? (
-                <CheckboxField
-                    label={label}
-                    checked={!!formState[id]}
-                    onChange={() =>
-                        handleChange(
-                            id,
-                            !(formState[id] === 'true' || formState[id] === true)
-                        )
-                    }
-                />
-            ) : (
-                <InputField
-                    label={label}
-                    type="number"
-                    min="0"
-                    value={formState[id] ?? ''}
-                    onChange={({ value }) => handleChange(id, value)}
-                    error={errors[id]}
-                />
-            )}
+    const renderField = ({ id, label, type, child_query }) => {
+        const value = formState[id]
+        const childValue = child_query ? formState[child_query.id] : null
+        const numericChildValue =
+            childValue !== '' && childValue !== null
+                ? Number(childValue)
+                : null
+        const isTrue = value === true || value === 'true'
 
-            {child_query && formState[id] === true && (
-                <div style={{ marginLeft: '1.75rem', marginTop: '0.35rem' }}>
-                    <InputField
-                        label={child_query.label}
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={formState[child_query.id] ?? ''}
-                        onChange={({ value }) => handleChange(child_query.id, value)}
-                        error={errors[child_query.id]}
+        if (type === 'BOOLEAN' && child_query) {
+            return (
+                <div key={id} style={{ marginBottom: '1.25rem' }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            flexWrap: 'wrap',
+                        }}
+                    >
+                        <BooleanChoiceField
+                            label={label}
+                            value={value}
+                            onChange={v => {
+                                handleChange(id, v)
+                                if (!v) {
+                                    handleChange(child_query.id, null)
+                                }
+                            }}
+                            error={errors[id]}
+                            trueLabel="Available"
+                            falseLabel="Not available"
+                        />
+                        <ConditionRatingField
+                            label={child_query.label}
+                            value={numericChildValue}
+                            onChange={num =>
+                                handleChange(child_query.id, num)
+                            }
+                            disabled={!isTrue}
+                            error={errors[child_query.id]}
+                        />
+                    </div>
+                </div>
+            )
+        }
+
+        if (type === 'BOOLEAN') {
+            return (
+                <div key={id} style={{ marginBottom: '1rem' }}>
+                    <BooleanChoiceField
+                        label={label}
+                        value={value}
+                        onChange={v => handleChange(id, v)}
+                        error={errors[id]}
                     />
                 </div>
-            )}
-        </div>
+            )
+        }
+
+        return (
+            <NumberField
+                key={id}
+                label={label}
+                value={formState[id] ?? ''}
+                onChange={val => handleChange(id, val)}
+                error={errors[id]}
+            />
+        )
+    }
+
+    const facilities = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        FACILITY_IDS.includes(f.id)
+    )
+    const capacity = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        CAPACITY_IDS.includes(f.id)
+    )
+    const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f =>
+        SANITATION_IDS.includes(f.id)
     )
 
-    const facilities = SCHOOL_INSPECTION_FIELDS.filter(f => FACILITY_IDS.includes(f.id))
-    const capacity = SCHOOL_INSPECTION_FIELDS.filter(f => CAPACITY_IDS.includes(f.id))
-    const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f => SANITATION_IDS.includes(f.id))
-
-    // resten av JSX-en din (header, accordions, sticky bar, alerts) kan være identisk,
-    // men nå med de nye variablene.
-    // ⬇️
     return (
         <div
             style={{
                 marginTop: '1rem',
-                background: '#ffffff',
+                background: '#fff',
                 borderRadius: 12,
                 border: '1px solid #e2e8f0',
                 padding: 16,
                 boxShadow: '0 1px 3px rgba(15,23,42,0.08)',
-                position: 'relative',
             }}
         >
+            {/* Popup med liste over manglende felt */}
+            {showMissingPopup && missingRequiredLabels.length > 0 && (
+                <AlertStack>
+                    <AlertBar
+                        warning
+                        duration={8000}
+                        onHidden={() => setShowMissingPopup(false)}
+                    >
+                        <div>
+                            <strong>
+                                Please fill in the required fields:
+                            </strong>
+                            <ul
+                                style={{
+                                    margin: '4px 0 0 18px',
+                                    padding: 0,
+                                }}
+                            >
+                                {missingRequiredLabels.map(label => (
+                                    <li key={label}>{label}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </AlertBar>
+                </AlertStack>
+            )}
+
             {/* Header */}
             <div
                 style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'baseline',
-                    marginBottom: 12,
-                    gap: 12,
+                    marginBottom: 16,
                     flexWrap: 'wrap',
                 }}
             >
@@ -180,34 +475,45 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
                     <h3 style={{ margin: 0 }}>
                         School inspection – {orgUnitName || orgUnitId}
                     </h3>
-                    <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                    <p
+                        style={{
+                            margin: 0,
+                            fontSize: 12,
+                            color: '#64748b',
+                        }}
+                    >
                         Inspection date: {inspectionDateLabel}
                     </p>
                 </div>
-
-                <div style={{ fontSize: 12, color: '#64748b' }}>
-                    {filledCount} of {totalCount} fields completed
+                <div
+                    style={{
+                        fontSize: 12,
+                        color: '#64748b',
+                    }}
+                >
+                    {filledCount} / {totalCount} fields completed
                 </div>
             </div>
 
             {/* progress bar */}
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 20 }}>
                 <div
                     style={{
                         height: 6,
-                        borderRadius: 999,
                         background: '#e5e7eb',
+                        borderRadius: 999,
                         overflow: 'hidden',
                     }}
                 >
                     <div
                         style={{
-                            width: `${progressPct}%`,
                             height: '100%',
-                            borderRadius: 999,
-                            transition: 'width 0.2s ease-out',
+                            width: `${progressPct}%`,
                             background:
-                                progressPct === 100 ? '#16a34a' : '#2563eb',
+                                progressPct === 100
+                                    ? '#16a34a'
+                                    : '#2563eb',
+                            transition: 'width .25s',
                         }}
                     />
                 </div>
@@ -217,126 +523,104 @@ export default function SchoolInspectionForm({ orgUnitId, orgUnitName, setActive
 
             {!loading && (
                 <>
-                    <details open style={{ marginBottom: '1rem' }}>
-                        <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 14, color: '#0f172a' }}>
+                    <details open style={sectionBoxStyle}>
+                        <summary
+                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                        >
                             Facilities
                         </summary>
                         <p
                             style={{
-                                marginTop: 4,
-                                marginBottom: '0.75rem',
                                 fontSize: 12,
                                 color: '#64748b',
                             }}
                         >
-                            Check which facilities are available at the school and rate
-                            condition 1–5.
+                            Select if available and rate condition from 1–5.
                         </p>
                         {facilities.map(renderField)}
                     </details>
 
-                    <details open style={{ marginBottom: '1rem' }}>
-                        <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 14, color: '#0f172a' }}>
+                    <details open style={sectionBoxStyle}>
+                        <summary
+                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                        >
                             Capacity
                         </summary>
                         <p
                             style={{
-                                marginTop: 4,
-                                marginBottom: '0.75rem',
                                 fontSize: 12,
                                 color: '#64748b',
+                                marginTop: 4,
+                                marginBottom: 12,
                             }}
                         >
-                            Provide numbers for classrooms, learners, seats and teachers.
+                            Enter basic counts for classrooms, learners, seats
+                            and teachers.
                         </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+                        <div style={sectionGridStyle}>
                             {capacity.map(renderField)}
                         </div>
                     </details>
 
-                    <details open style={{ marginBottom: '4rem' }}>
-                        <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 14, color: '#0f172a' }}>
+                    <details open style={sectionBoxStyle}>
+                        <summary
+                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                        >
                             Sanitation & staffing
                         </summary>
                         <p
                             style={{
-                                marginTop: 4,
-                                marginBottom: '0.75rem',
                                 fontSize: 12,
                                 color: '#64748b',
+                                marginTop: 4,
+                                marginBottom: 12,
                             }}
                         >
-                            Report toilets per group. Total toilets is calculated automatically.
+                            Report toilets per group. Total toilets is
+                            calculated automatically.
                         </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+                        <div style={sectionGridStyle}>
                             {sanitation.map(renderField)}
                         </div>
-                        <div style={{ marginTop: '0.75rem', marginBottom: '0.5rem' }}>
-                            <strong>Total toilets: {totalToilets}</strong>
-                        </div>
+                        <strong
+                            style={{
+                                display: 'block',
+                                marginTop: 10,
+                            }}
+                        >
+                            Total toilets: {totalToilets}
+                        </strong>
                     </details>
 
                     <div
                         style={{
-                            position: 'sticky',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            paddingTop: 8,
-                            marginTop: 'auto',
-                            background:
-                                'linear-gradient(to top, rgba(248,250,252,0.96), rgba(248,250,252,0.85), transparent)',
+                            marginTop: '2rem',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
                         }}
                     >
-                        <div
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                gap: 8,
-                                flexWrap: 'wrap',
-                            }}
+                        <Button
+                            primary
+                            onClick={handleSubmit}
+                            disabled={loading}
                         >
-                            <span style={{ fontSize: 12, color: '#64748b' }}>
-                                {filledCount} of {totalCount} fields completed
-                            </span>
-                            <Button
-                                primary
-                                onClick={handleSubmit}
-                                disabled={loading}
-                                style={{ minWidth: 180 }}
-                            >
-                                Submit inspection
-                            </Button>
-                        </div>
+                            Submit inspection
+                        </Button>
                     </div>
 
                     {data && (
                         <AlertStack>
-                            <AlertBar success duration={8000}>
-                                <p>
-                                    <strong>Success:</strong>{' '}
-                                    {`Data posted with num fields: ${lastSubmitted.length}`}
-                                </p>
+                            <AlertBar success duration={5000}>
+                                Submitted successfully (
+                                {lastSubmitted.length} fields)
                             </AlertBar>
                         </AlertStack>
                     )}
 
                     {error && (
-                        <div style={{ color: 'red', marginTop: '1rem' }}>
-                            <p>
-                                <strong>Error:</strong>{' '}
-                                {error.message || 'An unexpected error occurred'}
-                            </p>
-                            {error.code && (
-                                <p>
-                                    <strong>Code:</strong> {error.code}
-                                </p>
-                            )}
-                            {error.details && (
-                                <pre>{JSON.stringify(error.details, null, 2)}</pre>
-                            )}
-                        </div>
+                        <AlertBar critical>
+                            {error.message || 'Unexpected error'}
+                        </AlertBar>
                     )}
                 </>
             )}

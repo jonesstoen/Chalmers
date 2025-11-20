@@ -5,31 +5,62 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 ChartJS.register(MatrixController, MatrixElement, LinearScale, Tooltip, Legend, Title, ChartDataLabels)
 
+// Stock-style heatmap color logic
+function heatmapColor(value, thresholdValue, goodWhenLower) {
+    if (isNaN(value)) return "hsl(0, 0%, 82%)"; // neutral light gray
+
+    // distance from threshold (0 = perfect)
+    const diff = Math.abs(value - thresholdValue) / thresholdValue;
+    const clamped = Math.min(Math.max(diff, 0), 1);
+
+    // Gray zone if close to perfect (±5%)
+    if (clamped < 0.05) {
+        return "hsl(0, 0%, 85%)";
+    }
+
+    // good or bad?
+    const good = goodWhenLower ? value <= thresholdValue : value >= thresholdValue;
+
+    // smooth gradient using HSL
+    const lightness = 85 - clamped * 40;   // 85% → 45%
+    const saturation = 40 + clamped * 40;  // 40% → 80%
+
+    if (good) {
+        // green scale
+        return `hsl(120, ${saturation}%, ${lightness}%)`;
+    } else {
+        // red scale
+        return `hsl(0, ${saturation}%, ${lightness}%)`;
+    }
+}
+
+
 export default function Heatmap({ processed }) {
     if (!processed?.length) return <p>No data available</p>
 
-    // ✅ Use only the latest event
     const latestEvent = processed[processed.length - 1]
     const eventsToShow = latestEvent ? [latestEvent] : []
 
+    // thresholds defined here
     const ratios = [
-        { key: 'seatsToLearner', label: 'Seats/Learner', threshold: v => v >= 1 },
-        { key: 'learnerToClassroom', label: 'Learners/Classroom', threshold: v => v <= 53 },
-        { key: 'learnerToTeacher', label: 'Learners/Teacher', threshold: v => v <= 45 },
-        { key: 'learnerToToilet', label: 'Learners/Toilet', threshold: v => v <= 25 },
+        { key: 'seatsToLearner', label: 'Seats/Learner', threshold: v => v >= 1, thresholdValue: 1 },
+        { key: 'learnerToClassroom', label: 'Learners/Classroom', threshold: v => v <= 53, thresholdValue: 53 },
+        { key: 'learnerToTeacher', label: 'Learners/Teacher', threshold: v => v <= 45, thresholdValue: 45 },
+        { key: 'learnerToToilet', label: 'Learners/Toilet', threshold: v => v <= 25, thresholdValue: 25 },
     ]
 
-    // ✅ Build matrix data with totals included
     const matrixData = []
     eventsToShow.forEach((event, yIndex) => {
         ratios.forEach((r, xIndex) => {
             const value = Number(event.ratios?.[r.key]) || NaN
             const meets = r.threshold(value)
+
             matrixData.push({
                 x: xIndex,
                 y: yIndex,
                 v: value,
                 meets,
+                thresholdValue: r.thresholdValue,   // <<< FIXED
                 label: r.label,
                 date: event.date,
                 totals: {
@@ -43,24 +74,14 @@ export default function Heatmap({ processed }) {
         })
     })
 
-    // ✅ White–green–red gradient color scale
-    const colorScale = (v, meets) => {
-        if (isNaN(v)) return 'rgba(200,200,200,0.3)'
-        if (v === 1) return 'rgba(255,255,255,1)'
-        const intensity = Math.min(Math.abs(v - 1) / 2, 1)
-        return meets
-            ? `rgba(0,200,0,${0.3 + intensity * 0.7})`
-            : `rgba(220,0,0,${0.3 + intensity * 0.7})`
-    }
-
     const data = {
         datasets: [
             {
                 label: 'Infrastructure Ratios',
                 data: matrixData,
                 backgroundColor: ctx => {
-                    const { v, meets } = ctx.raw
-                    return colorScale(v, meets)
+                    const { v, meets, thresholdValue } = ctx.raw
+                    return heatmapColor(v, () => meets, thresholdValue)
                 },
                 borderWidth: 1,
                 width: ({ chart }) =>
@@ -86,7 +107,7 @@ export default function Heatmap({ processed }) {
                     title: ctx => ctx[0].raw.label,
                     label: ctx => {
                         const r = ctx.raw
-                        const t = r.totals || {}
+                        const t = r.totals
                         const ratio = isNaN(r.v) ? 'N/A' : r.v.toFixed(2)
 
                         switch (r.label) {

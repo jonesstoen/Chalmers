@@ -2,43 +2,71 @@ import { useContext } from "react"
 import InspectionContext from "../../../../context/InspectionContext"
 import SchoolGraph from "../../../analytics/components/SchoolGraph"
 import HeatmapComparison from "../../../analytics/heatmap/HeatmapComparison"
+import { dataElementIdToDescription } from "../../configs/inspectionFormUtils"
+import { SCHOOL_INSPECTION_FIELDS } from "../../configs/schoolInspectionConfig"
 
 function Result({ OrgId }) {
   const [inspectionDict] = useContext(InspectionContext)
-  const results = inspectionDict[OrgId]
 
-  if (!results?.length) {
-    return <p>Submit an inspection for {OrgId} to see a summary.</p>
-  }
-
-  // Build local submission object for heatmap / graphs
-  const localSubmission = results.reduce((acc, curr) => {
-    acc[curr.dataElement] = curr.value
-    return acc
-  }, {})
+  // Last local submission only (one inspection)
+  const results = inspectionDict?.[OrgId] ?? []
 
   const submissionDate = new Date().toLocaleDateString("en-GB")
 
-  return (
-    <><HeatmapComparison schoolId={OrgId}/>
+  // All possible data elements (full form)
+const allDataElements = SCHOOL_INSPECTION_FIELDS.map(f => f.id)
 
-{/* Graphs below */}
-<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
-  {results.map(({ dataElement, value }) => (
-    <GraphCard
-      key={dataElement}
-      schoolId={OrgId}
-      dataElement={dataElement}
-      localPoints={[{ label: submissionDate, value: Number(value) || 0 }]}
-    />
-  ))}
-</div>
-</>
+  return (
+    <>
+          <HeatmapComparison schoolId={OrgId} />
+
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+          gap: "1.5rem",
+        }}
+      >
+        
+        {/* CASE 1: User just submitted something → use localPoints */}
+        {results.length > 0 &&
+          results.map(({ dataElement, value }) => (
+            <GraphCard
+              key={dataElement}
+              schoolId={OrgId}
+              dataElement={dataElement}
+              localPoints={[
+                {
+                  label: submissionDate,
+                  value: Number(value) || 0,
+                },
+              ]}
+            />
+          ))}
+
+        {/* CASE 2: No local context (after refresh) → show graphs for ALL dataElements
+            Using only historic DHIS2 data (localPoints=[])
+        */}
+        {results.length === 0 &&
+          allDataElements.map((dataElement) => (
+            <GraphCard
+              key={dataElement}
+              schoolId={OrgId}
+              dataElement={dataElement}
+            />
+          ))}
+      </div>
+    </>
   )
 }
 
+
 /* ------------------ Graph Card ------------------ */
 function GraphCard({ schoolId, dataElement, localPoints }) {
+
+  const name = dataElementIdToDescription(dataElement)
+
   return (
     <div
       style={{
@@ -51,7 +79,7 @@ function GraphCard({ schoolId, dataElement, localPoints }) {
       <SchoolGraph
         schoolId={schoolId}
         dataElements={[dataElement]}
-        label={`Data Element: ${dataElement}`}
+        label={`${name}`}
         localPoints={localPoints}
       />
     </div>
