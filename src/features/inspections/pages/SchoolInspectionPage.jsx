@@ -110,12 +110,7 @@ function InspectionPanel({selected, activeTab, setActiveTab, selectedEvent, setS
                             >
                                 {i18n.t('Edit inspections')}
                             </Tab>
-                            <Tab
-                                selected={activeTab === 'delete'}
-                                onClick={() => setActiveTab('delete')}
-                            >
-                                {i18n.t('Delete inspection')}
-                            </Tab>
+
                             <Tab
                                 selected={activeTab === 'tldr'}
                                 onClick={() => setActiveTab('tldr')}
