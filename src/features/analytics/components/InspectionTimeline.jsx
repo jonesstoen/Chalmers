@@ -8,7 +8,7 @@ const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },
     elec: { on: 'IKiSAA19Xvl', cond: 'MH2eDd7qWxR' },
     wash: { on: 'n9KwS4rY2HC', cond: 'ie3bFiVatHT' },
-    lib:  { on: 'Y6DQqwTdhiZ', cond: 'IAomDvMcUDr' },
+    lib: { on: 'Y6DQqwTdhiZ', cond: 'IAomDvMcUDr' },
     play: { on: 'XThfmg6f2oC', cond: 'JzZfwXtdL6G' },
     rooms: 'ya5SyA5hej4',
     clean: 'XIgpDhDC4Ol',
@@ -30,8 +30,14 @@ const ouQuery = {
     },
 }
 
+// Bool med tooltip
 const Bool = ({ v }) => (
-    <span className={v ? classes.boolOk : classes.boolBad}>{v ? '✓' : '✗'}</span>
+    <span
+        className={v ? classes.boolOk : classes.boolBad}
+        title={v ? 'Available' : 'Not available'}
+    >
+        {v ? '✓' : '✗'}
+    </span>
 )
 
 const Badge = ({ v }) => (
@@ -46,14 +52,48 @@ const Badge = ({ v }) => (
     </span>
 )
 
+// Liten chip for status-kolonnen
+const StatusChip = ({ status }) => {
+    if (!status) return null
+    const key = status.toLowerCase()
+    const extra = classes['statusChip_' + key] || ''
+    return (
+        <span
+            className={`${classes.statusChip} ${extra}`}
+            title={status}
+        >
+            {status}
+        </span>
+    )
+}
+
 function Th({ label, active, asc, onClick, first }) {
+    const baseClass = `${classes.th} ${first ? classes.firstColTh : ''}`
+
+    let icon = null
+    if (active) {
+        icon = (
+            <span className={classes.sortIcon}>
+                {asc ? '▲' : '▼'}
+            </span>
+        )
+    } else {
+        icon = (
+            <span className={classes.sortIconInactive}>
+                ⬍
+            </span>
+        )
+    }
+
     return (
         <th
             onClick={onClick}
-            className={`${classes.th} ${first ? classes.firstColTh : ''}`}
+            className={baseClass}
+            title="Click to sort"
+            scope="col"
         >
-            {label}
-            {active ? (asc ? ' ▲' : ' ▼') : ''}
+            <span className={classes.thLabel}>{label}</span>
+            {icon}
         </th>
     )
 }
@@ -67,10 +107,7 @@ function toBool(v) {
 export default function InspectionTimeline({ schoolId, onSelect }) {
     const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
 
-    const ouVars = useMemo(
-        () => ({ id: schoolId || '' }),
-        [schoolId]
-    )
+    const ouVars = useMemo(() => ({ id: schoolId || '' }), [schoolId])
     const { data: ouData } = useDataQuery(ouQuery, {
         variables: ouVars,
         lazy: !schoolId,
@@ -81,16 +118,63 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
     const [sortAsc, setSortAsc] = useState(true)
     const [selectedEvent, setSelectedEvent] = useState(null)
 
+    const numericKeys = useMemo(
+        () =>
+            new Set([
+                F.learners,
+                F.seats,
+                F.rooms,
+                F.clean,
+                F.teachers,
+                F.toiletsT,
+                F.toiletsB,
+                F.toiletsG,
+                F.toiletsTot,
+            ]),
+        []
+    )
+
     const sorted = useMemo(() => {
         const list = Array.isArray(events) ? [...events] : []
         list.sort((a, b) => {
-            const A = a?.[sortKey] ?? ''
-            const B = b?.[sortKey] ?? ''
-            const c = A > B ? 1 : A < B ? -1 : 0
+            const A = a?.[sortKey]
+            const B = b?.[sortKey]
+
+            // Sorter dato som Date
+            if (sortKey === 'eventdate') {
+                const dA = A ? new Date(A).getTime() : 0
+                const dB = B ? new Date(B).getTime() : 0
+                const diff = dA - dB
+                return sortAsc ? diff : -diff
+            }
+
+            //  Numeriske felt: sorter som tall
+            if (numericKeys.has(sortKey)) {
+                const nA =
+                    A === undefined || A === null || A === ''
+                        ? NaN
+                        : Number(A)
+                const nB =
+                    B === undefined || B === null || B === ''
+                        ? NaN
+                        : Number(B)
+
+                if (Number.isNaN(nA) && Number.isNaN(nB)) return 0
+                if (Number.isNaN(nA)) return sortAsc ? 1 : -1
+                if (Number.isNaN(nB)) return sortAsc ? -1 : 1
+
+                const diff = nA - nB
+                return sortAsc ? diff : -diff
+            }
+
+            // fallback: string-compare
+            const sA = (A ?? '').toString()
+            const sB = (B ?? '').toString()
+            const c = sA.localeCompare(sB)
             return sortAsc ? c : -c
         })
         return list
-    }, [events, sortKey, sortAsc])
+    }, [events, sortKey, sortAsc, numericKeys])
 
     // early returns
     if (!schoolId) return null
@@ -132,6 +216,8 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         onSelect?.(ev)
     }
 
+    const isSortedCol = key => sortKey === key
+
     return (
         <div style={{ padding: '0.75rem', overflowX: 'auto' }}>
             <h3 style={{ margin: '0 0 .25rem' }}>
@@ -144,21 +230,59 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                     Events: <strong>{numEvents}</strong>
                 </span>
                 <span>
-                    Last inspection:{' '}
-                    <strong>{latestDateLabel}</strong>
+                    Last inspection: <strong>{latestDateLabel}</strong>
+                </span>
+                <span className={classes.sortHint}>
+                    Tip: Click column headers to sort
                 </span>
             </div>
 
             <table className={classes.table}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                 <tr>
-                    <Th label="Date"     first onClick={() => toggleSort('eventdate')}   active={sortKey==='eventdate'}   asc={sortAsc}/>
-                    <Th label="Status"        onClick={() => toggleSort('eventstatus')} active={sortKey==='eventstatus'} asc={sortAsc}/>
-                    <Th label="Learners"      onClick={() => toggleSort(F.learners)}    active={sortKey===F.learners}    asc={sortAsc}/>
-                    <Th label="Seats"         onClick={() => toggleSort(F.seats)}       active={sortKey===F.seats}       asc={sortAsc}/>
-                    <Th label="Classrooms"    onClick={() => toggleSort(F.rooms)}       active={sortKey===F.rooms}       asc={sortAsc}/>
-                    <Th label="Clean rooms"   onClick={() => toggleSort(F.clean)}       active={sortKey===F.clean}       asc={sortAsc}/>
-                    <Th label="Teachers"      onClick={() => toggleSort(F.teachers)}    active={sortKey===F.teachers}    asc={sortAsc}/>
+                    <Th
+                        label="Date"
+                        first
+                        onClick={() => toggleSort('eventdate')}
+                        active={sortKey === 'eventdate'}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Status"
+                        onClick={() => toggleSort('eventstatus')}
+                        active={sortKey === 'eventstatus'}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Learners"
+                        onClick={() => toggleSort(F.learners)}
+                        active={sortKey === F.learners}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Seats"
+                        onClick={() => toggleSort(F.seats)}
+                        active={sortKey === F.seats}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Classrooms"
+                        onClick={() => toggleSort(F.rooms)}
+                        active={sortKey === F.rooms}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Clean rooms"
+                        onClick={() => toggleSort(F.clean)}
+                        active={sortKey === F.clean}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Teachers"
+                        onClick={() => toggleSort(F.teachers)}
+                        active={sortKey === F.teachers}
+                        asc={sortAsc}
+                    />
                     <th className={classes.group}>Lab</th>
                     <th className={classes.group}>Lab cond</th>
                     <th className={classes.group}>Electricity</th>
@@ -169,10 +293,30 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                     <th className={classes.group}>Lib cond</th>
                     <th className={classes.group}>Playground</th>
                     <th className={classes.group}>Play cond</th>
-                    <Th label="Toilets T"     onClick={() => toggleSort(F.toiletsT)}    active={sortKey===F.toiletsT}    asc={sortAsc}/>
-                    <Th label="Toilets B"     onClick={() => toggleSort(F.toiletsB)}    active={sortKey===F.toiletsB}    asc={sortAsc}/>
-                    <Th label="Toilets G"     onClick={() => toggleSort(F.toiletsG)}    active={sortKey===F.toiletsG}    asc={sortAsc}/>
-                    <Th label="Toilets total" onClick={() => toggleSort(F.toiletsTot)}  active={sortKey===F.toiletsTot}  asc={sortAsc}/>
+                    <Th
+                        label="Toilets T"
+                        onClick={() => toggleSort(F.toiletsT)}
+                        active={sortKey === F.toiletsT}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Toilets B"
+                        onClick={() => toggleSort(F.toiletsB)}
+                        active={sortKey === F.toiletsB}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Toilets G"
+                        onClick={() => toggleSort(F.toiletsG)}
+                        active={sortKey === F.toiletsG}
+                        asc={sortAsc}
+                    />
+                    <Th
+                        label="Toilets total"
+                        onClick={() => toggleSort(F.toiletsTot)}
+                        active={sortKey === F.toiletsTot}
+                        asc={sortAsc}
+                    />
                 </tr>
                 </thead>
 
@@ -187,37 +331,151 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                                 : classes.row
                     }`
                     return (
-                        <tr key={e.psi || i} onClick={() => pick(e)} className={rowClass}>
-                            <td className={`${classes.td} ${classes.firstCol}`}>{new Date(e.eventdate).toLocaleDateString()}</td>
-                            <td className={classes.td}>{e.eventstatus}</td>
-                            <td className={classes.tdNum}>{e[F.learners] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.seats] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.rooms] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.clean] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.teachers] ?? '–'}</td>
+                        <tr
+                            key={e.psi || i}
+                            onClick={() => pick(e)}
+                            className={rowClass}
+                        >
+                            <td
+                                className={`${classes.td} ${classes.firstCol} ${
+                                    isSortedCol('eventdate')
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {new Date(
+                                    e.eventdate
+                                ).toLocaleDateString()}
+                            </td>
 
-                            <td className={classes.tdCenter}><Bool v={toBool(e[F.lab.on])} /></td>
-                            <td className={classes.td}><Badge v={e[F.lab.cond]} /></td>
-                            <td className={classes.tdCenter}><Bool v={toBool(e[F.elec.on])} /></td>
-                            <td className={classes.td}><Badge v={e[F.elec.cond]} /></td>
-                            <td className={classes.tdCenter}><Bool v={toBool(e[F.wash.on])} /></td>
-                            <td className={classes.td}><Badge v={e[F.wash.cond]} /></td>
-                            <td className={classes.tdCenter}><Bool v={toBool(e[F.lib.on])} /></td>
-                            <td className={classes.td}><Badge v={e[F.lib.cond]} /></td>
-                            <td className={classes.tdCenter}><Bool v={toBool(e[F.play.on])} /></td>
-                            <td className={classes.td}><Badge v={e[F.play.cond]} /></td>
+                            <td
+                                className={`${classes.td} ${
+                                    isSortedCol('eventstatus')
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                <StatusChip status={e.eventstatus} />
+                            </td>
 
-                            <td className={classes.tdNum}>{e[F.toiletsT] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.toiletsB] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.toiletsG] ?? '–'}</td>
-                            <td className={classes.tdNum}>{e[F.toiletsTot] ?? '–'}</td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.learners)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.learners] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.seats)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.seats] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.rooms)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.rooms] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.clean)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.clean] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.teachers)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.teachers] ?? '–'}
+                            </td>
+
+                            <td className={classes.tdCenter}>
+                                <Bool v={toBool(e[F.lab.on])} />
+                            </td>
+                            <td className={classes.td}>
+                                <Badge v={e[F.lab.cond]} />
+                            </td>
+                            <td className={classes.tdCenter}>
+                                <Bool v={toBool(e[F.elec.on])} />
+                            </td>
+                            <td className={classes.td}>
+                                <Badge v={e[F.elec.cond]} />
+                            </td>
+                            <td className={classes.tdCenter}>
+                                <Bool v={toBool(e[F.wash.on])} />
+                            </td>
+                            <td className={classes.td}>
+                                <Badge v={e[F.wash.cond]} />
+                            </td>
+                            <td className={classes.tdCenter}>
+                                <Bool v={toBool(e[F.lib.on])} />
+                            </td>
+                            <td className={classes.td}>
+                                <Badge v={e[F.lib.cond]} />
+                            </td>
+                            <td className={classes.tdCenter}>
+                                <Bool v={toBool(e[F.play.on])} />
+                            </td>
+                            <td className={classes.td}>
+                                <Badge v={e[F.play.cond]} />
+                            </td>
+
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.toiletsT)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.toiletsT] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.toiletsB)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.toiletsB] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.toiletsG)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.toiletsG] ?? '–'}
+                            </td>
+                            <td
+                                className={`${classes.tdNum} ${
+                                    isSortedCol(F.toiletsTot)
+                                        ? classes.sortedCol
+                                        : ''
+                                }`}
+                            >
+                                {e[F.toiletsTot] ?? '–'}
+                            </td>
                         </tr>
                     )
                 })}
                 </tbody>
             </table>
-
-
         </div>
     )
 }
