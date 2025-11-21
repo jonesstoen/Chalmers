@@ -1,60 +1,45 @@
-import { useMemo } from "react"
-import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
+import {useMemo} from "react"
+import {useCacheableQuery} from "../../../shared/cache/cacheableQuery"
+
+// ---- STATIC QUERY (DHIS2-safe) ----
+const ORG_UNIT_QUERY = {
+    ou: {
+        resource: "organisationUnits",
+        id: ({ id }) => id,   // resolved per OU ID
+        params: () => ({
+            fields: [
+                "children[name,id]",
+                "parents[name,id]",
+                "name",
+                "id",
+                "programs[name,id]",
+                "dataSets[name,id]"
+            ],
+            paging: false,
+        }),
+    },
+}
 
 export default function useFetchOrgUnits(orgIds = []) {
 
-    // ---- 1. Stable dataKey (OU list only, sorted for stability) ----
-    const dataKey = useMemo(() => {
-        const sorted = [...orgIds].sort()
-        return JSON.stringify({
-            type: "orgUnits",
-            orgIds: sorted,
-        })
-    }, [orgIds])
-
-    // ---- 2. Stable variables for the query ----
-    // Each key becomes a sub-query in useDataQuery
+    // ---- Stable variables ----
     const variables = useMemo(() => {
-        const vars = {}
+        const v = {}
         for (const id of orgIds) {
-            vars[id] = { id }
+            v[id] = { id }
         }
-        return vars
+        return v
     }, [orgIds])
 
-    // ---- 3. Stable query object (memoized once) ----
-    // DHIS2 `useDataQuery` supports MULTI-QUERY style:
-    // query = { ou1: { resource, id, params }, ou2: { ... } }
-    const query = useMemo(() => ({
-        // We dynamically build subqueries based on variables
-        ...Object.fromEntries(
-            Object.keys(variables).map(id => [
-                id,
-                {
-                    resource: "organisationUnits",
-                    id: ({ id }) => id,           // → /organisationUnits/{id}
-                    params: () => ({
-                        fields: [
-                            "children[name,id]",
-                            "parents[name,id]",
-                            "name",
-                            "id",
-                            "programs[name,id]",
-                            "dataSets[name,id]"
-                        ],
-                        paging: false,
-                    })
-                }
-            ])
-        )
-        // IMPORTANT: query must NOT depend on variables (shape only)
-    }), [])
-
-    // ---- 4. Run cacheable query ----
-    return useCacheableQuery(
-        "data",     // <-- ALWAYS "data"
-        dataKey,
-        query,
-        variables
+    // ---- Stable dataKey ----
+    const dataKey = useMemo(() =>
+            JSON.stringify({
+                type: "orgUnits",
+                ids: [...orgIds].sort(),
+            }),
+        [orgIds]
     )
+
+    // ---- Use same query object for all requests ----
+    return useCacheableQuery("data", dataKey, ORG_UNIT_QUERY, variables)
 }
