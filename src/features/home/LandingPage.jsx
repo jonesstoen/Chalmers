@@ -3,7 +3,6 @@ import React, { useMemo, useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'
 import useFetchAnalytics from '../analytics/api/analyticsAPI'
-import SyncBanner from './SyncBanner'
 import MetricTile from './MetricTile'
 import PrioritySchoolCard from './PrioritySchoolCard'
 import SchoolSearchBar from '../inspections/components/SchoolSearchBar'
@@ -119,22 +118,9 @@ export default function LandingPage() {
                     padding: '16px 24px 32px',
                 }}
             >
-                <h2
-                    style={{
-                        marginBottom: 8,
-                        fontSize: 20,
-                        fontWeight: 700,
-                        color: '#0f172a',
-                    }}
-                >
-                    Overview
-                </h2>
-
-                <SyncBanner />
-
                 <p
                     style={{
-                        marginTop: 4,
+                        marginTop: 0,
                         marginBottom: 12,
                         fontSize: 12,
                         color: isOnline ? '#16a34a' : '#b45309',
