@@ -1,10 +1,9 @@
 // features/home/LandingPage.jsx
-import React, { useMemo, useEffect, useState, useCallback } from 'react'
+import React, { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'
 import useFetchAnalytics from '../analytics/api/analyticsAPI'
 import MetricTile from './MetricTile'
-import PrioritySchoolCard from './PrioritySchoolCard'
 import SchoolSearchBar from '../inspections/components/SchoolSearchBar'
 
 const PROGRAM_ID = 'UxK2o06ScIe'
@@ -13,7 +12,6 @@ const ROOTS = [
     { id: 'Bp3y61WbHwn', label: 'Kanifing' },
     { id: 'RlPlK44dtoo', label: 'Banjul' },
 ]
-const RATIO_THRESHOLD = 0.7
 const MONTHLY_INSPECTION_TARGET = 2500
 
 function monthRangeISO(d = new Date()) {
@@ -55,18 +53,10 @@ export default function LandingPage() {
     const rows = data?.analytics?.rows ?? []
     const inspectionsThisMonth = rows.length
 
-    const [priorityOuIds, setPriorityOuIds] = useState([])
-
-
-
-    // OU-info for både priority schools og lastOu
+    // OU-info for lastOu
     const allOuIds = useMemo(() => {
-        const ids = [...priorityOuIds]
-        if (lastOu && !ids.includes(lastOu)) {
-            ids.push(lastOu)
-        }
-        return ids
-    }, [priorityOuIds, lastOu])
+        return lastOu ? [lastOu] : []
+    }, [lastOu])
 
     const OU_BATCH_QUERY = useMemo(
         () => ({
@@ -323,43 +313,6 @@ export default function LandingPage() {
                         value={loading ? '…' : String(ouList.length)}
                         subtitle="Based on seat-to-learner ratio"
                     />
-                </section>
-
-                {/* PRIORITY SCHOOLS */}
-                <section style={{ marginTop: 16 }}>
-                    <h3 style={{ marginBottom: 8, color: '#0f172a' }}>
-                        Priority schools
-                    </h3>
-                    {error && (
-                        <p style={{ color: 'crimson' }}>
-                            Error loading analytics: {error.message}
-                        </p>
-                    )}
-                    {!loading && !error && ouList.length === 0 && (
-                        <p style={{ fontSize: 14, color: '#64748b' }}>
-                            No priority schools detected this month.
-                        </p>
-                    )}
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns:
-                                'repeat(auto-fit,minmax(280px,1fr))',
-                            gap: 12,
-                        }}
-                    >
-                        {ouList
-                            .filter(ou => priorityOuIds.includes(ou.id))
-                            .map(ou => (
-                                <PrioritySchoolCard
-                                    key={ou.id}
-                                    name={ou.displayName || ou.name}
-                                    district={ou.parent?.name ?? '—'}
-                                    status="Low seat-to-learner ratio"
-                                    onOpen={() => openSchool(ou.id)}
-                                />
-                            ))}
-                    </div>
                 </section>
             </div>
         </div>
