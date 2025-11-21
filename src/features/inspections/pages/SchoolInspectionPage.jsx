@@ -5,6 +5,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useRef,
 } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import { TabBar, Tab, NoticeBox, Tag } from '@dhis2/ui'
@@ -12,6 +13,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import classes from '../../../App/App.module.css'
 import pageClasses from './SchoolInspectionPage.module.css'
 import OrgTreePanel from '../../org-units/components/OrgTreePanel'
+import SchoolSearchBar from '../components/SchoolSearchBar'
 import SchoolInspectionForm from '../components/SchoolInspectionForm'
 import EditInspectionForm from '../components/EditInspectionForm'
 import DeleteInspectionPanel from '../components/DeleteInspectionPanel'
@@ -226,6 +228,7 @@ export default function SchoolInspectionPage() {
     const [activeTab, setActiveTab] = useState('submit')
     const [selectedEvent, setSelectedEvent] = useState(null)
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+    const orgTreePanelRef = useRef(null)
 
     const { data, selectedId } = useFetchOrgUnits(selected)
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
@@ -277,12 +280,29 @@ export default function SchoolInspectionPage() {
         navigate('/')
     }, [navigate])
 
+    const handleSearchSelect = useCallback((school) => {
+        if (orgTreePanelRef.current?.handleSearchPick) {
+            orgTreePanelRef.current.handleSearchPick(school)
+        }
+    }, [])
+
     return (
-        <div className={classes.container}>
-            {/* Sidebar / org tree */}
-            <aside className={classes.sidebar}>
+        <div className={pageClasses.pageWrapper}>
+            {/* School Search Bar - standalone element */}
+            <div style={{ 
+                width: '100%', 
+                position: 'relative',
+                marginBottom: 16,
+            }}>
+                <SchoolSearchBar onSelect={handleSearchSelect} />
+            </div>
+
+            <div className={classes.container} style={{ padding: 0 }}>
+                {/* Sidebar / org tree */}
+                <aside className={classes.sidebar}>
                 <div className={classes.sidebarDesktop}>
                     <OrgTreePanel
+                        ref={orgTreePanelRef}
                         roots={ROOTS}
                         initialRootId={ROOTS[0].id}
                         onRootChange={handleRootChange}
@@ -303,6 +323,7 @@ export default function SchoolInspectionPage() {
                     {mobileSidebarOpen && (
                         <div className={classes.sidebarMobileBody}>
                             <OrgTreePanel
+                                ref={orgTreePanelRef}
                                 roots={ROOTS}
                                 initialRootId={ROOTS[0].id}
                                 onRootChange={handleRootChange}
@@ -344,6 +365,7 @@ export default function SchoolInspectionPage() {
                     />
                 )}
             </main>
+            </div>
         </div>
     )
 }

@@ -50,7 +50,7 @@ const getIcon = type => {
 
     return (
         
-        <div style={{ maxWidth: 500, margin: '1rem auto' }}>
+        <div style={{ width: '100%', position: 'relative' }}>
             <Input
                 placeholder="Search for a school or cluster..."
                 value={query}
@@ -60,6 +60,11 @@ const getIcon = type => {
        {query && (
     <div
         style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 1000,
             maxHeight: 300,
             overflowY: 'auto',
             border: '1px solid #ccc',
@@ -67,6 +72,7 @@ const getIcon = type => {
             marginTop: 8,
             background: '#fff',
             padding: 8,
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         }}
     >
         {/* ⭐ LEGEND GOES HERE */}
@@ -100,8 +106,10 @@ const getIcon = type => {
                 {filtered.slice(0, 50).map(s => (
                     <li
                         key={s.id}
-                        onClick={() => onSelect?.(s)}
-
+                        onClick={() => {
+                            onSelect?.(s)
+                            setQuery('')
+                        }}
                         style={{
                             padding: '8px 8px',
                             cursor: 'pointer',
