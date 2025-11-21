@@ -161,24 +161,6 @@ export default function LandingPage() {
                         Get started by opening the inspector, resuming your last
                         school, or searching for a school.
                     </p>
-                    {lastOuInfo && (
-                        <p
-                            style={{
-                                marginTop: 12,
-                                marginBottom: 0,
-                                fontSize: 14,
-                                color: '#64748b',
-                            }}
-                        >
-                            📍 Last visited:{' '}
-                            <strong>
-                                {lastOuInfo.displayName || lastOuInfo.name}
-                            </strong>
-                            {lastOuInfo.parent?.name
-                                ? ` (${lastOuInfo.parent.name})`
-                                : ''}
-                        </p>
-                    )}
                 </div>
 
                 {/* Centered buttons and search */}
@@ -204,6 +186,10 @@ export default function LandingPage() {
                             fontSize: 16,
                             cursor: 'pointer',
                             width: '100%',
+                            minHeight: 56,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
                             transition: 'all 0.2s',
                         }}
@@ -235,6 +221,12 @@ export default function LandingPage() {
                                 fontSize: 16,
                                 cursor: 'pointer',
                                 width: '100%',
+                                minHeight: 56,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 4,
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={e => {
@@ -247,7 +239,19 @@ export default function LandingPage() {
                             }}
                             title="Open your last visited school"
                         >
-                            Resume last school
+                            <span>Resume last school</span>
+                            {lastOuInfo && (
+                                <span
+                                    style={{
+                                        fontSize: 14,
+                                        color: '#64748b',
+                                        fontWeight: 400,
+                                    }}
+                                >
+                                    📍 Last visited:{' '}
+                                    {lastOuInfo.displayName || lastOuInfo.name}
+                                </span>
+                            )}
                         </button>
                     )}
 
