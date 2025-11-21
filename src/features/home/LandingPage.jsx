@@ -99,203 +99,172 @@ export default function LandingPage() {
             style={{
                 background: '#f1f5f9',
                 minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px',
             }}
         >
-            <div
+            {/* Online status at top */}
+            <p
                 style={{
-                    maxWidth: 1180,
-                    margin: '0 auto',
-                    padding: '16px 24px 32px',
+                    position: 'absolute',
+                    top: 24,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    margin: 0,
+                    fontSize: 12,
+                    color: isOnline ? '#16a34a' : '#b45309',
                 }}
             >
-                <p
-                    style={{
-                        marginTop: 0,
-                        marginBottom: 12,
-                        fontSize: 12,
-                        color: isOnline ? '#16a34a' : '#b45309',
-                    }}
-                >
-                    {isOnline
-                        ? 'Online — changes sync automatically.'
-                        : 'Offline — changes will sync when you are back online.'}
-                </p>
+                {isOnline
+                    ? 'Online — changes sync automatically.'
+                    : 'Offline — changes will sync when you are back online.'}
+            </p>
 
-                {/* HERO + SEARCH I SAMME KORT */}
-                <section style={{ marginTop: 8 }}>
-                    <div
+            {/* Main centered container */}
+            <div
+                style={{
+                    width: '100%',
+                    maxWidth: 800,
+                    padding: '48px',
+                    border: '1px solid #e5e7eb',
+                    background: '#ffffff',
+                    borderRadius: 16,
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 32,
+                }}
+            >
+                {/* Welcome text */}
+                <div style={{ textAlign: 'center' }}>
+                    <h1
                         style={{
-                            padding: 16,
-                            border: '1px solid #e5e7eb',
-                            background: '#ffffff',
-                            borderRadius: 12,
-                            boxShadow: '0 1px 3px rgba(15,23,42,0.06)',
+                            fontSize: 32,
+                            fontWeight: 700,
+                            marginBottom: 12,
+                            color: '#0f172a',
                         }}
                     >
-                        <div
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns:
-                                    'minmax(0,1fr) minmax(0,1.4fr)',
-                                gap: 16,
-                                alignItems: 'start',
-                            }}
-                        >
-                            {/* LEFT SIDE: Stacked buttons and search */}
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 8,
-                                }}
-                            >
-                                <button
-                                    onClick={openSchoolInspection}
-                                    style={{
-                                        padding: '10px 14px',
-                                        borderRadius: 10,
-                                        border: '1px solid #2563eb',
-                                        background: '#2563eb',
-                                        color: '#fff',
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        width: '100%',
-                                    }}
-                                    aria-label="Open Inspector"
-                                >
-                                    Open inspector
-                                </button>
-
-                                {lastOu && (
-                                    <button
-                                        onClick={() => openSchool(lastOu)}
-                                        style={{
-                                            padding: '10px 14px',
-                                            borderRadius: 10,
-                                            border: '1px dashed #e5e7eb',
-                                            background: '#fff',
-                                            cursor: 'pointer',
-                                            fontWeight: 500,
-                                            width: '100%',
-                                        }}
-                                        title="Open your last visited school"
-                                    >
-                                        Resume last school
-                                    </button>
-                                )}
-
-                                <div style={{ width: '100%', marginTop: -16 }}>
-                                    <SchoolSearchBar
-                                        onSelect={school => openSchool(school.id)}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* RIGHT SIDE: Welcome text and info */}
-                            <div>
-                                <div
-                                    style={{
-                                        fontSize: 20,
-                                        fontWeight: 700,
-                                        marginBottom: 6,
-                                    }}
-                                >
-                                    Welcome — key metrics and quick links to get
-                                    you started.
-                                </div>
-                                <p
-                                    style={{
-                                        margin: 0,
-                                        color: '#475569',
-                                        fontSize: 14,
-                                    }}
-                                >
-                                    Go to the inspection module to browse
-                                    organisation trees, open your school&apos;s
-                                    form, and submit data.
-                                </p>
-
-                                {lastOuInfo && (
-                                    <p
-                                        style={{
-                                            marginTop: 10,
-                                            marginBottom: 0,
-                                            fontSize: 13,
-                                            color: '#64748b',
-                                        }}
-                                    >
-                                        📍 Last visited:{' '}
-                                        <strong>
-                                            {lastOuInfo.displayName ||
-                                                lastOuInfo.name}
-                                        </strong>
-                                        {lastOuInfo.parent?.name
-                                            ? ` (${lastOuInfo.parent.name})`
-                                            : ''}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* MONTHLY PROGRESS */}
-                <section style={{ marginTop: 16 }}>
-                    <div
+                        Welcome
+                    </h1>
+                    <p
                         style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'baseline',
-                            marginBottom: 6,
+                            margin: 0,
+                            color: '#475569',
+                            fontSize: 16,
+                            lineHeight: 1.6,
                         }}
                     >
-                        <span
+                        Get started by opening the inspector, resuming your last
+                        school, or searching for a school.
+                    </p>
+                    {lastOuInfo && (
+                        <p
                             style={{
-                                fontSize: 13,
-                                fontWeight: 600,
-                                color: '#0f172a',
-                            }}
-                        >
-                            Monthly inspection progress
-                        </span>
-                        <span
-                            style={{
-                                fontSize: 12,
+                                marginTop: 12,
+                                marginBottom: 0,
+                                fontSize: 14,
                                 color: '#64748b',
                             }}
                         >
-                            {inspectionsThisMonth} / {MONTHLY_INSPECTION_TARGET}{' '}
-                            inspections ({progressPct}%)
-                        </span>
-                    </div>
-                    <div
+                            📍 Last visited:{' '}
+                            <strong>
+                                {lastOuInfo.displayName || lastOuInfo.name}
+                            </strong>
+                            {lastOuInfo.parent?.name
+                                ? ` (${lastOuInfo.parent.name})`
+                                : ''}
+                        </p>
+                    )}
+                </div>
+
+                {/* Centered buttons and search */}
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                        width: '100%',
+                        maxWidth: 400,
+                        margin: '0 auto',
+                    }}
+                >
+                    <button
+                        onClick={openSchoolInspection}
                         style={{
-                            height: 8,
-                            background: '#e5e7eb',
-                            borderRadius: 999,
-                            overflow: 'hidden',
+                            padding: '16px 24px',
+                            borderRadius: 12,
+                            border: 'none',
+                            background: '#2563eb',
+                            color: '#fff',
+                            fontWeight: 600,
+                            fontSize: 16,
+                            cursor: 'pointer',
+                            width: '100%',
+                            boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+                            transition: 'all 0.2s',
                         }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.background = '#1d4ed8'
+                            e.currentTarget.style.boxShadow =
+                                '0 4px 6px rgba(37, 99, 235, 0.3)'
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.background = '#2563eb'
+                            e.currentTarget.style.boxShadow =
+                                '0 2px 4px rgba(37, 99, 235, 0.2)'
+                        }}
+                        aria-label="Open Inspector"
                     >
-                        <div
+                        Open inspector
+                    </button>
+
+                    {lastOu && (
+                        <button
+                            onClick={() => openSchool(lastOu)}
                             style={{
-                                height: '100%',
-                                width: `${progressPct}%`,
-                                background:
-                                    progressPct >= 100 ? '#16a34a' : '#2563eb',
-                                transition: 'width .25s ease-out',
+                                padding: '16px 24px',
+                                borderRadius: 12,
+                                border: '1px solid #e5e7eb',
+                                background: '#fff',
+                                color: '#0f172a',
+                                fontWeight: 500,
+                                fontSize: 16,
+                                cursor: 'pointer',
+                                width: '100%',
+                                transition: 'all 0.2s',
                             }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = '#f8fafc'
+                                e.currentTarget.style.borderColor = '#cbd5e1'
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = '#fff'
+                                e.currentTarget.style.borderColor = '#e5e7eb'
+                            }}
+                            title="Open your last visited school"
+                        >
+                            Resume last school
+                        </button>
+                    )}
+
+                    <div style={{ width: '100%', marginTop: -4 }}>
+                        <SchoolSearchBar
+                            onSelect={school => openSchool(school.id)}
                         />
                     </div>
-                </section>
+                </div>
 
-                {/* KPI-KORT */}
-                <section
+                {/* Metrics at bottom */}
+                <div
                     style={{
                         display: 'grid',
-                        gridTemplateColumns:
-                            'repeat(auto-fit, minmax(220px,1fr))',
-                        gap: 12,
-                        marginTop: 16,
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: 16,
+                        marginTop: 8,
                     }}
                 >
                     <MetricTile
@@ -313,7 +282,56 @@ export default function LandingPage() {
                         value={loading ? '…' : String(ouList.length)}
                         subtitle="Based on seat-to-learner ratio"
                     />
-                </section>
+                </div>
+
+                {/* Monthly progress */}
+                <div style={{ marginTop: 8 }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            marginBottom: 8,
+                        }}
+                    >
+                        <span
+                            style={{
+                                fontSize: 14,
+                                fontWeight: 600,
+                                color: '#0f172a',
+                            }}
+                        >
+                            Monthly inspection progress
+                        </span>
+                        <span
+                            style={{
+                                fontSize: 13,
+                                color: '#64748b',
+                            }}
+                        >
+                            {inspectionsThisMonth} / {MONTHLY_INSPECTION_TARGET}{' '}
+                            ({progressPct}%)
+                        </span>
+                    </div>
+                    <div
+                        style={{
+                            height: 10,
+                            background: '#e5e7eb',
+                            borderRadius: 999,
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <div
+                            style={{
+                                height: '100%',
+                                width: `${progressPct}%`,
+                                background:
+                                    progressPct >= 100 ? '#16a34a' : '#2563eb',
+                                transition: 'width .25s ease-out',
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     )
