@@ -58,38 +58,7 @@ export default function LandingPage() {
 
     const [priorityOuIds, setPriorityOuIds] = useState([])
 
-    useEffect(() => {
-        if (!rows.length || !headers.length) return setPriorityOuIds([])
 
-        const ouIdx = headers.findIndex(h => h.name === 'ou')
-        const learnersIdx = headers.findIndex(h => h.name === 'DO0LBJfXY00')
-        const seatsIdx = headers.findIndex(h => h.name === 'jcC1uz56IpY')
-
-        if (ouIdx < 0 || learnersIdx < 0 || seatsIdx < 0) {
-            return setPriorityOuIds([])
-        }
-
-        const byOu = new Map()
-        for (const r of rows) {
-            const ou = r[ouIdx]
-            const learners = Number(r[learnersIdx] || 0)
-            const seats = Number(r[seatsIdx] || 0)
-            const agg = byOu.get(ou) ?? { learners: 0, seats: 0 }
-            agg.learners += Number.isNaN(learners) ? 0 : learners
-            agg.seats += Number.isNaN(seats) ? 0 : seats
-            byOu.set(ou, agg)
-        }
-
-        const bad = []
-        for (const [ou, { learners, seats }] of byOu.entries()) {
-            if (learners > 0 && seats / learners < RATIO_THRESHOLD) {
-                bad.push({ ou, ratio: seats / learners })
-            }
-        }
-
-        bad.sort((a, b) => a.ratio - b.ratio)
-        setPriorityOuIds(bad.slice(0, 8).map(x => x.ou))
-    }, [rows, headers])
 
     // OU-info for både priority schools og lastOu
     const allOuIds = useMemo(() => {
