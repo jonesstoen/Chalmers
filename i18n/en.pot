@@ -5,17 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-16T14:40:44.757Z\n"
-"PO-Revision-Date: 2025-11-16T14:40:44.757Z\n"
-
-msgid "Select a school"
-msgstr "Select a school"
-
-msgid "Pick a node in the tree to see details."
-msgstr "Pick a node in the tree to see details."
-
-msgid "Analytics"
-msgstr "Analytics"
+"POT-Creation-Date: 2025-11-21T14:59:27.775Z\n"
+"PO-Revision-Date: 2025-11-21T14:59:27.775Z\n"
 
 msgid "Selected event"
 msgstr "Selected event"
@@ -29,23 +20,14 @@ msgstr "Learners"
 msgid "Seats"
 msgstr "Seats"
 
-msgid "School Inspection"
-msgstr "School Inspection"
-
-msgid "Pick a school"
-msgstr "Pick a school"
-
-msgid "Select a node in the tree to continue."
-msgstr "Select a node in the tree to continue."
+msgid "Back to overview"
+msgstr "Back to overview"
 
 msgid "New inspection"
 msgstr "New inspection"
 
 msgid "Edit inspections"
 msgstr "Edit inspections"
-
-msgid "Delete inspection"
-msgstr "Delete inspection"
 
 msgid "History"
 msgstr "History"
@@ -61,6 +43,16 @@ msgstr "Pick an event in the table above to delete."
 
 msgid "Organisation units"
 msgstr "Organisation units"
+
+msgid "Pick a School or Cluster"
+msgstr "Pick a School or Cluster"
+
+msgid ""
+"Search for a school in the searchbar or Select a node in the tree to "
+"continue."
+msgstr ""
+"Search for a school in the searchbar or Select a node in the tree to "
+"continue."
 
 msgid "No roots available"
 msgstr "No roots available"

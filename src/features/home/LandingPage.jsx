@@ -160,11 +160,62 @@ export default function LandingPage() {
                             style={{
                                 display: 'grid',
                                 gridTemplateColumns:
-                                    'minmax(0,1.4fr) minmax(0,1fr)',
+                                    'minmax(0,1fr) minmax(0,1.4fr)',
                                 gap: 16,
-                                alignItems: 'center',
+                                alignItems: 'start',
                             }}
                         >
+                            {/* LEFT SIDE: Stacked buttons and search */}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 8,
+                                }}
+                            >
+                                <button
+                                    onClick={openSchoolInspection}
+                                    style={{
+                                        padding: '10px 14px',
+                                        borderRadius: 10,
+                                        border: '1px solid #2563eb',
+                                        background: '#2563eb',
+                                        color: '#fff',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                    }}
+                                    aria-label="Open Inspector"
+                                >
+                                    Open inspector
+                                </button>
+
+                                {lastOu && (
+                                    <button
+                                        onClick={() => openSchool(lastOu)}
+                                        style={{
+                                            padding: '10px 14px',
+                                            borderRadius: 10,
+                                            border: '1px dashed #e5e7eb',
+                                            background: '#fff',
+                                            cursor: 'pointer',
+                                            fontWeight: 500,
+                                            width: '100%',
+                                        }}
+                                        title="Open your last visited school"
+                                    >
+                                        Resume last school
+                                    </button>
+                                )}
+
+                                <div style={{ width: '100%' }}>
+                                    <SchoolSearchBar
+                                        onSelect={school => openSchool(school.id)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* RIGHT SIDE: Welcome text and info */}
                             <div>
                                 <div
                                     style={{
@@ -208,55 +259,6 @@ export default function LandingPage() {
                                     </p>
                                 )}
                             </div>
-
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    gap: 8,
-                                    justifyContent: 'flex-end',
-                                    flexWrap: 'wrap',
-                                }}
-                            >
-                                <button
-                                    onClick={openSchoolInspection}
-                                    style={{
-                                        padding: '10px 14px',
-                                        borderRadius: 10,
-                                        border: '1px solid #2563eb',
-                                        background: '#2563eb',
-                                        color: '#fff',
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                    }}
-                                    aria-label="Open Inspector"
-                                >
-                                    Open inspector
-                                </button>
-
-                                {lastOu && (
-                                    <button
-                                        onClick={() => openSchool(lastOu)}
-                                        style={{
-                                            padding: '10px 14px',
-                                            borderRadius: 10,
-                                            border: '1px dashed #e5e7eb',
-                                            background: '#fff',
-                                            cursor: 'pointer',
-                                            fontWeight: 500,
-                                        }}
-                                        title="Open your last visited school"
-                                    >
-                                        Resume last school
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* QUICK SEARCH UNDER TEKSTEN */}
-                        <div style={{ marginTop: 14 }}>
-                            <SchoolSearchBar
-                                onSelect={school => openSchool(school.id)}
-                            />
                         </div>
                     </div>
                 </section>
