@@ -1,11 +1,10 @@
 // features/org-units/components/OrgTreePanel.jsx
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react'
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
 import classes from '../../../App/App.module.css'
-import SchoolSearchBar from '../../inspections/components/SchoolSearchBar.jsx'
 
-export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }) {
+const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }, ref) {
     const safeInitialRoot = initialRootId ?? roots?.[0]?.id
 
     // --------------------------
@@ -164,6 +163,11 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
         onSelect?.([unit.id])
     }, [roots, currentRootId, onSelect])
 
+    // Expose handleSearchPick via ref
+    useImperativeHandle(ref, () => ({
+        handleSearchPick,
+    }), [handleSearchPick])
+
     // Notify root change
     useEffect(() => {
         if (currentRootId) onRootChange?.(currentRootId)
@@ -213,11 +217,6 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
                 </div>
             </div>
 
-            <SchoolSearchBar
-                onSelect={handleSearchPick}
-                onDone={() => setSearchDismissTick(t => t + 1)}
-            />
-
             <div className={classes.treeScroll}>
                 <OrganisationUnitTree
                     key={currentRootId}
@@ -232,4 +231,6 @@ export default function OrgTreePanel({ roots, initialRootId, onRootChange, onSel
             </div>
         </aside>
     )
-}
+})
+
+export default OrgTreePanel
