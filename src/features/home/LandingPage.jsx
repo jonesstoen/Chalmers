@@ -255,7 +255,13 @@ export default function LandingPage() {
                         </button>
                     )}
 
-                    <div style={{ width: '100%', marginTop: -4 }}>
+                    <div
+                        style={{
+                            width: '100%',
+                            marginTop: -4,
+                            position: 'relative',
+                        }}
+                    >
                         <SchoolSearchBar
                             onSelect={school => openSchool(school.id)}
                         />
