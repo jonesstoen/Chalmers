@@ -33,7 +33,9 @@ export default function useFetchOrgUnits(orgIds = []) {
     const safeOrgIds = Array.isArray(orgIds) ? orgIds : []
 
     // Select *one* org unit (same behaviour as your original hook)
-    const selectedId = safeOrgIds.length > 0 ? safeOrgIds[0] : null
+    // Filter out empty strings and null values
+    const validIds = safeOrgIds.filter(id => id && typeof id === 'string' && id.trim() !== '')
+    const selectedId = validIds.length > 0 ? validIds[0] : null
 
     // -----------------------------------------------------------------------
     // VARIABLES — always an object, never undefined

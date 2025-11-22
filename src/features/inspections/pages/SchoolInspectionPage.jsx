@@ -135,6 +135,15 @@ function InspectionPanel({
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
+    // Defensive check: if we don't have org unit data, show a message
+    if (!ou || !orgUnitId) {
+        return (
+            <NoticeBox title={i18n.t('Loading school information')}>
+                {i18n.t('Please wait while school information is being loaded...')}
+            </NoticeBox>
+        )
+    }
+
     return (
         <>
             <TabBar>
@@ -230,7 +239,7 @@ export default function SchoolInspectionPage() {
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
     const orgTreePanelRef = useRef(null)
 
-    const { data, selectedId } = useFetchOrgUnits(selected)
+    const { data, selectedId, loading: orgUnitLoading, error: orgUnitError } = useFetchOrgUnits(selected)
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
 
     const navigate = useNavigate()
@@ -350,11 +359,23 @@ export default function SchoolInspectionPage() {
                     </NoticeBox>
                 )}
 
-                {selectedId && isAggregate && (
+                {selectedId && orgUnitLoading && (
+                    <NoticeBox>
+                        {i18n.t('Loading school information...')}
+                    </NoticeBox>
+                )}
+
+                {selectedId && orgUnitError && (
+                    <NoticeBox error title={i18n.t('Error loading school')}>
+                        {orgUnitError.message || i18n.t('Failed to load school information')}
+                    </NoticeBox>
+                )}
+
+                {selectedId && !orgUnitLoading && !orgUnitError && data?.ou && isAggregate && (
                     <AggregatedAnalyticsPanel data={data} />
                 )}
 
-                {selectedId && !isAggregate && (
+                {selectedId && !orgUnitLoading && !orgUnitError && data?.ou && !isAggregate && (
                     <InspectionPanel
                         selected={selected}
                         activeTab={activeTab}
