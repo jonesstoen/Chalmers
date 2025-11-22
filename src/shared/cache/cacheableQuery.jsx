@@ -48,17 +48,10 @@ export function useCacheableQuery(
     }, [dataKey, cache]);
 
     // Should we query the network?
-    // If forceLazy is true, always be lazy (don't fetch)
-    // If forceLazy is false, fetch if:
-    //   - No cache (cacheStatus === "none")
-    //   - Stale cache (cacheStatus === "stale-cache")
-    //   - Or if we have cached data but it's invalid (cachedData is null/undefined)
-    const shouldFetch = !forceLazy && (
-        cacheStatus === "none" || 
-        cacheStatus === "stale-cache" ||
-        (cacheStatus === "cache" && !cachedData)
-    );
-    const willBeLazy = forceLazy || !shouldFetch;
+    // SIMPLIFIED: If forceLazy is false, ALWAYS fetch (ignore cache for now to fix the bug)
+    // If forceLazy is true, don't fetch
+    // TODO: Re-enable cache optimization once the basic fetch works
+    const willBeLazy = forceLazy;
 
     // Debug logging - ALWAYS log to see what's happening
     const isOrgUnitQuery = typeof dataKey === 'string' && dataKey.includes('orgUnit')
