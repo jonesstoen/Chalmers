@@ -98,7 +98,7 @@ export default function useFetchOrgUnits(orgIds = []) {
         refetch,
     } = useDataQuery(ORG_UNIT_QUERY, {
         variables,
-        lazy,
+        skip: !selectedId, // Skip when no selectedId (instead of lazy)
     })
     
     console.log('📊 [useFetchOrgUnits] useDataQuery result:', {
