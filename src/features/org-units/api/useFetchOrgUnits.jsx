@@ -93,6 +93,13 @@ export default function useFetchOrgUnits(orgIds = []) {
     // Make the query — same signature as analytics hook
     // TEMPORARY: Use useDataQuery directly to bypass cache and see if query works
     // -----------------------------------------------------------------------
+    console.log('🔍 [useFetchOrgUnits] About to call useDataQuery:', {
+        selectedId,
+        variables,
+        lazy,
+        queryId: ORG_UNIT_QUERY.ou.id(variables)
+    })
+    
     const {
         data: networkData,
         loading,
@@ -101,6 +108,15 @@ export default function useFetchOrgUnits(orgIds = []) {
     } = useDataQuery(ORG_UNIT_QUERY, {
         variables,
         lazy,
+    })
+    
+    console.log('📊 [useFetchOrgUnits] useDataQuery result:', {
+        hasNetworkData: !!networkData,
+        networkDataKeys: networkData ? Object.keys(networkData) : [],
+        networkDataOu: networkData?.ou,
+        loading,
+        error: error?.message || error,
+        errorFull: error
     })
     
     // For now, just use network data directly (bypass cache)
