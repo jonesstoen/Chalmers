@@ -30,11 +30,13 @@ export function useCacheableQuery(
 
             if (cancelled) return;
 
-            if (item) {
+            if (item && item.value != null) {
+                // Only use cache if it has actual data (not null/undefined)
                 const stale = isCacheStale(item.timestamp);
                 setCachedData(item.value);
                 setCacheStatus(stale ? "stale-cache" : "cache");
             } else {
+                // No cache or cache has null/undefined - need to fetch
                 setCachedData(null);
                 setCacheStatus("none");
             }
@@ -50,15 +52,16 @@ export function useCacheableQuery(
     const willBeLazy = forceLazy || !shouldFetch;
 
     // Debug logging for org unit queries
-    if (dataKey?.includes('orgUnit') && !willBeLazy) {
-        console.log('[useCacheableQuery] Will fetch:', {
+    if (dataKey?.includes('orgUnit')) {
+        console.log('[useCacheableQuery] State:', {
             dataKey,
             cacheStatus,
             shouldFetch,
             forceLazy,
             willBeLazy,
             hasCachedData: !!cachedData,
-            cachedDataKeys: cachedData ? Object.keys(cachedData) : []
+            cachedDataKeys: cachedData ? Object.keys(cachedData) : [],
+            cachedDataOu: cachedData?.ou
         })
     }
 
