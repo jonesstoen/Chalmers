@@ -47,6 +47,20 @@ export function useCacheableQuery(
 
     // Should we query the network?
     const shouldFetch = cacheStatus === "none" || cacheStatus === "stale-cache";
+    const willBeLazy = forceLazy || !shouldFetch;
+
+    // Debug logging for org unit queries
+    if (dataKey?.includes('orgUnit') && !willBeLazy) {
+        console.log('[useCacheableQuery] Will fetch:', {
+            dataKey,
+            cacheStatus,
+            shouldFetch,
+            forceLazy,
+            willBeLazy,
+            hasCachedData: !!cachedData,
+            cachedDataKeys: cachedData ? Object.keys(cachedData) : []
+        })
+    }
 
     // ---- 2. DHIS2 network query ----
     const {
@@ -59,8 +73,17 @@ export function useCacheableQuery(
         // NEW LOGIC:
         // forceLazy = guaranteed lazy
         // otherwise lazy only if cache says don't fetch
-        lazy: forceLazy || !shouldFetch,
+        lazy: willBeLazy,
     });
+
+    // Debug logging for network data
+    if (dataKey?.includes('orgUnit') && networkData) {
+        console.log('[useCacheableQuery] Network data received:', {
+            dataKey,
+            networkDataKeys: Object.keys(networkData),
+            networkDataOu: networkData?.ou
+        })
+    }
 
     // ---- 3. When network returns valid data, update cache ----
     useEffect(() => {

@@ -110,10 +110,13 @@ export default function useFetchOrgUnits(orgIds = []) {
         console.log('[useFetchOrgUnits] Query result:', {
             selectedId,
             hasData: !!data,
+            dataKeys: data ? Object.keys(data) : [],
             dataOu: data?.ou,
+            dataFull: data, // Log full data structure
             loading,
             error: error?.message,
-            source
+            source,
+            variables
         })
     }
 
