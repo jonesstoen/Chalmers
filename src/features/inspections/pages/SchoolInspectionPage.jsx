@@ -135,14 +135,26 @@ function InspectionPanel({
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
+    // Debug logging
+    console.log('📋 [InspectionPanel] Check:', {
+        hasOu: !!ou,
+        hasOrgUnitId: !!orgUnitId,
+        orgUnitId,
+        orgUnitName,
+        ouKeys: ou ? Object.keys(ou) : []
+    })
+
     // Defensive check: if we don't have org unit data, show a message
     if (!ou || !orgUnitId) {
+        console.log('⚠️ [InspectionPanel] Missing data, showing loading message')
         return (
             <NoticeBox title={i18n.t('Loading school information')}>
                 {i18n.t('Please wait while school information is being loaded...')}
             </NoticeBox>
         )
     }
+    
+    console.log('✅ [InspectionPanel] Has data, rendering form')
 
     return (
         <>
@@ -294,7 +306,8 @@ export default function SchoolInspectionPage() {
     }, [])
 
     const ou = data?.ou
-    const isAggregate = ou?.children && ou?.children?.length > 0
+    // isAggregate is true if the org unit has children (it's a cluster, not a school)
+    const isAggregate = !!(ou?.children && Array.isArray(ou.children) && ou.children.length > 0)
     
     // Debug logging
     if (selectedId) {
