@@ -119,18 +119,30 @@ export default function useFetchOrgUnits(orgIds = []) {
     })
     
     // Extract the org unit from the response
-    // DHIS2 API returns { ou: { organisationUnits: [...] } } or { ou: {...} } depending on the query
-    // We need to handle both cases
+    // When querying by ID, DHIS2 returns { ou: { organisationUnits: [orgUnit] } } 
+    // We need to extract the org unit from the array
     let data = networkData
     if (networkData?.ou) {
-        // If ou has organisationUnits array, extract the first item
-        if (networkData.ou.organisationUnits && Array.isArray(networkData.ou.organisationUnits) && networkData.ou.organisationUnits.length > 0) {
-            data = {
-                ou: networkData.ou.organisationUnits[0]
+        // Check if ou has organisationUnits array (list response)
+        if (networkData.ou.organisationUnits && Array.isArray(networkData.ou.organisationUnits)) {
+            if (networkData.ou.organisationUnits.length > 0) {
+                // Extract the first org unit from the array
+                data = {
+                    ou: networkData.ou.organisationUnits[0]
+                }
+            } else {
+                // Empty array - no data
+                data = { ou: null }
             }
+        } else if (networkData.ou.id) {
+            // ou is already the org unit object (single item response)
+            // Use it as is
+            data = networkData
+        } else {
+            // Unexpected structure
+            console.warn('⚠️ [useFetchOrgUnits] Unexpected data structure:', networkData.ou)
+            data = { ou: null }
         }
-        // Otherwise, if ou is already the org unit object, use it as is
-        // (This handles the case where the API returns { ou: { id: ..., name: ... } })
     }
     
     const source = "network"
@@ -138,8 +150,10 @@ export default function useFetchOrgUnits(orgIds = []) {
     console.log('🔧 [useFetchOrgUnits] Data extraction:', {
         originalKeys: networkData ? Object.keys(networkData) : [],
         originalOuKeys: networkData?.ou ? Object.keys(networkData.ou) : [],
+        originalOuHasArray: !!(networkData?.ou?.organisationUnits),
         extractedOuKeys: data?.ou ? Object.keys(data.ou) : [],
-        extractedOuId: data?.ou?.id
+        extractedOuId: data?.ou?.id,
+        extractedOuName: data?.ou?.name || data?.ou?.displayName
     })
 
     // Debug logging (remove after fixing)
