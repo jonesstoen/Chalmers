@@ -385,6 +385,12 @@ export default function SchoolInspectionPage() {
                         data={data}
                     />
                 )}
+
+                {selectedId && !orgUnitLoading && !orgUnitError && !data?.ou && (
+                    <NoticeBox warning title={i18n.t('No data available')}>
+                        {i18n.t('School information could not be loaded. Please try selecting the school again.')}
+                    </NoticeBox>
+                )}
             </main>
             </div>
         </div>

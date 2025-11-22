@@ -8,7 +8,10 @@ import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
 const ORG_UNIT_QUERY = {
     ou: {
         resource: "organisationUnits",
-        id: ({ id }) => id, // → /organisationUnits/{id}
+        id: ({ id }) => {
+            // Only return id if it's a valid string, otherwise return undefined to prevent query execution
+            return id && typeof id === 'string' && id.trim() !== '' ? id : undefined
+        },
         params: () => ({
             fields: [
                 "id",
@@ -38,13 +41,18 @@ export default function useFetchOrgUnits(orgIds = []) {
     const selectedId = validIds.length > 0 ? validIds[0] : null
 
     // -----------------------------------------------------------------------
-    // VARIABLES — always an object, never undefined
-    // DHIS2 will only run the request when lazy:false
+    // VARIABLES — only create when we have a valid selectedId
     // -----------------------------------------------------------------------
     const variables = useMemo(
-        () => ({
-            id: selectedId ?? "", // never undefined
-        }),
+        () => {
+            if (!selectedId) {
+                // Return a dummy object to satisfy useDataQuery, but lazy will prevent execution
+                return { id: null }
+            }
+            return {
+                id: selectedId,
+            }
+        },
         [selectedId]
     )
 
