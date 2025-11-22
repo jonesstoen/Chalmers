@@ -294,7 +294,20 @@ export default function SchoolInspectionPage() {
     }, [])
 
     const ou = data?.ou
-    const isAggregate = ou?.children && data?.ou?.children?.length > 0
+    const isAggregate = ou?.children && ou?.children?.length > 0
+    
+    // Debug logging
+    if (selectedId) {
+        console.log('🔍 [SchoolInspectionPage] Render check:', {
+            selectedId,
+            orgUnitLoading,
+            hasData: !!data,
+            hasOu: !!data?.ou,
+            ou,
+            isAggregate,
+            orgUnitError: !!orgUnitError
+        })
+    }
 
     const handleBackToLanding = useCallback(() => {
         navigate('/')
@@ -362,36 +375,67 @@ export default function SchoolInspectionPage() {
                     onBack={handleBackToLanding}
                 />
 
-                {!selectedId ? (
-                    <NoticeBox title={i18n.t('Pick a School or Cluster')}>
-                        {i18n.t(
-                            'Search for a school in the searchbar or Select a node in the tree to continue.'
-                        )}
-                    </NoticeBox>
-                ) : orgUnitLoading ? (
-                    <NoticeBox>
-                        {i18n.t('Loading school information...')}
-                    </NoticeBox>
-                ) : orgUnitError ? (
-                    <NoticeBox error title={i18n.t('Error loading school')}>
-                        {orgUnitError.message || i18n.t('Failed to load school information')}
-                    </NoticeBox>
-                ) : data?.ou && isAggregate ? (
-                    <AggregatedAnalyticsPanel data={data} />
-                ) : data?.ou && !isAggregate ? (
-                    <InspectionPanel
-                        selected={selected}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        selectedEvent={selectedEvent}
-                        setSelectedEvent={setSelectedEvent}
-                        data={data}
-                    />
-                ) : (
-                    <NoticeBox warning title={i18n.t('No data available')}>
-                        {i18n.t('School information could not be loaded. Please try selecting the school again.')}
-                    </NoticeBox>
-                )}
+                {(() => {
+                    // Debug: Log which branch we're taking
+                    if (selectedId) {
+                        console.log('🎯 [SchoolInspectionPage] Rendering branch:', {
+                            hasSelectedId: !!selectedId,
+                            orgUnitLoading,
+                            hasError: !!orgUnitError,
+                            hasDataOu: !!data?.ou,
+                            isAggregate,
+                            willShow: !selectedId ? 'pick' : 
+                                     orgUnitLoading ? 'loading' :
+                                     orgUnitError ? 'error' :
+                                     data?.ou && isAggregate ? 'analytics' :
+                                     data?.ou && !isAggregate ? 'inspection' : 'no-data'
+                        })
+                    }
+                    
+                    if (!selectedId) {
+                        return (
+                            <NoticeBox title={i18n.t('Pick a School or Cluster')}>
+                                {i18n.t(
+                                    'Search for a school in the searchbar or Select a node in the tree to continue.'
+                                )}
+                            </NoticeBox>
+                        )
+                    }
+                    if (orgUnitLoading) {
+                        return (
+                            <NoticeBox>
+                                {i18n.t('Loading school information...')}
+                            </NoticeBox>
+                        )
+                    }
+                    if (orgUnitError) {
+                        return (
+                            <NoticeBox error title={i18n.t('Error loading school')}>
+                                {orgUnitError.message || i18n.t('Failed to load school information')}
+                            </NoticeBox>
+                        )
+                    }
+                    if (data?.ou && isAggregate) {
+                        return <AggregatedAnalyticsPanel data={data} />
+                    }
+                    if (data?.ou && !isAggregate) {
+                        return (
+                            <InspectionPanel
+                                selected={selected}
+                                activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                selectedEvent={selectedEvent}
+                                setSelectedEvent={setSelectedEvent}
+                                data={data}
+                            />
+                        )
+                    }
+                    return (
+                        <NoticeBox warning title={i18n.t('No data available')}>
+                            {i18n.t('School information could not be loaded. Please try selecting the school again.')}
+                        </NoticeBox>
+                    )
+                })()}
             </main>
             </div>
         </div>
