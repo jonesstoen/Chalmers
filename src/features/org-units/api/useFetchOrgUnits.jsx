@@ -9,8 +9,12 @@ const ORG_UNIT_QUERY = {
     ou: {
         resource: "organisationUnits",
         id: ({ id }) => {
-            // Only return id if it's a valid string, otherwise return undefined to prevent query execution
-            return id && typeof id === 'string' && id.trim() !== '' ? id : undefined
+            // Only return id if it's a valid non-empty string
+            // Return undefined for null, undefined, empty string, or invalid types to prevent query execution
+            if (!id || typeof id !== 'string' || id.trim() === '') {
+                return undefined
+            }
+            return id
         },
         params: () => ({
             fields: [

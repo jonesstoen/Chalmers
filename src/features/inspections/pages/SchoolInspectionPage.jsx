@@ -351,31 +351,23 @@ export default function SchoolInspectionPage() {
                     onBack={handleBackToLanding}
                 />
 
-                {!selectedId && (
+                {!selectedId ? (
                     <NoticeBox title={i18n.t('Pick a School or Cluster')}>
                         {i18n.t(
                             'Search for a school in the searchbar or Select a node in the tree to continue.'
                         )}
                     </NoticeBox>
-                )}
-
-                {selectedId && orgUnitLoading && (
+                ) : orgUnitLoading ? (
                     <NoticeBox>
                         {i18n.t('Loading school information...')}
                     </NoticeBox>
-                )}
-
-                {selectedId && orgUnitError && (
+                ) : orgUnitError ? (
                     <NoticeBox error title={i18n.t('Error loading school')}>
                         {orgUnitError.message || i18n.t('Failed to load school information')}
                     </NoticeBox>
-                )}
-
-                {selectedId && !orgUnitLoading && !orgUnitError && data?.ou && isAggregate && (
+                ) : data?.ou && isAggregate ? (
                     <AggregatedAnalyticsPanel data={data} />
-                )}
-
-                {selectedId && !orgUnitLoading && !orgUnitError && data?.ou && !isAggregate && (
+                ) : data?.ou && !isAggregate ? (
                     <InspectionPanel
                         selected={selected}
                         activeTab={activeTab}
@@ -384,9 +376,7 @@ export default function SchoolInspectionPage() {
                         setSelectedEvent={setSelectedEvent}
                         data={data}
                     />
-                )}
-
-                {selectedId && !orgUnitLoading && !orgUnitError && !data?.ou && (
+                ) : (
                     <NoticeBox warning title={i18n.t('No data available')}>
                         {i18n.t('School information could not be loaded. Please try selecting the school again.')}
                     </NoticeBox>
