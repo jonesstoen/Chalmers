@@ -18,7 +18,7 @@ import SchoolInspectionForm from '../components/SchoolInspectionForm'
 import EditInspectionForm from '../components/EditInspectionForm'
 import DeleteInspectionPanel from '../components/DeleteInspectionPanel'
 import InspectionTimeline from '../../analytics/components/InspectionTimeline'
-import useFetchOrgUnits from '../../org-units/hooks/useFetchOrgUnits'
+import useFetchOrgUnits from '../../org-units/api/useFetchOrgUnits'
 import Result from '../components/inspection_result/Result'
 import InspectionContext from '../../../context/InspectionContext'
 import AggregatedAnalyticsPanel from '../../analytics/components/AggregatedAnalyticsPanel'
@@ -289,8 +289,8 @@ export default function SchoolInspectionPage() {
     return (
         <div className={pageClasses.pageWrapper}>
             {/* School Search Bar - standalone element */}
-            <div style={{ 
-                width: '100%', 
+            <div style={{
+                width: '100%',
                 position: 'relative',
                 marginBottom: 16,
             }}>
