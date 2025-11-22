@@ -120,15 +120,18 @@ export default function useFetchOrgUnits(orgIds = []) {
     
     // Extract the org unit from the response
     // When querying by ID, DHIS2 returns { ou: { organisationUnits: [orgUnit] } } 
-    // We need to extract the org unit from the array
+    // We need to extract the org unit from the array that matches our selectedId
     let data = networkData
     if (networkData?.ou) {
         // Check if ou has organisationUnits array (list response)
         if (networkData.ou.organisationUnits && Array.isArray(networkData.ou.organisationUnits)) {
             if (networkData.ou.organisationUnits.length > 0) {
-                // Extract the first org unit from the array
+                // Find the org unit that matches our selectedId (in case array has multiple)
+                const matchingOu = networkData.ou.organisationUnits.find(ou => ou.id === selectedId) 
+                    || networkData.ou.organisationUnits[0] // Fallback to first if no match
+                
                 data = {
-                    ou: networkData.ou.organisationUnits[0]
+                    ou: matchingOu
                 }
             } else {
                 // Empty array - no data
@@ -151,9 +154,13 @@ export default function useFetchOrgUnits(orgIds = []) {
         originalKeys: networkData ? Object.keys(networkData) : [],
         originalOuKeys: networkData?.ou ? Object.keys(networkData.ou) : [],
         originalOuHasArray: !!(networkData?.ou?.organisationUnits),
+        originalOuArrayLength: networkData?.ou?.organisationUnits?.length,
+        originalOuArrayItems: networkData?.ou?.organisationUnits?.map(ou => ({ id: ou.id, name: ou.name || ou.displayName })) || [],
         extractedOuKeys: data?.ou ? Object.keys(data.ou) : [],
         extractedOuId: data?.ou?.id,
-        extractedOuName: data?.ou?.name || data?.ou?.displayName
+        extractedOuName: data?.ou?.name || data?.ou?.displayName,
+        extractedOuChildren: data?.ou?.children?.length || 0,
+        selectedId // The ID we requested
     })
 
     // Debug logging (remove after fixing)
