@@ -11,7 +11,8 @@ const ORG_UNIT_QUERY = {
         id: ({ id }) => {
             // Only return id if it's a valid non-empty string
             // Return undefined for null, undefined, empty string, or invalid types to prevent query execution
-            if (!id || typeof id !== 'string' || id.trim() === '') {
+            // This prevents the query from executing with invalid IDs
+            if (id == null || typeof id !== 'string' || id.trim() === '') {
                 return undefined
             }
             return id
@@ -50,8 +51,8 @@ export default function useFetchOrgUnits(orgIds = []) {
     const variables = useMemo(
         () => {
             if (!selectedId) {
-                // Return a dummy object to satisfy useDataQuery, but lazy will prevent execution
-                return { id: null }
+                // Return empty object - lazy will prevent execution
+                return {}
             }
             return {
                 id: selectedId,
@@ -77,6 +78,16 @@ export default function useFetchOrgUnits(orgIds = []) {
     // -----------------------------------------------------------------------
     const lazy = !selectedId
 
+    // Debug logging (remove after fixing)
+    if (selectedId) {
+        console.log('[useFetchOrgUnits] Fetching org unit:', {
+            selectedId,
+            variables,
+            lazy,
+            dataKey
+        })
+    }
+
     // -----------------------------------------------------------------------
     // Make the query — same signature as analytics hook
     // -----------------------------------------------------------------------
@@ -93,6 +104,18 @@ export default function useFetchOrgUnits(orgIds = []) {
         variables,         // stable variables
         lazy               // 5th parameter (your updated hook supports this)
     )
+
+    // Debug logging (remove after fixing)
+    if (selectedId) {
+        console.log('[useFetchOrgUnits] Query result:', {
+            selectedId,
+            hasData: !!data,
+            dataOu: data?.ou,
+            loading,
+            error: error?.message,
+            source
+        })
+    }
 
     // -----------------------------------------------------------------------
     // Output — when no selectedId, behave like "no data"

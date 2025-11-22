@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-21T14:59:27.775Z\n"
-"PO-Revision-Date: 2025-11-21T14:59:27.775Z\n"
+"POT-Creation-Date: 2025-11-22T18:28:16.913Z\n"
+"PO-Revision-Date: 2025-11-22T18:28:16.914Z\n"
 
 msgid "Selected event"
 msgstr "Selected event"
@@ -22,6 +22,12 @@ msgstr "Seats"
 
 msgid "Back to overview"
 msgstr "Back to overview"
+
+msgid "Loading school information"
+msgstr "Loading school information"
+
+msgid "Please wait while school information is being loaded..."
+msgstr "Please wait while school information is being loaded..."
 
 msgid "New inspection"
 msgstr "New inspection"
@@ -53,6 +59,25 @@ msgid ""
 msgstr ""
 "Search for a school in the searchbar or Select a node in the tree to "
 "continue."
+
+msgid "Loading school information..."
+msgstr "Loading school information..."
+
+msgid "Error loading school"
+msgstr "Error loading school"
+
+msgid "Failed to load school information"
+msgstr "Failed to load school information"
+
+msgid "No data available"
+msgstr "No data available"
+
+msgid ""
+"School information could not be loaded. Please try selecting the school "
+"again."
+msgstr ""
+"School information could not be loaded. Please try selecting the school "
+"again."
 
 msgid "No roots available"
 msgstr "No roots available"
