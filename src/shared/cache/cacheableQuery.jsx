@@ -48,7 +48,16 @@ export function useCacheableQuery(
     }, [dataKey, cache]);
 
     // Should we query the network?
-    const shouldFetch = cacheStatus === "none" || cacheStatus === "stale-cache";
+    // If forceLazy is true, always be lazy (don't fetch)
+    // If forceLazy is false, fetch if:
+    //   - No cache (cacheStatus === "none")
+    //   - Stale cache (cacheStatus === "stale-cache")
+    //   - Or if we have cached data but it's invalid (cachedData is null/undefined)
+    const shouldFetch = !forceLazy && (
+        cacheStatus === "none" || 
+        cacheStatus === "stale-cache" ||
+        (cacheStatus === "cache" && !cachedData)
+    );
     const willBeLazy = forceLazy || !shouldFetch;
 
     // Debug logging for org unit queries
