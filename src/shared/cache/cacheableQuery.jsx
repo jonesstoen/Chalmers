@@ -60,11 +60,14 @@ export function useCacheableQuery(
     );
     const willBeLazy = forceLazy || !shouldFetch;
 
-    // Debug logging for org unit queries - always log to see what's happening
+    // Debug logging - log for all queries to see what's happening
     const isOrgUnitQuery = typeof dataKey === 'string' && dataKey.includes('orgUnit')
-    if (isOrgUnitQuery) {
+    
+    // Always log for org unit queries, or log first few for debugging
+    if (isOrgUnitQuery || (typeof dataKey === 'string' && dataKey.length < 100)) {
         console.log('[useCacheableQuery] State:', {
-            dataKey,
+            dataKey: String(dataKey).substring(0, 100), // Truncate long keys
+            isOrgUnitQuery,
             cacheStatus,
             shouldFetch,
             forceLazy,
@@ -72,8 +75,7 @@ export function useCacheableQuery(
             hasCachedData: !!cachedData,
             cachedDataKeys: cachedData ? Object.keys(cachedData) : [],
             cachedDataOu: cachedData?.ou,
-            cachedDataType: typeof cachedData,
-            cachedDataValue: cachedData
+            cachedDataType: typeof cachedData
         })
     }
 
