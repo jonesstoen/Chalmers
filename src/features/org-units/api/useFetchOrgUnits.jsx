@@ -4,34 +4,32 @@ import { useDataQuery } from "@dhis2/app-runtime"
 // import { useCacheableQuery } from "../../../shared/cache/cacheableQuery" // Temporarily disabled to test
 
 // ---------------------------------------------------------------------------
-// STATIC QUERY – same pattern as EVENTS_ANALYTICS_QUERY
+// QUERY BUILDER - build query dynamically based on selectedId
 // ---------------------------------------------------------------------------
-const ORG_UNIT_QUERY = {
-    ou: {
-        resource: "organisationUnits",
-        id: ({ id }) => {
-            // Only return id if it's a valid non-empty string
-            // Return undefined for null, undefined, empty string, or invalid types to prevent query execution
-            // This prevents the query from executing with invalid IDs
-            if (id == null || typeof id !== 'string' || id.trim() === '') {
-                return undefined
-            }
-            return id
+const buildOrgUnitQuery = (orgUnitId) => {
+    if (!orgUnitId) {
+        return null // Return null to prevent query execution
+    }
+    
+    return {
+        ou: {
+            resource: "organisationUnits",
+            id: orgUnitId, // Direct value, not a function
+            params: {
+                fields: [
+                    "id",
+                    "name",
+                    "displayName",
+                    "level",
+                    "parent[id,name]",
+                    "children[id,name]",
+                    "programs[id,name,programStages[id,name,displayName]]",
+                    "dataSets[id,name]",
+                ].join(","),
+                paging: false,
+            },
         },
-        params: () => ({
-            fields: [
-                "id",
-                "name",
-                "displayName",
-                "level",
-                "parent[id,name]",
-                "children[id,name]",
-                "programs[id,name,programStages[id,name,displayName]]",
-                "dataSets[id,name]",
-            ].join(","),
-            paging: false,
-        }),
-    },
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -90,14 +88,14 @@ export default function useFetchOrgUnits(orgIds = []) {
     }
 
     // -----------------------------------------------------------------------
-    // Make the query — same signature as analytics hook
-    // TEMPORARY: Use useDataQuery directly to bypass cache and see if query works
+    // Make the query — build query dynamically with direct id value
     // -----------------------------------------------------------------------
+    const query = useMemo(() => buildOrgUnitQuery(selectedId), [selectedId])
+    
     console.log('🔍 [useFetchOrgUnits] About to call useDataQuery:', {
         selectedId,
-        variables,
-        lazy,
-        queryId: ORG_UNIT_QUERY.ou.id(variables)
+        query,
+        lazy
     })
     
     const {
@@ -105,9 +103,9 @@ export default function useFetchOrgUnits(orgIds = []) {
         loading,
         error,
         refetch,
-    } = useDataQuery(ORG_UNIT_QUERY, {
-        variables,
-        lazy,
+    } = useDataQuery(query, {
+        variables: {}, // No variables needed since id is in query
+        lazy: !query || lazy, // Lazy if no query or if lazy flag is set
     })
     
     console.log('📊 [useFetchOrgUnits] useDataQuery result:', {
