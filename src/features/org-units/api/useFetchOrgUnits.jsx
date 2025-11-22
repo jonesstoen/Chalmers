@@ -110,6 +110,14 @@ export default function useFetchOrgUnits(orgIds = []) {
         errorFull: error
     })
     
+    // Debug: Log what we're returning
+    console.log('✅ [useFetchOrgUnits] Returning:', {
+        hasData: !!networkData,
+        loading,
+        error: !!error,
+        selectedId
+    })
+    
     // For now, just use network data directly (bypass cache)
     const data = networkData
     const source = "network"

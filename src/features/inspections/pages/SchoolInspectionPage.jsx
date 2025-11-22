@@ -240,6 +240,17 @@ export default function SchoolInspectionPage() {
     const orgTreePanelRef = useRef(null)
 
     const { data, selectedId, loading: orgUnitLoading, error: orgUnitError } = useFetchOrgUnits(selected)
+    
+    // Debug logging
+    if (selectedId) {
+        console.log('🏫 [SchoolInspectionPage] State:', {
+            selectedId,
+            orgUnitLoading,
+            hasData: !!data,
+            dataOu: data?.ou,
+            orgUnitError: orgUnitError?.message
+        })
+    }
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
 
     const navigate = useNavigate()
