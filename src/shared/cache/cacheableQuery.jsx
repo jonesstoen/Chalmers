@@ -60,8 +60,9 @@ export function useCacheableQuery(
     );
     const willBeLazy = forceLazy || !shouldFetch;
 
-    // Debug logging for org unit queries
-    if (dataKey?.includes('orgUnit')) {
+    // Debug logging for org unit queries - always log to see what's happening
+    const isOrgUnitQuery = typeof dataKey === 'string' && dataKey.includes('orgUnit')
+    if (isOrgUnitQuery) {
         console.log('[useCacheableQuery] State:', {
             dataKey,
             cacheStatus,
@@ -70,7 +71,9 @@ export function useCacheableQuery(
             willBeLazy,
             hasCachedData: !!cachedData,
             cachedDataKeys: cachedData ? Object.keys(cachedData) : [],
-            cachedDataOu: cachedData?.ou
+            cachedDataOu: cachedData?.ou,
+            cachedDataType: typeof cachedData,
+            cachedDataValue: cachedData
         })
     }
 
@@ -89,11 +92,14 @@ export function useCacheableQuery(
     });
 
     // Debug logging for network data
-    if (dataKey?.includes('orgUnit') && networkData) {
-        console.log('[useCacheableQuery] Network data received:', {
+    if (isOrgUnitQuery) {
+        console.log('[useCacheableQuery] Network query state:', {
             dataKey,
-            networkDataKeys: Object.keys(networkData),
-            networkDataOu: networkData?.ou
+            hasNetworkData: !!networkData,
+            networkDataKeys: networkData ? Object.keys(networkData) : [],
+            networkDataOu: networkData?.ou,
+            loading,
+            error: error?.message || error
         })
     }
 
