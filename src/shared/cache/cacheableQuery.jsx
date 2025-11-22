@@ -53,23 +53,16 @@ export function useCacheableQuery(
     // TODO: Re-enable cache optimization once the basic fetch works
     const willBeLazy = forceLazy;
 
-    // Debug logging - ALWAYS log to see what's happening
+    // Debug logging only for org unit queries
     const isOrgUnitQuery = typeof dataKey === 'string' && dataKey.includes('orgUnit')
-    
-    // Always log for debugging
-    console.log('[useCacheableQuery] State:', {
-        dataKey: String(dataKey).substring(0, 150), // Truncate long keys
-        isOrgUnitQuery,
-        cacheStatus,
-        shouldFetch,
-        forceLazy,
-        willBeLazy,
-        hasCachedData: !!cachedData,
-        cachedDataKeys: cachedData ? Object.keys(cachedData) : [],
-        cachedDataOu: cachedData?.ou,
-        cachedDataType: typeof cachedData,
-        variables
-    })
+    if (isOrgUnitQuery) {
+        console.log('[useCacheableQuery]', {
+            dataKey: String(dataKey).substring(0, 80),
+            forceLazy,
+            willBeLazy,
+            hasCachedData: !!cachedData
+        })
+    }
 
     // ---- 2. DHIS2 network query ----
     const {
