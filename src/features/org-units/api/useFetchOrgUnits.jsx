@@ -4,32 +4,26 @@ import { useDataQuery } from "@dhis2/app-runtime"
 // import { useCacheableQuery } from "../../../shared/cache/cacheableQuery" // Temporarily disabled to test
 
 // ---------------------------------------------------------------------------
-// QUERY BUILDER - build query dynamically based on selectedId
+// STATIC QUERY – must be static for DHIS2 useDataQuery
 // ---------------------------------------------------------------------------
-const buildOrgUnitQuery = (orgUnitId) => {
-    if (!orgUnitId) {
-        return null // Return null to prevent query execution
-    }
-    
-    return {
-        ou: {
-            resource: "organisationUnits",
-            id: orgUnitId, // Direct value, not a function
-            params: {
-                fields: [
-                    "id",
-                    "name",
-                    "displayName",
-                    "level",
-                    "parent[id,name]",
-                    "children[id,name]",
-                    "programs[id,name,programStages[id,name,displayName]]",
-                    "dataSets[id,name]",
-                ].join(","),
-                paging: false,
-            },
-        },
-    }
+const ORG_UNIT_QUERY = {
+    ou: {
+        resource: "organisationUnits",
+        id: ({ id }) => id, // Function that returns the id from variables
+        params: () => ({
+            fields: [
+                "id",
+                "name",
+                "displayName",
+                "level",
+                "parent[id,name]",
+                "children[id,name]",
+                "programs[id,name,programStages[id,name,displayName]]",
+                "dataSets[id,name]",
+            ].join(","),
+            paging: false,
+        }),
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -88,14 +82,13 @@ export default function useFetchOrgUnits(orgIds = []) {
     }
 
     // -----------------------------------------------------------------------
-    // Make the query — build query dynamically with direct id value
+    // Make the query — use static query with variables
     // -----------------------------------------------------------------------
-    const query = useMemo(() => buildOrgUnitQuery(selectedId), [selectedId])
-    
     console.log('🔍 [useFetchOrgUnits] About to call useDataQuery:', {
         selectedId,
-        query,
-        lazy
+        variables,
+        lazy,
+        queryId: variables.id
     })
     
     const {
@@ -103,9 +96,9 @@ export default function useFetchOrgUnits(orgIds = []) {
         loading,
         error,
         refetch,
-    } = useDataQuery(query, {
-        variables: {}, // No variables needed since id is in query
-        lazy: !query || lazy, // Lazy if no query or if lazy flag is set
+    } = useDataQuery(ORG_UNIT_QUERY, {
+        variables,
+        lazy,
     })
     
     console.log('📊 [useFetchOrgUnits] useDataQuery result:', {
