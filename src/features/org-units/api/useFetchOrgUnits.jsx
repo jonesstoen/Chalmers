@@ -1,6 +1,7 @@
 // features/org-units/api/useFetchOrgUnits.jsx
 import { useMemo } from "react"
-import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
+import { useDataQuery } from "@dhis2/app-runtime"
+// import { useCacheableQuery } from "../../../shared/cache/cacheableQuery" // Temporarily disabled to test
 
 // ---------------------------------------------------------------------------
 // STATIC QUERY – same pattern as EVENTS_ANALYTICS_QUERY
@@ -90,20 +91,21 @@ export default function useFetchOrgUnits(orgIds = []) {
 
     // -----------------------------------------------------------------------
     // Make the query — same signature as analytics hook
+    // TEMPORARY: Use useDataQuery directly to bypass cache and see if query works
     // -----------------------------------------------------------------------
     const {
-        data,
+        data: networkData,
         loading,
         error,
         refetch,
-        source,
-    } = useCacheableQuery(
-        "data",            // cache bucket
-        dataKey,           // stable key
-        ORG_UNIT_QUERY,    // static query definition
-        variables,         // stable variables
-        lazy               // 5th parameter (your updated hook supports this)
-    )
+    } = useDataQuery(ORG_UNIT_QUERY, {
+        variables,
+        lazy,
+    })
+    
+    // For now, just use network data directly (bypass cache)
+    const data = networkData
+    const source = "network"
 
     // Debug logging (remove after fixing)
     if (selectedId) {
