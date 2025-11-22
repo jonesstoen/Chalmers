@@ -118,9 +118,29 @@ export default function useFetchOrgUnits(orgIds = []) {
         selectedId
     })
     
-    // For now, just use network data directly (bypass cache)
-    const data = networkData
+    // Extract the org unit from the response
+    // DHIS2 API returns { ou: { organisationUnits: [...] } } or { ou: {...} } depending on the query
+    // We need to handle both cases
+    let data = networkData
+    if (networkData?.ou) {
+        // If ou has organisationUnits array, extract the first item
+        if (networkData.ou.organisationUnits && Array.isArray(networkData.ou.organisationUnits) && networkData.ou.organisationUnits.length > 0) {
+            data = {
+                ou: networkData.ou.organisationUnits[0]
+            }
+        }
+        // Otherwise, if ou is already the org unit object, use it as is
+        // (This handles the case where the API returns { ou: { id: ..., name: ... } })
+    }
+    
     const source = "network"
+    
+    console.log('🔧 [useFetchOrgUnits] Data extraction:', {
+        originalKeys: networkData ? Object.keys(networkData) : [],
+        originalOuKeys: networkData?.ou ? Object.keys(networkData.ou) : [],
+        extractedOuKeys: data?.ou ? Object.keys(data.ou) : [],
+        extractedOuId: data?.ou?.id
+    })
 
     // Debug logging (remove after fixing)
     if (selectedId) {
