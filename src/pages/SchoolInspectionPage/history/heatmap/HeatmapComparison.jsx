@@ -2,7 +2,6 @@ import React, { useContext } from "react"
 import { useProcessedRatios } from "./useProcessedRatios"
 import { useLocalRatios } from "./useLocalRatios"
 import InspectionContext from "../../../../context/InspectionContext"
-import RatioCard from "./RatioCard"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"
 import styles from './HeatmapComparison.module.css'
 
@@ -12,6 +11,41 @@ const RATIO_KEYS = [
   { key: "learnerToTeacher", label: "Learners / Teacher", threshold: v => v <= 45 },
   { key: "learnerToToilet", label: "Learners / Toilet", threshold: v => v <= 25 },
 ]
+
+const mapThreshold = {
+    seatsToLearner: 1,
+    learnerToClassroom: 53,
+    learnerToTeacher: 45,
+    learnerToToilet: 25,
+}
+
+const goodWhenLower = {
+    seatsToLearner: false,
+    learnerToClassroom: true,
+    learnerToTeacher: true,
+    learnerToToilet: true,
+}
+
+function smoothColor(value, thresholdValue, goodWhenLower) {
+    if (value == null || isNaN(value)) return "hsl(0, 0%, 88%)"
+
+    let diff = goodWhenLower
+        ? value / thresholdValue
+        : Math.abs(value - thresholdValue) / thresholdValue
+
+    diff = Math.min(diff, 1)
+
+    if (diff < 0.10) return "hsl(0, 0%, 88%)"
+
+    const isGood = goodWhenLower ? value <= thresholdValue : value >= thresholdValue
+
+    const lightness = 82 - diff * 35
+    const saturation = 35 + diff * 35
+
+    return isGood
+        ? `hsl(120, ${saturation}%, ${lightness}%)`
+        : `hsl(0, ${saturation}%, ${lightness}%)`
+}
 
 // -----------------------------------------
 // ALWAYS use totals from source.totals
@@ -28,9 +62,6 @@ function extractTotals(source) {
         toilets: Number(source.toilets ?? 0),
     };
 }
-
-
-
 
 export default function HeatmapComparison({ schoolId }) {
     const [inspectionDict] = useContext(InspectionContext)
@@ -56,7 +87,6 @@ export default function HeatmapComparison({ schoolId }) {
         remoteDataArray?.length > 1
             ? remoteDataArray[remoteDataArray.length - 2]
             : null
-console.log("REMOTE RAW", remoteData);
 
     const localData =
         localDataArray?.length > 0 ? localDataArray[0] : secondLatestRemote
@@ -78,80 +108,79 @@ console.log("REMOTE RAW", remoteData);
                 <FullHeatmapLegend />
             </div>
 
-            <div className={styles.grid}>
-                {/* MOST RECENT REMOTE */}
-                <div className={styles.column}>
-                    <h4>Most Recent Inspection</h4>
+            <div className={styles.ratiosContainer}>
+                {RATIO_KEYS.map(({ key, label, threshold }) => {
+                    const prevValue = remoteData?.ratios[key]
+                    const currValue = localData?.ratios[key]
+                    
+                    // Calculate change
+                    let percentChange = null
+                    let absoluteChange = null
+                    if (!isNaN(prevValue) && !isNaN(currValue) && prevValue != null && currValue != null) {
+                        percentChange = ((currValue - prevValue) / prevValue) * 100
+                        absoluteChange = currValue - prevValue
+                    }
 
-                    {RATIO_KEYS.map(({ key, label }) => (
-                        <div key={key} className={styles.cardWrapper}>
-                            <RatioCard
-                                ratioKey={key}
-                                label={label}
-                                value={remoteData?.ratios[key]}
-                                totals={remoteTotals}
-                            />
-                        </div>
-                    ))}
-                </div>
+                    const thresholdValue = mapThreshold[key]
+                    const goodLower = goodWhenLower[key]
 
-                {/* CHANGE PERCENT */}
-                <div className={styles.column}>
-                    <h4>
-                        {usingFallback
-                            ? "Change Since Previous Inspection"
-                            : "Change Since Last Time"}
-                    </h4>
+                    const prevColor = smoothColor(prevValue, thresholdValue, goodLower)
+                    const currColor = smoothColor(currValue, thresholdValue, goodLower)
 
-                    {RATIO_KEYS.map(({ key, label, threshold }) => {
-                        const prev = remoteData?.ratios[key]
-                        const curr = localData?.ratios[key]
-
-                        if (isNaN(prev) || isNaN(curr))
-                            return (
-                                <div key={key} className={styles.changeCard}>
-                                    <div className={styles.changeLabel}>{label}</div>
-                                    <div className={styles.changeValue}>N/A</div>
+                    return (
+                        <div key={key} className={styles.ratioRow}>
+                            <div className={styles.ratioLabel}>{label}</div>
+                            <div className={styles.ratioValues}>
+                                {/* Most Recent */}
+                                <div 
+                                    className={styles.valueSection}
+                                    style={{ background: prevColor }}
+                                >
+                                    <div className={styles.sectionLabel}>Most Recent</div>
+                                    <div className={styles.sectionValue}>
+                                        {isNaN(prevValue) || prevValue == null ? "N/A" : prevValue.toFixed(1)}
+                                    </div>
                                 </div>
-                            )
 
-                        const percent = ((curr - prev) / prev) * 100
-                        const absoluteChange = curr - prev
-                        const sign = percent >= 0 ? "+" : ""
-                        const good = threshold(curr)
+                                {/* Change */}
+                                <div className={styles.valueSection}>
+                                    <div className={styles.sectionLabel}>
+                                        {usingFallback
+                                            ? "Change Since Previous"
+                                            : "Change Since Last"}
+                                    </div>
+                                    <div className={styles.sectionValue}>
+                                        {percentChange != null ? (
+                                            <>
+                                                <span className={styles.changePercent}>
+                                                    {percentChange >= 0 ? "+" : ""}{percentChange.toFixed(0)}%
+                                                </span>
+                                                <span className={styles.changeAbsolute}>
+                                                    ({absoluteChange >= 0 ? "+" : ""}{absoluteChange.toFixed(1)})
+                                                </span>
+                                            </>
+                                        ) : (
+                                            "N/A"
+                                        )}
+                                    </div>
+                                </div>
 
-                        return (
-                            <div
-                                key={key}
-                                className={`${styles.changeCard} ${good ? styles.changeCardGood : styles.changeCardBad}`}
-                            >
-                                <div className={styles.changeLabel}>{label}</div>
-                                <div className={styles.changeValue}>
-                                    <span className={styles.changePercent}>{sign}{percent.toFixed(0)}%</span>
-                                    <span className={styles.changeAbsolute}>
-                                        ({sign}{absoluteChange.toFixed(1)})
-                                    </span>
+                                {/* Previous / Just Submitted */}
+                                <div 
+                                    className={styles.valueSection}
+                                    style={{ background: currColor }}
+                                >
+                                    <div className={styles.sectionLabel}>
+                                        {hasLocalSubmission ? "Just Submitted" : "Previous"}
+                                    </div>
+                                    <div className={styles.sectionValue}>
+                                        {isNaN(currValue) || currValue == null ? "N/A" : currValue.toFixed(1)}
+                                    </div>
                                 </div>
                             </div>
-                        )
-                    })}
-                </div>
-
-                {/* LOCAL OR FALLBACK */}
-                <div className={styles.column}>
-                    <h4>{hasLocalSubmission ? "Just Submitted" : "Previous Inspection"}</h4>
-
-                    {RATIO_KEYS.map(({ key, label }) => (
-                        <div key={key} className={styles.cardWrapper}>
-                            <RatioCard
-                                ratioKey={key}
-                                label={label}
-                                value={localData?.ratios[key]}
-                                totals={localTotals}
-                            />
                         </div>
-                    ))}
-                </div>
+                    )
+                })}
             </div>
         </>
     )
