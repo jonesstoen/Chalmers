@@ -7,6 +7,7 @@ export default function ConditionRatingField({
                                                  onChange,
                                                  disabled = false,
                                                  error,
+                                                 hasChanged = false,
                                              }) {
     const options = [1, 2, 3, 4, 5]
     const numericValue =
@@ -31,9 +32,23 @@ export default function ConditionRatingField({
                     fontWeight: 600, 
                     color: disabled ? '#94a3b8' : '#0f172a',
                     marginBottom: 4,
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
                 }}>
-                    {label}
+                    <span>{label}</span>
+                    {hasChanged && (
+                        <span style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: '#d97706',
+                            background: '#fef3c7',
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                        }}>
+                            Changed
+                        </span>
+                    )}
                     {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
                 </label>
             )}

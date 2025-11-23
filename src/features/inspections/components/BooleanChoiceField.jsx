@@ -8,6 +8,7 @@ export default function BooleanChoiceField({
                                                error,
                                                trueLabel = 'Yes',
                                                falseLabel = 'No',
+                                               hasChanged = false,
                                            }) {
     const normalized =
         value === true || value === 'true'
@@ -65,9 +66,23 @@ export default function BooleanChoiceField({
                     fontWeight: 600, 
                     color: '#0f172a',
                     marginBottom: 4,
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
                 }}>
-                    {label}
+                    <span>{label}</span>
+                    {hasChanged && (
+                        <span style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: '#d97706',
+                            background: '#fef3c7',
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                        }}>
+                            Changed
+                        </span>
+                    )}
                     {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
                 </label>
             )}

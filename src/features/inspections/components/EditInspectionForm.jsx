@@ -93,7 +93,7 @@ const numberInputFocusStyle = {
     background: '#ffffff',
 }
 
-function NumberField({ label, value = '', onChange, error, iconNames }) {
+function NumberField({ label, value = '', onChange, error, iconNames, hasChanged = false }) {
     const [isFocused, setIsFocused] = React.useState(false)
     const numericValue = value === '' || value === null || value === undefined ? 0 : Number(value) || 0
 
@@ -108,7 +108,15 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
     }
 
     return (
-        <div style={numberFieldContainerStyle}>
+        <div style={{
+            ...numberFieldContainerStyle,
+            ...(hasChanged && {
+                padding: '8px',
+                borderRadius: 8,
+                background: '#fef3c7',
+                border: '2px solid #fbbf24',
+            }),
+        }}>
             <label style={{
                 ...numberLabelStyle,
                 ...(error && { color: '#b91c1c' }),
@@ -125,6 +133,19 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     />
                 )}
                 <span>{label}</span>
+                {hasChanged && (
+                    <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: '#d97706',
+                        background: '#fef3c7',
+                        padding: '2px 6px',
+                        borderRadius: 4,
+                        marginLeft: 4,
+                    }}>
+                        Changed
+                    </span>
+                )}
                 {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
             </label>
             <div style={{
@@ -141,6 +162,10 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     onBlur={() => setIsFocused(false)}
                     style={{
                         ...(isFocused ? numberInputFocusStyle : numberInputStyle),
+                        ...(hasChanged && {
+                            borderColor: '#fbbf24',
+                            background: '#ffffff',
+                        }),
                         flex: 1,
                     }}
                     aria-invalid={!!error}
@@ -189,6 +214,7 @@ export default function EditInspectionForm({
                                                onDeleted,
                                            }) {
     const [formState, setFormState] = useState({})
+    const [originalFormState, setOriginalFormState] = useState({}) // Store original values for change detection
     const [errors, setErrors] = useState({})
     const [lastSaved, setLastSaved] = useState(null)
 
@@ -239,6 +265,7 @@ export default function EditInspectionForm({
         })
 
         setFormState(next)
+        setOriginalFormState({ ...next }) // Store original values for comparison
         setErrors({})
         setLastSaved(null)
         setMissingRequiredLabels([])
@@ -444,6 +471,23 @@ export default function EditInspectionForm({
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
 
+    // Helper function to check if a field has changed from original
+    const hasFieldChanged = (fieldId) => {
+        const current = formState[fieldId]
+        const original = originalFormState[fieldId]
+        
+        // Handle different value types
+        if (current === original) return false
+        if (current === null && (original === null || original === undefined || original === '')) return false
+        if ((current === null || current === undefined || current === '') && original === null) return false
+        
+        // Normalize for comparison
+        const currentNormalized = current === null || current === undefined || current === '' ? null : String(current)
+        const originalNormalized = original === null || original === undefined || original === '' ? null : String(original)
+        
+        return currentNormalized !== originalNormalized
+    }
+
     const renderField = ({ id, label, type, child_query }) => {
         const value = formState[id]
         const hasChild = !!child_query
@@ -471,7 +515,17 @@ export default function EditInspectionForm({
                             alignItems: 'flex-start',
                         }}
                     >
-                        <div style={{ flex: '1 1 auto', minWidth: '200px', maxWidth: '300px' }}>
+                        <div style={{ 
+                            flex: '1 1 auto', 
+                            minWidth: '200px', 
+                            maxWidth: '300px',
+                            ...(hasFieldChanged(id) && {
+                                padding: '8px',
+                                borderRadius: 8,
+                                background: '#fef3c7',
+                                border: '2px solid #fbbf24',
+                            }),
+                        }}>
                             <BooleanChoiceField
                                 label={label}
                                 value={value}
@@ -484,9 +538,19 @@ export default function EditInspectionForm({
                                 error={errors[id]}
                                 trueLabel="Available"
                                 falseLabel="Not available"
+                                hasChanged={hasFieldChanged(id)}
                             />
                         </div>
-                        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                        <div style={{ 
+                            flex: '1 1 auto', 
+                            minWidth: '200px',
+                            ...(hasFieldChanged(childId) && {
+                                padding: '8px',
+                                borderRadius: 8,
+                                background: '#fef3c7',
+                                border: '2px solid #fbbf24',
+                            }),
+                        }}>
                             <ConditionRatingField
                                 label={child_query.label}
                                 value={numericChildValue}
@@ -495,6 +559,7 @@ export default function EditInspectionForm({
                                 }
                                 disabled={!isTrue}
                                 error={errors[childId]}
+                                hasChanged={hasFieldChanged(childId)}
                             />
                         </div>
                     </div>
@@ -505,12 +570,21 @@ export default function EditInspectionForm({
         // Ren BOOLEAN
         if (type === 'BOOLEAN') {
             return (
-                <div key={id} style={{ marginBottom: '1.5rem' }}>
+                <div key={id} style={{
+                    marginBottom: '1.5rem',
+                    ...(hasFieldChanged(id) && {
+                        padding: '8px',
+                        borderRadius: 8,
+                        background: '#fef3c7',
+                        border: '2px solid #fbbf24',
+                    }),
+                }}>
                     <BooleanChoiceField
                         label={label}
                         value={value}
                         onChange={v => handleChange(id, v)}
                         error={errors[id]}
+                        hasChanged={hasFieldChanged(id)}
                     />
                 </div>
             )
@@ -526,6 +600,7 @@ export default function EditInspectionForm({
                 onChange={val => handleChange(id, val)}
                 error={errors[id]}
                 iconNames={FIELD_ICONS[id]}
+                hasChanged={hasFieldChanged(id)}
             />
         )
     }
