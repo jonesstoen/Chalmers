@@ -1,4 +1,4 @@
-// features/inspections/components/ConditionRatingField.jsx
+// pages/SchoolInspectionPage/newInspection/components/ConditionRatingField.jsx
 import React from 'react'
 import { IconError16, IconWarning16 } from '@dhis2/ui'
 

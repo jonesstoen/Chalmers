@@ -1,4 +1,4 @@
-// src/D2App/features/inspections/hooks/useUpdateSchoolInspectionEvent.jsx
+// pages/SchoolInspectionPage/editInspection/hooks/useUpdateSchoolInspection.jsx
 import usePostEvent from '../../../../shared/api/useTrackerEventMutation'
 
 /**

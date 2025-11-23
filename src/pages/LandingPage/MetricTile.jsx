@@ -1,4 +1,4 @@
-// features/home/MetricTile.jsx (eller hvor den ligger)
+// pages/LandingPage/MetricTile.jsx
 export default function MetricTile({ title, value, subtitle }) {
     return (
         <div

@@ -1,4 +1,4 @@
-// features/inspections/components/BooleanChoiceField.jsx
+// pages/SchoolInspectionPage/newInspection/components/BooleanChoiceField.jsx
 import React from 'react'
 import { IconError16, IconWarning16 } from '@dhis2/ui'
 

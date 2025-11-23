@@ -1,4 +1,4 @@
-// features/inspections/configs/fieldIcons.js
+// pages/SchoolInspectionPage/newInspection/configs/fieldIcons.js
 // Maps field IDs to their corresponding icons
 
 export const FIELD_ICONS = {

@@ -1,4 +1,4 @@
-// features/inspections/configs/schoolInspectionConfig.js
+// pages/SchoolInspectionPage/newInspection/configs/schoolInspectionConfig.js
 
 export const SCHOOL_INSPECTION_FIELDS = [
     {

@@ -1,4 +1,4 @@
-// src/D2App/features/analytics/heatmap/useProcessedRatios.jsx
+// pages/SchoolInspectionPage/history/heatmap/useProcessedRatios.jsx
 import { useSchoolAnalytics } from '../components/useSchoolAnalytics'
 import { useMemo } from 'react'
 

@@ -1,4 +1,4 @@
-// features/inspections/hooks/useDeleteSchoolInspectionEvent.jsx
+// pages/SchoolInspectionPage/editInspection/hooks/useDeleteSchoolInspection.jsx
 import usePostEvent from '../../../../shared/api/useTrackerEventMutation'
 
 export function useDeleteSchoolInspectionEvent() {

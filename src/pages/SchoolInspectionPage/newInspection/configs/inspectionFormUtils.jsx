@@ -1,4 +1,4 @@
-// features/inspections/utils/inspectionFormUtils.js
+// pages/SchoolInspectionPage/newInspection/configs/inspectionFormUtils.jsx
 import { CHILD_FIELD_IDS, SCHOOL_INSPECTION_FIELDS } from './schoolInspectionConfig'
 
 export const computeTotalToilets = (formState) =>
