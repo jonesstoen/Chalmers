@@ -14,7 +14,7 @@ import {
     IconCross16,
 } from '@dhis2/ui'
 import usePostSchoolInspectionEvent from './hooks/usePostSchoolInspectionEvent'
-import InspectionContext from '../../../../context/InspectionContext'
+import InspectionContext from '../../../context/InspectionContext'
 import formStyles from './SchoolInspectionForm.module.css'
 import {
     SCHOOL_INSPECTION_FIELDS,
@@ -31,7 +31,7 @@ import {
 } from './configs/inspectionFormUtils'
 import BooleanChoiceField from './components/BooleanChoiceField'
 import ConditionRatingField from './components/ConditionRatingField'
-import Icon, { CombinedIcon } from '../../../../shared/ui/icons/Icon'
+import Icon, { CombinedIcon } from '../../../shared/ui/icons/Icon'
 import { FIELD_ICONS } from './configs/fieldIcons'
 
 const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'

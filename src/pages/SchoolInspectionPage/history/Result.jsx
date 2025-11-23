@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import InspectionContext from "../../../../context/InspectionContext"
+import InspectionContext from "../../../context/InspectionContext"
 import SchoolGraph from "./graphs/SchoolGraph"
 import HeatmapComparison from "./heatmap/HeatmapComparison"
 import { dataElementIdToDescription } from "../newInspection/configs/inspectionFormUtils"

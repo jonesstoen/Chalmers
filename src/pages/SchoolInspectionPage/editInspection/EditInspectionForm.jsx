@@ -32,7 +32,7 @@ import {
 
 import BooleanChoiceField from '../newInspection/components/BooleanChoiceField'
 import ConditionRatingField from '../newInspection/components/ConditionRatingField'
-import Icon, { CombinedIcon } from '../../../../shared/ui/icons/Icon'
+import Icon, { CombinedIcon } from '../../../shared/ui/icons/Icon'
 import { FIELD_ICONS } from '../newInspection/configs/fieldIcons'
 import editFormStyles from './EditInspectionForm.module.css'
 
