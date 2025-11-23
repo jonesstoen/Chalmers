@@ -1,4 +1,4 @@
-// features/org-units/components/OrgTreePanel.jsx
+// pages/SchoolInspectionPage/components/OrgTreePanel.jsx
 import React, { useState, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react'
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'

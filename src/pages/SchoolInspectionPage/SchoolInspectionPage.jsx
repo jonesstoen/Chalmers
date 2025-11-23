@@ -1,4 +1,4 @@
-// features/inspections/pages/SchoolInspectionPage.jsx
+// pages/SchoolInspectionPage/SchoolInspectionPage.jsx
 import React, {
     useMemo,
     useState,
@@ -10,18 +10,18 @@ import React, {
 import i18n from '@dhis2/d2-i18n'
 import { TabBar, Tab, NoticeBox, Tag, CircularLoader } from '@dhis2/ui'
 import { useNavigate, useLocation } from 'react-router-dom'
-import classes from '../../../App/App.module.css'
+import classes from '../../App/App.module.css'
 import pageClasses from './SchoolInspectionPage.module.css'
-import OrgTreePanel from '../../org-units/components/OrgTreePanel'
-import SchoolSearchBar from '../components/SchoolSearchBar'
-import SchoolInspectionForm from '../components/SchoolInspectionForm'
-import EditInspectionForm from '../components/EditInspectionForm'
-import DeleteInspectionPanel from '../components/DeleteInspectionPanel'
-import InspectionTimeline from '../../analytics/components/InspectionTimeline'
-import useFetchOrgUnits from '../../org-units/api/useFetchOrgUnits'
-import Result from '../components/inspection_result/Result'
-import InspectionContext from '../../../context/InspectionContext'
-import AggregatedAnalyticsPanel from '../../analytics/components/AggregatedAnalyticsPanel'
+import OrgTreePanel from './components/OrgTreePanel'
+import SchoolSearchBar from '../LandingPage/components/SchoolSearchBar'
+import SchoolInspectionForm from './newInspection/SchoolInspectionForm'
+import EditInspectionForm from './editInspection/EditInspectionForm'
+import DeleteInspectionPanel from './editInspection/DeleteInspectionPanel'
+import InspectionTimeline from './history/components/InspectionTimeline'
+import useFetchOrgUnits from './api/useFetchOrgUnits'
+import Result from './history/Result'
+import InspectionContext from '../../context/InspectionContext'
+import AggregatedAnalyticsPanel from './history/components/AggregatedAnalyticsPanel'
 
 function EventSummary({ event }) {
     if (!event) return null

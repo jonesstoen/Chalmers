@@ -1,4 +1,4 @@
-// features/org-units/api/useFetchOrgUnits.jsx
+// pages/SchoolInspectionPage/api/useFetchOrgUnits.jsx
 import { useMemo } from "react"
 import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
 

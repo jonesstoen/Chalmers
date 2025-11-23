@@ -6,7 +6,7 @@ import LandingPage from '../pages/LandingPage/LandingPage'
 
 import InspectionContext from '../context/InspectionContext'
 import AttributeContext from '../context/AttributeContext'
-import SchoolInspectionPage from '../features/inspections/pages/SchoolInspectionPage'
+import SchoolInspectionPage from '../pages/SchoolInspectionPage/SchoolInspectionPage'
 
 
 export default function App() {
