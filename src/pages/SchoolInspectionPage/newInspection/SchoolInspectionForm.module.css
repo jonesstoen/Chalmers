@@ -136,6 +136,12 @@
 
 .progressSection {
     margin-bottom: 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #ffffff;
+    padding: 16px 0;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .progressBar {

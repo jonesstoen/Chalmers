@@ -84,9 +84,8 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
     }
 
     const handleDecrement = () => {
-        if (numericValue > 0) {
-            onChange(String(numericValue - 1))
-        }
+        // Allow going down to 0
+        onChange(String(Math.max(0, numericValue - 1)))
     }
 
     return (
@@ -133,7 +132,7 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                 />
                 <Button
                     onClick={handleDecrement}
-                    disabled={numericValue <= 0}
+                    disabled={numericValue < 0}
                     icon={<IconSubtract16 />}
                     small
                     aria-label={`Decrease ${label}`}

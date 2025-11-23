@@ -39,14 +39,49 @@ export const computeProgress = (formState) => {
     let total = 0
 
     SCHOOL_INSPECTION_FIELDS.forEach(field => {
-        total += 1
-        const v = formState[field.id]
-        if (v !== undefined && v !== '') filled += 1
+        // Skip auto-calculated fields
+        if (field.id === 'iytoDmoTUWY') { // TOTAL_TOILETS_ID
+            return
+        }
 
-        if (field.child_query) {
+        const v = formState[field.id]
+        
+        if (field.type === 'BOOLEAN' && field.child_query) {
+            // For Available/Unavailable fields with condition rating
             total += 1
-            const cv = formState[field.child_query.id]
-            if (cv !== undefined && cv !== '') filled += 1
+            
+            if (v === true || v === 'true') {
+                // If "Available" is selected, need condition rating to count as complete
+                const childValue = formState[field.child_query.id]
+                if (childValue !== undefined && childValue !== null && childValue !== '') {
+                    filled += 1
+                }
+            } else if (v === false || v === 'false') {
+                // If "Unavailable" is selected, counts as complete
+                filled += 1
+            }
+            // If null (deselected), doesn't count
+            
+            // Child field (condition rating) is only counted if parent is "Available"
+            // So we don't add it to total separately
+        } else if (field.type === 'BOOLEAN') {
+            // Simple boolean field (no child)
+            total += 1
+            if (v === true || v === 'true' || v === false || v === 'false') {
+                filled += 1
+            }
+            // If null (deselected), doesn't count
+        } else {
+            // Numeric field
+            total += 1
+            // Count if value is defined and not empty (including 0)
+            if (v !== undefined && v !== null && v !== '') {
+                // 0 is a valid input, so count it
+                const numValue = Number(v)
+                if (!Number.isNaN(numValue)) {
+                    filled += 1
+                }
+            }
         }
     })
 
