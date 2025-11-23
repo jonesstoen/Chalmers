@@ -10,6 +10,7 @@ import {
 } from '@dhis2/ui'
 import usePostSchoolInspectionEvent from '../hooks/usePostSchoolInspectionEvent'
 import InspectionContext from '../../../context/InspectionContext'
+import formStyles from './SchoolInspectionForm.module.css'
 import {
     SCHOOL_INSPECTION_FIELDS,
     FACILITY_IDS,
@@ -77,9 +78,10 @@ const sectionBoxStyle = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
 }
 
+// Responsive grid - mobile-first: single column on small screens
 const sectionGridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
     columnGap: 20,
     rowGap: 16,
     alignItems: 'flex-start',
@@ -373,7 +375,7 @@ export default function SchoolInspectionForm({
 
         if (type === 'BOOLEAN' && child_query) {
             return (
-                <div key={id} style={{ marginBottom: '1.25rem' }}>
+                <div key={id} style={{ marginBottom: '1.5rem' }}>
                     <div
                         style={{
                             display: 'flex',
@@ -381,28 +383,32 @@ export default function SchoolInspectionForm({
                             flexWrap: 'wrap',
                         }}
                     >
-                        <BooleanChoiceField
-                            label={label}
-                            value={value}
-                            onChange={v => {
-                                handleChange(id, v)
-                                if (!v) {
-                                    handleChange(child_query.id, null)
+                        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                            <BooleanChoiceField
+                                label={label}
+                                value={value}
+                                onChange={v => {
+                                    handleChange(id, v)
+                                    if (!v) {
+                                        handleChange(child_query.id, null)
+                                    }
+                                }}
+                                error={errors[id]}
+                                trueLabel="Available"
+                                falseLabel="Not available"
+                            />
+                        </div>
+                        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                            <ConditionRatingField
+                                label={child_query.label}
+                                value={numericChildValue}
+                                onChange={num =>
+                                    handleChange(child_query.id, num)
                                 }
-                            }}
-                            error={errors[id]}
-                            trueLabel="Available"
-                            falseLabel="Not available"
-                        />
-                        <ConditionRatingField
-                            label={child_query.label}
-                            value={numericChildValue}
-                            onChange={num =>
-                                handleChange(child_query.id, num)
-                            }
-                            disabled={!isTrue}
-                            error={errors[child_query.id]}
-                        />
+                                disabled={!isTrue}
+                                error={errors[child_query.id]}
+                            />
+                        </div>
                     </div>
                 </div>
             )
@@ -489,32 +495,39 @@ export default function SchoolInspectionForm({
                 style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'baseline',
+                    alignItems: 'flex-start',
                     marginBottom: 16,
                     flexWrap: 'wrap',
+                    gap: 12,
                 }}
             >
-                <div>
-                    <h3 style={{ margin: 0 }}>
-                        School inspection – {orgUnitName || orgUnitId}
+                <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+                    <h3 style={{ 
+                        margin: 0,
+                        fontSize: 20,
+                        lineHeight: 1.3,
+                    }}>
+                        {i18n.t('School inspection')} – {orgUnitName || orgUnitId}
                     </h3>
                     <p
                         style={{
-                            margin: 0,
+                            margin: '4px 0 0',
                             fontSize: 12,
                             color: '#64748b',
                         }}
                     >
-                        Inspection date: {inspectionDateLabel}
+                        {i18n.t('Inspection date')}: {inspectionDateLabel}
                     </p>
                 </div>
                 <div
                     style={{
                         fontSize: 12,
                         color: '#64748b',
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
                     }}
                 >
-                    {filledCount} / {totalCount} fields completed
+                    {filledCount} / {totalCount} {i18n.t('fields completed')}
                 </div>
             </div>
 
@@ -697,7 +710,9 @@ export default function SchoolInspectionForm({
                             display: 'flex',
                             justifyContent: 'flex-end',
                             gap: 12,
+                            flexWrap: 'wrap',
                         }}
+                        className={formStyles.submitButtonContainer}
                     >
                         <Button
                             primary
@@ -705,7 +720,7 @@ export default function SchoolInspectionForm({
                             disabled={loading}
                             large
                         >
-                            {loading ? 'Submitting...' : 'Submit inspection'}
+                            {loading ? i18n.t('Submitting...') : i18n.t('Submit inspection')}
                         </Button>
                     </div>
 
