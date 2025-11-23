@@ -7,6 +7,8 @@ import {
     NoticeBox,
     AlertStack,
     AlertBar,
+    IconSubtract16,
+    IconAdd16,
 } from '@dhis2/ui'
 import { useUpdateSchoolInspectionEvent } from '../hooks/useUpdateSchoolInspection'
 import { useDeleteSchoolInspectionEvent } from '../hooks/useDeleteSchoolInspection'
@@ -93,6 +95,17 @@ const numberInputFocusStyle = {
 
 function NumberField({ label, value = '', onChange, error, iconNames }) {
     const [isFocused, setIsFocused] = React.useState(false)
+    const numericValue = value === '' || value === null || value === undefined ? 0 : Number(value) || 0
+
+    const handleIncrement = () => {
+        onChange(String(numericValue + 1))
+    }
+
+    const handleDecrement = () => {
+        if (numericValue > 0) {
+            onChange(String(numericValue - 1))
+        }
+    }
 
     return (
         <div style={numberFieldContainerStyle}>
@@ -114,17 +127,39 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                 <span>{label}</span>
                 {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
             </label>
-            <input
-                type="number"
-                min="0"
-                value={value}
-                onChange={e => onChange(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                style={isFocused ? numberInputFocusStyle : numberInputStyle}
-                aria-invalid={!!error}
-                aria-describedby={error ? `${label}-error` : undefined}
-            />
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+            }}>
+                <Button
+                    onClick={handleDecrement}
+                    disabled={numericValue <= 0}
+                    icon={<IconSubtract16 />}
+                    small
+                    aria-label={`Decrease ${label}`}
+                />
+                <input
+                    type="number"
+                    min="0"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    style={{
+                        ...(isFocused ? numberInputFocusStyle : numberInputStyle),
+                        flex: 1,
+                    }}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? `${label}-error` : undefined}
+                />
+                <Button
+                    onClick={handleIncrement}
+                    icon={<IconAdd16 />}
+                    small
+                    aria-label={`Increase ${label}`}
+                />
+            </div>
             {error && (
                 <p
                     id={`${label}-error`}
