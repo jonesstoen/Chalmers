@@ -26,6 +26,8 @@ import {
 } from '../configs/inspectionFormUtils'
 import BooleanChoiceField from './BooleanChoiceField'
 import ConditionRatingField from './ConditionRatingField'
+import Icon, { CombinedIcon } from '../../../shared/ui/icons/Icon'
+import { FIELD_ICONS } from '../configs/fieldIcons'
 
 const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
 
@@ -79,20 +81,26 @@ const sectionBoxStyle = {
 }
 
 // Responsive grid - mobile-first: single column on small screens
+// Grid for 2 fields per line
 const sectionGridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     columnGap: 20,
-    rowGap: 16,
+    rowGap: 20,
     alignItems: 'flex-start',
-    maxWidth: 960,
     marginTop: 8,
     marginBottom: 8,
 }
 
+// Mobile: single column
+const sectionGridStyleMobile = {
+    ...sectionGridStyle,
+    gridTemplateColumns: '1fr',
+    columnGap: 12,
+}
+
 const numberFieldContainerStyle = {
-    marginBottom: '1rem',
-    maxWidth: 320,
+    marginBottom: 0, // Grid handles spacing
     width: '100%',
 }
 
@@ -125,16 +133,26 @@ const numberInputFocusStyle = {
     background: '#ffffff',
 }
 
-function NumberField({ label, value = '', onChange, error }) {
+function NumberField({ label, value = '', onChange, error, iconNames }) {
     const [isFocused, setIsFocused] = React.useState(false)
 
     return (
         <div style={numberFieldContainerStyle}>
             <label style={{
                 ...numberLabelStyle,
-                ...(error && { color: '#b91c1c' })
+                ...(error && { color: '#b91c1c' }),
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
             }}>
-                {label}
+                {iconNames && iconNames.length > 0 && (
+                    <CombinedIcon 
+                        icons={iconNames} 
+                        size={20} 
+                        style={{ color: error ? '#b91c1c' : '#2563eb' }}
+                    />
+                )}
+                <span>{label}</span>
                 {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
             </label>
             <input
@@ -434,6 +452,7 @@ export default function SchoolInspectionForm({
                 value={formState[id] ?? ''}
                 onChange={val => handleChange(id, val)}
                 error={errors[id]}
+                iconNames={FIELD_ICONS[id]}
             />
         )
     }
@@ -644,7 +663,10 @@ export default function SchoolInspectionForm({
                             Enter basic counts for classrooms, learners, seats
                             and teachers.
                         </p>
-                        <div style={sectionGridStyle}>
+                        <div 
+                            style={sectionGridStyle}
+                            className={formStyles.capacityGrid}
+                        >
                             {capacity.map(renderField)}
                         </div>
                     </details>
@@ -674,7 +696,10 @@ export default function SchoolInspectionForm({
                             Report toilets per group. Total toilets is
                             calculated automatically.
                         </p>
-                        <div style={sectionGridStyle}>
+                        <div 
+                            style={sectionGridStyle}
+                            className={formStyles.sanitationGrid}
+                        >
                             {sanitation.map(renderField)}
                         </div>
                         <div

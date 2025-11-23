@@ -5,8 +5,53 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-22T18:28:16.913Z\n"
-"PO-Revision-Date: 2025-11-22T18:28:16.914Z\n"
+"POT-Creation-Date: 2025-11-23T13:30:54.393Z\n"
+"PO-Revision-Date: 2025-11-23T13:30:54.394Z\n"
+
+msgid "Please complete all required fields"
+msgstr "Please complete all required fields"
+
+msgid "Saving changes..."
+msgstr "Saving changes..."
+
+msgid "Deleting inspection..."
+msgstr "Deleting inspection..."
+
+msgid "Changes saved successfully!"
+msgstr "Changes saved successfully!"
+
+msgid "Error saving changes"
+msgstr "Error saving changes"
+
+msgid "An unexpected error occurred. Please try again."
+msgstr "An unexpected error occurred. Please try again."
+
+msgid "Error deleting inspection"
+msgstr "Error deleting inspection"
+
+msgid "School inspection"
+msgstr "School inspection"
+
+msgid "Inspection date"
+msgstr "Inspection date"
+
+msgid "fields completed"
+msgstr "fields completed"
+
+msgid "Submitting inspection..."
+msgstr "Submitting inspection..."
+
+msgid "Submitting..."
+msgstr "Submitting..."
+
+msgid "Submit inspection"
+msgstr "Submit inspection"
+
+msgid "Inspection submitted successfully!"
+msgstr "Inspection submitted successfully!"
+
+msgid "Error submitting inspection"
+msgstr "Error submitting inspection"
 
 msgid "Selected event"
 msgstr "Selected event"
@@ -47,6 +92,12 @@ msgstr "Pick an event in the table above to edit."
 msgid "Pick an event in the table above to delete."
 msgstr "Pick an event in the table above to delete."
 
+msgid "Hide organisation units"
+msgstr "Hide organisation units"
+
+msgid "Show organisation units"
+msgstr "Show organisation units"
+
 msgid "Organisation units"
 msgstr "Organisation units"
 
@@ -81,3 +132,11 @@ msgstr ""
 
 msgid "No roots available"
 msgstr "No roots available"
+
+msgctxt "Application title"
+msgid "__MANIFEST_APP_TITLE"
+msgstr "Chalmers"
+
+msgctxt "Application description"
+msgid "__MANIFEST_APP_DESCRIPTION"
+msgstr ""

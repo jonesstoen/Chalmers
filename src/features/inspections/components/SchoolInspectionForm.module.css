@@ -4,6 +4,11 @@
     /* Base styles handled inline */
 }
 
+.capacityGrid,
+.sanitationGrid {
+    /* Base styles handled inline */
+}
+
 @media (max-width: 600px) {
     .submitButtonContainer {
         justify-content: stretch !important;
@@ -11,6 +16,12 @@
     
     .submitButtonContainer button {
         width: 100%;
+    }
+    
+    .capacityGrid,
+    .sanitationGrid {
+        grid-template-columns: 1fr !important;
+        column-gap: 12px !important;
     }
 }
 

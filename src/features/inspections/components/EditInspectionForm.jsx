@@ -27,6 +27,9 @@ import {
 
 import BooleanChoiceField from './BooleanChoiceField'
 import ConditionRatingField from './ConditionRatingField'
+import Icon, { CombinedIcon } from '../../../shared/ui/icons/Icon'
+import { FIELD_ICONS } from '../configs/fieldIcons'
+import editFormStyles from './EditInspectionForm.module.css'
 
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
@@ -42,18 +45,19 @@ const sectionBoxStyle = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
 }
 
+// Grid for 2 fields per line
 const sectionGridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-    gap: 20,
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    columnGap: 20,
+    rowGap: 20,
     alignItems: 'flex-start',
-    maxWidth: 960,
-    marginInline: 'auto',
+    marginTop: 8,
+    marginBottom: 8,
 }
 
 const numberFieldContainerStyle = {
-    marginBottom: '1rem',
-    maxWidth: 320,
+    marginBottom: 0, // Grid handles spacing
     width: '100%',
 }
 
@@ -86,16 +90,26 @@ const numberInputFocusStyle = {
     background: '#ffffff',
 }
 
-function NumberField({ label, value = '', onChange, error }) {
+function NumberField({ label, value = '', onChange, error, iconNames }) {
     const [isFocused, setIsFocused] = React.useState(false)
 
     return (
         <div style={numberFieldContainerStyle}>
             <label style={{
                 ...numberLabelStyle,
-                ...(error && { color: '#b91c1c' })
+                ...(error && { color: '#b91c1c' }),
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
             }}>
-                {label}
+                {iconNames && iconNames.length > 0 && (
+                    <CombinedIcon 
+                        icons={iconNames} 
+                        size={20} 
+                        style={{ color: error ? '#b91c1c' : '#2563eb' }}
+                    />
+                )}
+                <span>{label}</span>
                 {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
             </label>
             <input
@@ -470,6 +484,7 @@ export default function EditInspectionForm({
                 value={numericValue}
                 onChange={val => handleChange(id, val)}
                 error={errors[id]}
+                iconNames={FIELD_ICONS[id]}
             />
         )
     }
@@ -688,7 +703,10 @@ export default function EditInspectionForm({
                             teachers.
                         </p>
 
-                        <div style={sectionGridStyle}>
+                        <div 
+                            style={sectionGridStyle}
+                            className={editFormStyles.capacityGrid}
+                        >
                             {capacity.map(renderField)}
                         </div>
                     </details>
@@ -721,7 +739,10 @@ export default function EditInspectionForm({
                             recalculated automatically.
                         </p>
 
-                        <div style={sectionGridStyle}>
+                        <div 
+                            style={sectionGridStyle}
+                            className={editFormStyles.sanitationGrid}
+                        >
                             {sanitation.map(renderField)}
                         </div>
 

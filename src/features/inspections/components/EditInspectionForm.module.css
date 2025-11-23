@@ -1,0 +1,15 @@
+/* Mobile-first responsive styles for EditInspectionForm */
+
+.capacityGrid,
+.sanitationGrid {
+    /* Base styles handled inline */
+}
+
+@media (max-width: 600px) {
+    .capacityGrid,
+    .sanitationGrid {
+        grid-template-columns: 1fr !important;
+        column-gap: 12px !important;
+    }
+}
+
