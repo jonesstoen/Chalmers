@@ -11,7 +11,6 @@ import {
     IconAdd16,
     IconWarning16,
     IconError16,
-    IconCross16,
 } from '@dhis2/ui'
 import { useUpdateSchoolInspectionEvent } from '../hooks/useUpdateSchoolInspection'
 import { useDeleteSchoolInspectionEvent } from '../hooks/useDeleteSchoolInspection'
@@ -736,126 +735,87 @@ export default function EditInspectionForm({
                 position: 'relative',
             }}
         >
-            {/* Validation error popup overlay */}
+            {/* Validation error notification at bottom */}
             {showMissingPopup && missingRequiredLabels.length > 0 && (
-                <>
-                    {/* Backdrop */}
+                <div
+                    style={{
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
                     <div
                         style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: 'rgba(0, 0, 0, 0.5)',
-                            zIndex: 1000,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: 16,
+                            background: '#fef3c7',
+                            border: '2px solid #fbbf24',
+                            borderBottom: 'none',
+                            borderTopLeftRadius: 12,
+                            borderTopRightRadius: 12,
+                            boxShadow: '0 -4px 12px rgba(217, 119, 6, 0.2)',
+                            maxWidth: 600,
+                            width: '100%',
+                            maxHeight: '50vh',
+                            overflow: 'auto',
                         }}
-                        onClick={() => setShowMissingPopup(false)}
                     >
-                        {/* Popup card */}
-                        <div
-                            style={{
-                                background: '#ffffff',
-                                borderRadius: 12,
-                                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-                                maxWidth: 500,
-                                width: '100%',
-                                maxHeight: '90vh',
-                                overflow: 'auto',
-                                position: 'relative',
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Close button */}
-                            <button
-                                type="button"
-                                onClick={() => setShowMissingPopup(false)}
-                                style={{
-                                    position: 'absolute',
-                                    top: 12,
-                                    right: 12,
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 6,
-                                    border: 'none',
-                                    background: '#f1f5f9',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s ease',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = '#e2e8f0'
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = '#f1f5f9'
-                                }}
-                                aria-label={i18n.t('Close')}
-                            >
-                                <IconCross16 />
-                            </button>
-
-                            {/* Content */}
+                        <div style={{
+                            padding: '20px 24px',
+                        }}>
                             <div style={{
-                                padding: '24px 48px 24px 24px',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: 12,
                             }}>
                                 <div style={{
-                                    display: 'flex',
-                                    alignItems: 'flex-start',
-                                    gap: 12,
-                                    marginBottom: 16,
+                                    flexShrink: 0,
+                                    marginTop: 2,
                                 }}>
-                                    <div style={{
-                                        flexShrink: 0,
-                                        marginTop: 2,
+                                    <IconWarning16 />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <strong style={{ 
+                                        display: 'block', 
+                                        marginBottom: 10,
+                                        fontSize: 15,
+                                        fontWeight: 600,
+                                        color: '#92400e',
                                     }}>
-                                        <IconWarning16 />
+                                        {i18n.t('Please complete all required fields')}
+                                    </strong>
+                                    <div style={{ 
+                                        fontSize: 13,
+                                        color: '#78350f',
+                                        marginBottom: 12,
+                                        lineHeight: 1.5,
+                                    }}>
+                                        {i18n.t('The following {{count}} field(s) need to be filled before saving:', { count: missingRequiredLabels.length })}
                                     </div>
-                                    <div style={{ flex: 1 }}>
-                                        <strong style={{ 
-                                            display: 'block', 
-                                            marginBottom: 10,
-                                            fontSize: 16,
-                                            fontWeight: 600,
-                                            color: '#92400e',
-                                        }}>
-                                            {i18n.t('Please complete all required fields')}
-                                        </strong>
-                                        <div style={{ 
-                                            fontSize: 14,
+                                    <ul
+                                        style={{
+                                            margin: 0,
+                                            padding: 0,
+                                            paddingLeft: 20,
+                                            fontSize: 13,
                                             color: '#78350f',
-                                            marginBottom: 16,
-                                            lineHeight: 1.5,
-                                        }}>
-                                            {i18n.t('The following {{count}} field(s) need to be filled before saving:', { count: missingRequiredLabels.length })}
-                                        </div>
-                                        <ul
-                                            style={{
-                                                margin: 0,
-                                                padding: 0,
-                                                paddingLeft: 20,
-                                                fontSize: 14,
-                                                color: '#78350f',
-                                                lineHeight: 1.8,
-                                            }}
-                                        >
-                                            {missingRequiredLabels.map(label => (
-                                                <li key={label} style={{ marginBottom: 10 }}>
-                                                    {label}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                            lineHeight: 1.6,
+                                        }}
+                                    >
+                                        {missingRequiredLabels.map(label => (
+                                            <li key={label} style={{ marginBottom: 6 }}>
+                                                {label}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </>
+                </div>
             )}
 
             {/* Header */}
