@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-23T13:30:54.393Z\n"
-"PO-Revision-Date: 2025-11-23T13:30:54.394Z\n"
+"POT-Creation-Date: 2025-11-23T13:32:39.155Z\n"
+"PO-Revision-Date: 2025-11-23T13:32:39.155Z\n"
 
 msgid "Please complete all required fields"
 msgstr "Please complete all required fields"
@@ -132,11 +132,3 @@ msgstr ""
 
 msgid "No roots available"
 msgstr "No roots available"
-
-msgctxt "Application title"
-msgid "__MANIFEST_APP_TITLE"
-msgstr "Chalmers"
-
-msgctxt "Application description"
-msgid "__MANIFEST_APP_DESCRIPTION"
-msgstr ""
