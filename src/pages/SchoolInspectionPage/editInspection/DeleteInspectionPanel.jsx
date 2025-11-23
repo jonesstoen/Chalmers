@@ -1,7 +1,7 @@
-// features/inspections/components/DeleteInspectionPanel.jsx
+// pages/SchoolInspectionPage/editInspection/DeleteInspectionPanel.jsx
 import React from 'react'
 import { Button, NoticeBox } from '@dhis2/ui'
-import { useDeleteSchoolInspectionEvent } from '../hooks/useDeleteSchoolInspection'
+import { useDeleteSchoolInspectionEvent } from './hooks/useDeleteSchoolInspection'
 export default function DeleteInspectionPanel({ event }) {
     const [deleteEvent, { loading, error }] = useDeleteSchoolInspectionEvent()
 

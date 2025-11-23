@@ -1,5 +1,5 @@
 // src/D2App/features/inspections/hooks/useUpdateSchoolInspectionEvent.jsx
-import usePostEvent from '../../../shared/api/useTrackerEventMutation'
+import usePostEvent from '../../../../shared/api/useTrackerEventMutation'
 
 /**
  * Oppdaterer et eksisterende School Inspection-event via Tracker Importer
