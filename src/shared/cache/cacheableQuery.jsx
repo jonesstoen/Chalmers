@@ -19,6 +19,7 @@ export function useCacheableQuery(
 
     const [cachedData, setCachedData] = useState(null);
     const [cacheStatus, setCacheStatus] = useState("none");
+    const [cacheChecked, setCacheChecked] = useState(false);
     // "none" | "cache" | "stale-cache" | "network"
 
     // ---- 1. Load cache when dataKey changes ----
@@ -26,6 +27,8 @@ export function useCacheableQuery(
         let cancelled = false;
 
         (async () => {
+            setCacheChecked(false); // Reset check status when dataKey changes
+            
             const item = await cache.getItem(dataKey);
 
             if (cancelled) return;
@@ -40,6 +43,8 @@ export function useCacheableQuery(
                 setCachedData(null);
                 setCacheStatus("none");
             }
+            
+            setCacheChecked(true);
         })();
 
         return () => {
@@ -48,12 +53,13 @@ export function useCacheableQuery(
     }, [dataKey, cache]);
 
     // Should we query the network?
-    // SIMPLIFIED: If forceLazy is false, ALWAYS fetch (ignore cache for now to fix the bug)
-    // If forceLazy is true, don't fetch
-    // TODO: Re-enable cache optimization once the basic fetch works
-    const willBeLazy = forceLazy;
+    // Strategy: Start lazy, then refetch if needed after cache check
+    // If forceLazy is true, always lazy (skip query)
+    // Otherwise: Start lazy, then check cache - if no cache, we'll refetch
+    const willBeLazy = forceLazy || !cacheChecked
 
     // ---- 2. DHIS2 network query ----
+    // Start lazy, then refetch if no cache after cache check completes
     const {
         data: networkData,
         loading,
@@ -61,11 +67,19 @@ export function useCacheableQuery(
         refetch,
     } = useDataQuery(query, {
         variables,
-        // NEW LOGIC:
-        // forceLazy = guaranteed lazy
-        // otherwise lazy only if cache says don't fetch
         lazy: willBeLazy,
     });
+
+    // ---- 2b. After cache check, refetch if no cache and not forceLazy ----
+    useEffect(() => {
+        if (!cacheChecked) return; // Wait for cache check
+        if (forceLazy) return; // Don't fetch if forced lazy
+        if (cachedData != null) return; // Have cache, don't fetch
+        if (networkData) return; // Already have network data
+        
+        // No cache found, trigger fetch
+        refetch();
+    }, [cacheChecked, forceLazy, cachedData, networkData, refetch]);
 
     // ---- 3. When network returns valid data, update cache ----
     useEffect(() => {

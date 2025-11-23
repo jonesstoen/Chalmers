@@ -1,7 +1,6 @@
 // features/org-units/api/useFetchOrgUnits.jsx
 import { useMemo } from "react"
-import { useDataQuery } from "@dhis2/app-runtime"
-// import { useCacheableQuery } from "../../../shared/cache/cacheableQuery" // Temporarily disabled to test
+import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
 
 // ---------------------------------------------------------------------------
 // STATIC QUERY – must be static for DHIS2 useDataQuery
@@ -67,29 +66,33 @@ export default function useFetchOrgUnits(orgIds = []) {
     )
 
     // -----------------------------------------------------------------------
-    // Make the query — use static query with variables
+    // Make the query — use cacheableQuery (checks cache first, then fetches if needed)
     // -----------------------------------------------------------------------
     const {
-        data: networkData,
+        data: rawData,
         loading,
         error,
         refetch,
-    } = useDataQuery(ORG_UNIT_QUERY, {
+        source,
+    } = useCacheableQuery(
+        "data", // cacheKey
+        dataKey,
+        ORG_UNIT_QUERY,
         variables,
-        skip: !selectedId, // Skip when no selectedId (instead of lazy)
-    })
+        !selectedId // forceLazy: true when no selectedId (skip query)
+    )
     
     // Extract the org unit from the response
     // When querying by ID, DHIS2 returns { ou: { organisationUnits: [orgUnit] } } 
     // We need to extract the org unit from the array that matches our selectedId
-    let data = networkData
-    if (networkData?.ou) {
+    let data = rawData
+    if (rawData?.ou) {
         // Check if ou has organisationUnits array (list response)
-        if (networkData.ou.organisationUnits && Array.isArray(networkData.ou.organisationUnits)) {
-            if (networkData.ou.organisationUnits.length > 0) {
+        if (rawData.ou.organisationUnits && Array.isArray(rawData.ou.organisationUnits)) {
+            if (rawData.ou.organisationUnits.length > 0) {
                 // Find the org unit that matches our selectedId (in case array has multiple)
-                const matchingOu = networkData.ou.organisationUnits.find(ou => ou.id === selectedId) 
-                    || networkData.ou.organisationUnits[0] // Fallback to first if no match
+                const matchingOu = rawData.ou.organisationUnits.find(ou => ou.id === selectedId) 
+                    || rawData.ou.organisationUnits[0] // Fallback to first if no match
                 
                 data = {
                     ou: matchingOu
@@ -98,18 +101,16 @@ export default function useFetchOrgUnits(orgIds = []) {
                 // Empty array - no data
                 data = { ou: null }
             }
-        } else if (networkData.ou.id) {
+        } else if (rawData.ou.id) {
             // ou is already the org unit object (single item response)
             // Use it as is
-            data = networkData
+            data = rawData
         } else {
             // Unexpected structure
-            console.warn('⚠️ [useFetchOrgUnits] Unexpected data structure:', networkData.ou)
+            console.warn('⚠️ [useFetchOrgUnits] Unexpected data structure:', rawData.ou)
             data = { ou: null }
         }
     }
-    
-    const source = "network"
     
     // Single consolidated log for debugging
     if (selectedId) {
@@ -120,7 +121,8 @@ export default function useFetchOrgUnits(orgIds = []) {
             orgUnitName: data?.ou?.name || data?.ou?.displayName,
             isCluster: !!(data?.ou?.children?.length > 0),
             loading,
-            error: error?.message
+            error: error?.message,
+            source // Shows if data came from cache or network
         })
     }
 
