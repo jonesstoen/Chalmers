@@ -585,7 +585,8 @@ export default function EditInspectionForm({
                                 value={value}
                                 onChange={v => {
                                     handleChange(id, v)
-                                    if (v === false || v === 'false') {
+                                    // Clear condition rating if unselected (null) or set to false
+                                    if (v === null || v === false) {
                                         handleChange(childId, null)
                                     }
                                 }}
