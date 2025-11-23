@@ -1,102 +1,123 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDataQuery } from "@dhis2/app-runtime";
-import {dataCache, outboxCache} from "./config";
+import { dataCache, outboxCache } from "./config";
 
-export function useCacheableQuery(cacheKey, dataKey, query, variables = {}) {
+export function useCacheableQuery(
+    cacheKey,
+    dataKey,
+    query,
+    variables = {},
+    forceLazy = false
+) {
     const cacheMap = {
         data: dataCache,
         outbox: outboxCache,
-    }
+    };
 
-    // Stable cache instance
-    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey])
+    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey]);
 
-    const [cachedData, setCachedData] = useState(null)
-    const [cacheStatus, setCacheStatus] = useState("none")
-    // "none" | "cache" | "stale-cache" | "network"
+    const [cachedData, setCachedData] = useState(null);
+    const [cacheStatus, setCacheStatus] = useState("none");
+    const [cacheChecked, setCacheChecked] = useState(false);
+    // Status: "none" | "cache" | "stale-cache" | "network"
 
-    // ---- 1. Load cache when dataKey changes ----
+    // Check cache when dataKey changes
     useEffect(() => {
-        let cancelled = false
+        let cancelled = false;
 
-        ;(async () => {
-            const item = await cache.getItem(dataKey)
+        (async () => {
+            setCacheChecked(false);
+            
+            const item = await cache.getItem(dataKey);
 
-            if (cancelled) return
+            if (cancelled) return;
 
-            if (item) {
-                const stale = isCacheStale(item.timestamp)
-                setCachedData(item.value)
-                setCacheStatus(stale ? "stale-cache" : "cache")
+            if (item && item.value != null) {
+                const stale = isCacheStale(item.timestamp);
+                setCachedData(item.value);
+                setCacheStatus(stale ? "stale-cache" : "cache");
             } else {
-                setCachedData(null)
-                setCacheStatus("none")
+                setCachedData(null);
+                setCacheStatus("none");
             }
-        })()
+            
+            setCacheChecked(true);
+        })();
 
         return () => {
-            cancelled = true
-        }
-    }, [dataKey, cache])
+            cancelled = true;
+        };
+    }, [dataKey, cache]);
 
-    // Should we query the network?
-    const shouldFetch = cacheStatus === "none" || cacheStatus === "stale-cache"
+    // Start query lazy, then fetch if no cache
+    const willBeLazy = forceLazy || !cacheChecked
 
-    // ---- 2. DHIS2 network query ----
     const {
         data: networkData,
         loading,
         error,
+        refetch,
     } = useDataQuery(query, {
         variables,
-        lazy: !shouldFetch,
-    })
+        lazy: willBeLazy,
+    });
 
-    // ---- 3. When network returns valid data, update cache ----
+    // After cache check: if no cache and not forced lazy, fetch from network
     useEffect(() => {
-        if (!networkData) return
+        if (!cacheChecked) return;
+        if (forceLazy) return;
+        if (cachedData != null) return;
+        if (networkData) return;
+        
+        refetch();
+    }, [cacheChecked, forceLazy, cachedData, networkData, refetch]);
 
-        let cancelled = false
+    // When network data arrives, save to cache
+    useEffect(() => {
+        if (!networkData) return;
 
-        ;(async () => {
+        let cancelled = false;
+
+        (async () => {
             if (!deepEqual(networkData, cachedData)) {
                 await cache.setItem(dataKey, {
                     value: networkData,
                     timestamp: Date.now(),
-                })
+                });
             }
 
-            if (cancelled) return
+            if (cancelled) return;
 
-            setCachedData(networkData)
-            setCacheStatus("network")
-        })()
+            setCachedData(networkData);
+            setCacheStatus("network");
+        })();
 
         return () => {
-            cancelled = true
-        }
-    }, [networkData, dataKey, cache]) // <-- NOTICE: cachedData removed
+            cancelled = true;
+        };
+    }, [networkData, dataKey, cache]);
 
-    // ---- 4. Choose final result ----
-    const finalData = networkData || cachedData
+    // Return network data if available, otherwise cached data
+    const finalData = networkData || cachedData;
 
     return {
         data: finalData,
         loading,
         error,
+        refetch,
         source: cacheStatus,
-    }
+    };
 }
 
-// ~16 hours stale
+// Cache is stale after 16 hours
 function isCacheStale(timestamp) {
-    return Date.now() - timestamp > 16 * 60 * 60 * 1000
+    return Date.now() - timestamp > 16 * 60 * 60 * 1000;
 }
 
 function deepEqual(a, b) {
     try {
-        return JSON.stringify(a) === JSON.stringify(b)
+        return JSON.stringify(a) === JSON.stringify(b);
     } catch {
-        return false
+        return false;
     }
 }

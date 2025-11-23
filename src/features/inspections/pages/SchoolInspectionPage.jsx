@@ -18,7 +18,7 @@ import SchoolInspectionForm from '../components/SchoolInspectionForm'
 import EditInspectionForm from '../components/EditInspectionForm'
 import DeleteInspectionPanel from '../components/DeleteInspectionPanel'
 import InspectionTimeline from '../../analytics/components/InspectionTimeline'
-import useFetchOrgUnits from '../../org-units/hooks/useFetchOrgUnits'
+import useFetchOrgUnits from '../../org-units/api/useFetchOrgUnits'
 import Result from '../components/inspection_result/Result'
 import InspectionContext from '../../../context/InspectionContext'
 import AggregatedAnalyticsPanel from '../../analytics/components/AggregatedAnalyticsPanel'
@@ -135,6 +135,15 @@ function InspectionPanel({
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
+    // Show loading if org unit data not ready
+    if (!ou || !orgUnitId) {
+        return (
+            <NoticeBox title={i18n.t('Loading school information')}>
+                {i18n.t('Please wait while school information is being loaded...')}
+            </NoticeBox>
+        )
+    }
+
     return (
         <>
             <TabBar>
@@ -230,7 +239,7 @@ export default function SchoolInspectionPage() {
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
     const orgTreePanelRef = useRef(null)
 
-    const { data, selectedId } = useFetchOrgUnits(selected)
+    const { data, selectedId, loading: orgUnitLoading, error: orgUnitError } = useFetchOrgUnits(selected)
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
 
     const navigate = useNavigate()
@@ -274,7 +283,8 @@ export default function SchoolInspectionPage() {
     }, [])
 
     const ou = data?.ou
-    const isAggregate = ou?.children && data?.ou?.children?.length > 0
+    // isAggregate is true if the org unit has children (it's a cluster, not a school)
+    const isAggregate = !!(ou?.children && Array.isArray(ou.children) && ou.children.length > 0)
 
     const handleBackToLanding = useCallback(() => {
         navigate('/')
@@ -289,8 +299,8 @@ export default function SchoolInspectionPage() {
     return (
         <div className={pageClasses.pageWrapper}>
             {/* School Search Bar - standalone element */}
-            <div style={{ 
-                width: '100%', 
+            <div style={{
+                width: '100%',
                 position: 'relative',
                 marginBottom: 16,
             }}>
@@ -342,28 +352,51 @@ export default function SchoolInspectionPage() {
                     onBack={handleBackToLanding}
                 />
 
-                {!selectedId && (
-                    <NoticeBox title={i18n.t('Pick a School or Cluster')}>
-                        {i18n.t(
-                            'Search for a school in the searchbar or Select a node in the tree to continue.'
-                        )}
-                    </NoticeBox>
-                )}
-
-                {selectedId && isAggregate && (
-                    <AggregatedAnalyticsPanel data={data} />
-                )}
-
-                {selectedId && !isAggregate && (
-                    <InspectionPanel
-                        selected={selected}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        selectedEvent={selectedEvent}
-                        setSelectedEvent={setSelectedEvent}
-                        data={data}
-                    />
-                )}
+                {(() => {
+                    if (!selectedId) {
+                        return (
+                            <NoticeBox title={i18n.t('Pick a School or Cluster')}>
+                                {i18n.t(
+                                    'Search for a school in the searchbar or Select a node in the tree to continue.'
+                                )}
+                            </NoticeBox>
+                        )
+                    }
+                    if (orgUnitLoading) {
+                        return (
+                            <NoticeBox>
+                                {i18n.t('Loading school information...')}
+                            </NoticeBox>
+                        )
+                    }
+                    if (orgUnitError) {
+                        return (
+                            <NoticeBox error title={i18n.t('Error loading school')}>
+                                {orgUnitError.message || i18n.t('Failed to load school information')}
+                            </NoticeBox>
+                        )
+                    }
+                    if (data?.ou && isAggregate) {
+                        return <AggregatedAnalyticsPanel data={data} />
+                    }
+                    if (data?.ou && !isAggregate) {
+                        return (
+                            <InspectionPanel
+                                selected={selected}
+                                activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                selectedEvent={selectedEvent}
+                                setSelectedEvent={setSelectedEvent}
+                                data={data}
+                            />
+                        )
+                    }
+                    return (
+                        <NoticeBox warning title={i18n.t('No data available')}>
+                            {i18n.t('School information could not be loaded. Please try selecting the school again.')}
+                        </NoticeBox>
+                    )
+                })()}
             </main>
             </div>
         </div>

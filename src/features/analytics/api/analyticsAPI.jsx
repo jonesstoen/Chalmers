@@ -1,7 +1,27 @@
 // services/api/analyticsAPI.jsx
 import { useMemo } from 'react'
-import { useDataQuery } from '@dhis2/app-runtime'
 import {useCacheableQuery} from "../../../shared/cache/cacheableQuery";
+
+const EVENTS_ANALYTICS_QUERY = {
+    analytics: {
+        resource: "analytics/events/query",
+        id: ({ program }) => program,
+        params: ({
+                     dimensions,
+                     startDate,
+                     endDate,
+                     stage,
+                     descendants,
+                     paging,
+                 }) => ({
+            ...(dimensions?.length ? { dimension: dimensions } : {}),
+            ...(startDate && endDate ? { startDate, endDate } : {}),
+            ...(stage ? { stage } : {}),
+            ...(descendants ? { ouMode: "DESCENDANTS" } : {}),
+            paging,
+        }),
+    },
+}
 
 export default function useFetchAnalytics(
     programId,
@@ -10,27 +30,34 @@ export default function useFetchAnalytics(
     orgIds = [],
     { descendants = false, paging = false } = {}
 ) {
-    // Memoize dimensions
     const dimensions = useMemo(() => {
         const d = []
-
-        if (orgIds?.length) {
-            d.push(`ou:${orgIds.join(";")}`)
-        }
-
+        if (orgIds?.length) d.push(`ou:${orgIds.join(";")}`)
         for (const f of filter) {
             if (f?.itemid && f?.operator && f?.filter != null) {
                 d.push(`${f.itemid}:${f.operator}:${f.filter}`)
             }
         }
-
         return d
-    }, [orgIds, filter]) // <-- filter is already stable (don’t stringify!)
+    }, [orgIds, filter])
 
-    // memoize dataKey
+    const variables = useMemo(
+        () => ({
+            program: programId,
+            dimensions,
+            startDate,
+            endDate,
+            stage,
+            descendants,
+            paging,
+        }),
+        [programId, dimensions, startDate, endDate, stage, descendants, paging]
+    )
+
     const dataKey = useMemo(
         () =>
             JSON.stringify({
+                type: "fetchAnalytics",
                 programId,
                 orgIds,
                 startDate,
@@ -43,41 +70,10 @@ export default function useFetchAnalytics(
         [programId, orgIds, startDate, stage, filter, descendants, paging, dimensions]
     )
 
-    // Memoizing query object
-    const query = useMemo(() => ({
-        analytics: {
-            resource: 'analytics/events/query',
-            id: ({ program }) => program,
-            params: ({
-                    dimensions,
-                    startDate,
-                    endDate,
-                    stage,
-                    descendants,
-                    paging,
-                    }) => ({
-                ...(dimensions?.length ? { dimension: dimensions } : {}),
-                ...(startDate && endDate ? { startDate, endDate } : {}),
-                ...(stage ? { stage } : {}),
-                ...(descendants ? { ouMode: 'DESCENDANTS' } : {}),
-                paging,
-            }),
-        },
-    }), [])
-
-    // ---- 4. Use cacheable query ----
     return useCacheableQuery(
-        'data',
+        "data",
         dataKey,
-        query,
-        {
-            program: programId,
-            dimensions,
-            startDate,
-            endDate,
-            stage,
-            descendants,
-            paging,
-        }
+        EVENTS_ANALYTICS_QUERY,
+        variables
     )
 }
