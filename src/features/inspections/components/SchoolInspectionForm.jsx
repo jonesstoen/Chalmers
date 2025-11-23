@@ -1,6 +1,7 @@
 // features/inspections/components/SchoolInspectionForm.jsx
 
 import React, { useContext, useEffect, useState } from 'react'
+import i18n from '@dhis2/d2-i18n'
 import {
     Button,
     CircularLoader,
@@ -452,26 +453,30 @@ export default function SchoolInspectionForm({
                 boxShadow: '0 1px 3px rgba(15,23,42,0.08)',
             }}
         >
-            {/* Popup med liste over manglende felt */}
+            {/* Validation error alert */}
             {showMissingPopup && missingRequiredLabels.length > 0 && (
                 <AlertStack>
                     <AlertBar
                         warning
-                        duration={8000}
+                        duration={10000}
                         onHidden={() => setShowMissingPopup(false)}
                     >
                         <div>
-                            <strong>
-                                Please fill in the required fields:
+                            <strong style={{ display: 'block', marginBottom: 8 }}>
+                                {i18n.t('Please complete all required fields')}
                             </strong>
+                            <div style={{ fontSize: 13 }}>
+                                {i18n.t('The following {{count}} field(s) need to be filled:', { count: missingRequiredLabels.length })}
+                            </div>
                             <ul
                                 style={{
-                                    margin: '4px 0 0 18px',
+                                    margin: '8px 0 0 20px',
                                     padding: 0,
+                                    fontSize: 13,
                                 }}
                             >
                                 {missingRequiredLabels.map(label => (
-                                    <li key={label}>{label}</li>
+                                    <li key={label} style={{ marginBottom: 4 }}>{label}</li>
                                 ))}
                             </ul>
                         </div>
@@ -552,7 +557,23 @@ export default function SchoolInspectionForm({
                 </div>
             </div>
 
-            {loading && <CircularLoader small />}
+            {loading && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '16px',
+                    background: '#eff6ff',
+                    borderRadius: 8,
+                    border: '1px solid #bfdbfe',
+                    marginBottom: 20,
+                }}>
+                    <CircularLoader small />
+                    <span style={{ color: '#1e40af', fontWeight: 500 }}>
+                        {i18n.t('Submitting inspection...')}
+                    </span>
+                </div>
+            )}
 
             {!loading && (
                 <>
@@ -690,17 +711,28 @@ export default function SchoolInspectionForm({
 
                     {data && (
                         <AlertStack>
-                            <AlertBar success duration={5000}>
-                                Submitted successfully (
-                                {lastSubmitted.length} fields)
+                            <AlertBar success duration={8000}>
+                                <div>
+                                    <strong>{i18n.t('Inspection submitted successfully!')}</strong>
+                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                        {i18n.t('{{count}} fields saved', { count: lastSubmitted.length })}
+                                    </div>
+                                </div>
                             </AlertBar>
                         </AlertStack>
                     )}
 
                     {error && (
-                        <AlertBar critical>
-                            {error.message || 'Unexpected error'}
-                        </AlertBar>
+                        <AlertStack>
+                            <AlertBar critical duration={10000}>
+                                <div>
+                                    <strong>{i18n.t('Error submitting inspection')}</strong>
+                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                        {error.message || i18n.t('An unexpected error occurred. Please try again.')}
+                                    </div>
+                                </div>
+                            </AlertBar>
+                        </AlertStack>
                     )}
                 </>
             )}

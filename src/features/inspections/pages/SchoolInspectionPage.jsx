@@ -8,7 +8,7 @@ import React, {
     useRef,
 } from 'react'
 import i18n from '@dhis2/d2-i18n'
-import { TabBar, Tab, NoticeBox, Tag } from '@dhis2/ui'
+import { TabBar, Tab, NoticeBox, Tag, CircularLoader } from '@dhis2/ui'
 import { useNavigate, useLocation } from 'react-router-dom'
 import classes from '../../../App/App.module.css'
 import pageClasses from './SchoolInspectionPage.module.css'
@@ -391,9 +391,20 @@ export default function SchoolInspectionPage() {
                     }
                     if (orgUnitLoading) {
                         return (
-                            <NoticeBox>
-                                {i18n.t('Loading school information...')}
-                            </NoticeBox>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                                padding: '20px',
+                                background: '#ffffff',
+                                borderRadius: 12,
+                                border: '2px solid #e5e7eb',
+                            }}>
+                                <CircularLoader small />
+                                <span style={{ color: '#475569', fontWeight: 500 }}>
+                                    {i18n.t('Loading school information...')}
+                                </span>
+                            </div>
                         )
                     }
                     if (orgUnitError) {

@@ -1,5 +1,6 @@
 // features/inspections/components/EditInspectionForm.jsx
 import React, { useEffect, useState } from 'react'
+import i18n from '@dhis2/d2-i18n'
 import {
     Button,
     CircularLoader,
@@ -370,7 +371,7 @@ export default function EditInspectionForm({
         })
 
         setLastSaved(dataValuesArray.length)
-        alert('Event updated!')
+        // Success feedback is shown via AlertBar, no need for alert
     }
 
     const handleDelete = async () => {
@@ -386,8 +387,7 @@ export default function EditInspectionForm({
             return
 
         await deleteEvent({ eventId })
-        alert('Event deleted.')
-
+        // Success feedback handled by parent component or navigation
         if (onDeleted) onDeleted(eventId)
     }
 
@@ -498,27 +498,30 @@ export default function EditInspectionForm({
                 position: 'relative',
             }}
         >
-            {/* Popup med liste over manglende felt */}
+            {/* Validation error alert */}
             {showMissingPopup && missingRequiredLabels.length > 0 && (
                 <AlertStack>
                     <AlertBar
                         warning
-                        duration={8000}
+                        duration={10000}
                         onHidden={() => setShowMissingPopup(false)}
                     >
                         <div>
-                            <strong>
-                                Please fill in the required fields before
-                                saving:
+                            <strong style={{ display: 'block', marginBottom: 8 }}>
+                                {i18n.t('Please complete all required fields')}
                             </strong>
+                            <div style={{ fontSize: 13 }}>
+                                {i18n.t('The following {{count}} field(s) need to be filled before saving:', { count: missingRequiredLabels.length })}
+                            </div>
                             <ul
                                 style={{
-                                    margin: '4px 0 0 18px',
+                                    margin: '8px 0 0 20px',
                                     padding: 0,
+                                    fontSize: 13,
                                 }}
                             >
                                 {missingRequiredLabels.map(label => (
-                                    <li key={label}>{label}</li>
+                                    <li key={label} style={{ marginBottom: 4 }}>{label}</li>
                                 ))}
                             </ul>
                         </div>
@@ -605,7 +608,23 @@ export default function EditInspectionForm({
                 </div>
             </div>
 
-            {isBusy && <CircularLoader small />}
+            {isBusy && (
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '16px',
+                    background: '#eff6ff',
+                    borderRadius: 8,
+                    border: '1px solid #bfdbfe',
+                    marginBottom: 20,
+                }}>
+                    <CircularLoader small />
+                    <span style={{ color: '#1e40af', fontWeight: 500 }}>
+                        {saving ? i18n.t('Saving changes...') : i18n.t('Deleting inspection...')}
+                    </span>
+                </div>
+            )}
 
             {!isBusy && (
                 <>
@@ -777,43 +796,43 @@ export default function EditInspectionForm({
 
                     {lastSaved && (
                         <AlertStack>
-                            <AlertBar success duration={6000}>
-                                <p>
-                                    <strong>Saved:</strong>{' '}
-                                    {`Updated event with ${lastSaved} fields.`}
-                                </p>
+                            <AlertBar success duration={8000}>
+                                <div>
+                                    <strong>{i18n.t('Changes saved successfully!')}</strong>
+                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                        {i18n.t('Updated {{count}} field(s)', { count: lastSaved })}
+                                    </div>
+                                </div>
                             </AlertBar>
                         </AlertStack>
                     )}
 
                     {saveError && (
-                        <div
-                            style={{
-                                color: 'crimson',
-                                marginTop: '1rem',
-                            }}
-                        >
-                            <p>
-                                <strong>Error saving:</strong>{' '}
-                                {saveError.message ||
-                                    'An unexpected error occurred'}
-                            </p>
-                        </div>
+                        <AlertStack>
+                            <AlertBar critical duration={10000}>
+                                <div>
+                                    <strong>{i18n.t('Error saving changes')}</strong>
+                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                        {saveError.message ||
+                                            i18n.t('An unexpected error occurred. Please try again.')}
+                                    </div>
+                                </div>
+                            </AlertBar>
+                        </AlertStack>
                     )}
 
                     {deleteError && (
-                        <div
-                            style={{
-                                color: 'crimson',
-                                marginTop: '0.5rem',
-                            }}
-                        >
-                            <p>
-                                <strong>Error deleting:</strong>{' '}
-                                {deleteError.message ||
-                                    'An unexpected error occurred'}
-                            </p>
-                        </div>
+                        <AlertStack>
+                            <AlertBar critical duration={10000}>
+                                <div>
+                                    <strong>{i18n.t('Error deleting inspection')}</strong>
+                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                        {deleteError.message ||
+                                            i18n.t('An unexpected error occurred. Please try again.')}
+                                    </div>
+                                </div>
+                            </AlertBar>
+                        </AlertStack>
                     )}
                 </>
             )}
