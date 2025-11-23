@@ -33,11 +33,12 @@ const STAGE_ID = 'eJiBjm9Rl7E'
 // shared styles with inspection
 
 const sectionBoxStyle = {
-    background: '#fafafa',
-    padding: 16,
-    borderRadius: 10,
-    border: '1px solid #e5e7eb',
+    background: '#ffffff',
+    padding: 20,
+    borderRadius: 12,
+    border: '2px solid #e5e7eb',
     marginBottom: '1.5rem',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
 }
 
 const sectionGridStyle = {
@@ -57,27 +58,31 @@ const numberFieldContainerStyle = {
 
 const numberLabelStyle = {
     display: 'block',
-    marginBottom: 4,
-    fontSize: 13,
-    fontWeight: 500,
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: 600,
+    minHeight: 20,
     color: '#0f172a',
-    minHeight: 32,
 }
 
 const numberInputStyle = {
     width: '100%',
-    padding: '6px 10px',
+    padding: '12px 14px', // Larger padding for mobile touch targets
     borderRadius: 8,
-    border: '1px solid #cbd5e1',
-    fontSize: 14,
+    border: '2px solid #cbd5e1',
+    fontSize: 16, // Larger font for mobile readability
     outline: 'none',
     boxSizing: 'border-box',
+    minHeight: 44, // Minimum touch target size
+    transition: 'all 0.2s ease',
+    background: '#ffffff',
 }
 
 const numberInputFocusStyle = {
     ...numberInputStyle,
-    border: '1px solid #2563eb',
-    boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.2)',
+    border: '2px solid #2563eb',
+    boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
+    background: '#ffffff',
 }
 
 function NumberField({ label, value = '', onChange, error }) {
@@ -85,7 +90,13 @@ function NumberField({ label, value = '', onChange, error }) {
 
     return (
         <div style={numberFieldContainerStyle}>
-            <label style={numberLabelStyle}>{label}</label>
+            <label style={{
+                ...numberLabelStyle,
+                ...(error && { color: '#b91c1c' })
+            }}>
+                {label}
+                {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
+            </label>
             <input
                 type="number"
                 min="0"
@@ -94,17 +105,25 @@ function NumberField({ label, value = '', onChange, error }) {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 style={isFocused ? numberInputFocusStyle : numberInputStyle}
+                aria-invalid={!!error}
+                aria-describedby={error ? `${label}-error` : undefined}
             />
             {error && (
                 <p
+                    id={`${label}-error`}
                     style={{
-                        marginTop: 4,
+                        marginTop: 6,
                         marginBottom: 0,
                         fontSize: 12,
                         color: '#b91c1c',
+                        fontWeight: 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
                     }}
+                    role="alert"
                 >
-                    {error}
+                    <span>⚠</span> {error}
                 </p>
             )}
         </div>
@@ -548,13 +567,14 @@ export default function EditInspectionForm({
             </div>
 
             {/* progress bar */}
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 24 }}>
                 <div
                     style={{
-                        height: 6,
+                        height: 8,
                         borderRadius: 999,
                         background: '#e5e7eb',
                         overflow: 'hidden',
+                        position: 'relative',
                     }}
                 >
                     <div
@@ -562,13 +582,26 @@ export default function EditInspectionForm({
                             width: `${progressPct}%`,
                             height: '100%',
                             borderRadius: 999,
-                            transition: 'width 0.2s ease-out',
+                            transition: 'width 0.3s ease',
                             background:
                                 progressPct === 100
                                     ? '#16a34a'
                                     : '#2563eb',
                         }}
                     />
+                </div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: 8,
+                    fontSize: 12,
+                    color: '#64748b',
+                }}>
+                    <span>Progress: {filledCount} of {totalCount} fields</span>
+                    <span style={{ fontWeight: 600, color: progressPct === 100 ? '#16a34a' : '#2563eb' }}>
+                        {Math.round(progressPct)}%
+                    </span>
                 </div>
             </div>
 
@@ -582,26 +615,30 @@ export default function EditInspectionForm({
                             style={{
                                 cursor: 'pointer',
                                 fontWeight: 600,
-                                fontSize: 14,
+                                fontSize: 16,
                                 color: '#0f172a',
                                 listStyle: 'none',
                                 outline: 'none',
+                                marginBottom: 12,
+                                padding: '4px 0',
                             }}
                         >
                             Facilities
                         </summary>
                         <p
                             style={{
-                                marginTop: 4,
-                                marginBottom: '0.75rem',
-                                fontSize: 12,
+                                marginBottom: 16,
+                                fontSize: 13,
                                 color: '#64748b',
+                                lineHeight: 1.5,
                             }}
                         >
                             Edit which facilities are available and adjust
                             their condition if needed.
                         </p>
-                        {facilities.map(renderField)}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                            {facilities.map(renderField)}
+                        </div>
                     </details>
 
                     {/* Capacity */}
@@ -610,20 +647,22 @@ export default function EditInspectionForm({
                             style={{
                                 cursor: 'pointer',
                                 fontWeight: 600,
-                                fontSize: 14,
+                                fontSize: 16,
                                 color: '#0f172a',
                                 listStyle: 'none',
                                 outline: 'none',
+                                marginBottom: 12,
+                                padding: '4px 0',
                             }}
                         >
                             Capacity
                         </summary>
                         <p
                             style={{
-                                marginTop: 4,
-                                marginBottom: '0.75rem',
-                                fontSize: 12,
+                                marginBottom: 16,
+                                fontSize: 13,
                                 color: '#64748b',
+                                lineHeight: 1.5,
                             }}
                         >
                             Update numbers for classrooms, learners, seats and
@@ -641,20 +680,22 @@ export default function EditInspectionForm({
                             style={{
                                 cursor: 'pointer',
                                 fontWeight: 600,
-                                fontSize: 14,
+                                fontSize: 16,
                                 color: '#0f172a',
                                 listStyle: 'none',
                                 outline: 'none',
+                                marginBottom: 12,
+                                padding: '4px 0',
                             }}
                         >
                             Sanitation & staffing
                         </summary>
                         <p
                             style={{
-                                marginTop: 4,
-                                marginBottom: '0.75rem',
-                                fontSize: 12,
+                                marginBottom: 16,
+                                fontSize: 13,
                                 color: '#64748b',
+                                lineHeight: 1.5,
                             }}
                         >
                             Adjust toilets per group. Total toilets is
@@ -667,11 +708,26 @@ export default function EditInspectionForm({
 
                         <div
                             style={{
-                                marginTop: '0.75rem',
-                                marginBottom: '0.5rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                marginTop: 16,
+                                padding: '12px 16px',
+                                background: '#eff6ff',
+                                borderRadius: 8,
+                                border: '1px solid #bfdbfe',
                             }}
                         >
-                            <strong>Total toilets: {totalToilets}</strong>
+                            <strong style={{ fontSize: 14, color: '#1e40af' }}>
+                                Total toilets: 
+                            </strong>
+                            <span style={{ 
+                                fontSize: 16, 
+                                fontWeight: 700, 
+                                color: '#2563eb' 
+                            }}>
+                                {totalToilets}
+                            </span>
                         </div>
                     </details>
 
@@ -702,6 +758,7 @@ export default function EditInspectionForm({
                                     primary
                                     onClick={handleSave}
                                     disabled={saving || deleting}
+                                    large
                                     style={{ minWidth: 140 }}
                                 >
                                     {saving ? 'Saving…' : 'Save changes'}
@@ -710,6 +767,7 @@ export default function EditInspectionForm({
                                     destructive
                                     onClick={handleDelete}
                                     disabled={saving || deleting}
+                                    large
                                 >
                                     {deleting ? 'Deleting…' : 'Delete'}
                                 </Button>

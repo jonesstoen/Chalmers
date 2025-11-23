@@ -68,54 +68,58 @@ const clearDraft = orgUnitId => {
 
 // --- layout styles ---
 const sectionBoxStyle = {
-    background: '#fafafa',
-    padding: 16,
-    borderRadius: 10,
-    border: '1px solid #e5e7eb',
+    background: '#ffffff',
+    padding: 20,
+    borderRadius: 12,
+    border: '2px solid #e5e7eb',
     marginBottom: '1.5rem',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
 }
 
 const sectionGridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-    columnGap: 16,
-    rowGap: 12,
-    gap: 20,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    columnGap: 20,
+    rowGap: 16,
     alignItems: 'flex-start',
     maxWidth: 960,
-    marginTop: 4,
-    marginBottom: 4,
+    marginTop: 8,
+    marginBottom: 8,
 }
 
 const numberFieldContainerStyle = {
-    marginBottom: '0.75rem',
+    marginBottom: '1rem',
     maxWidth: 320,
     width: '100%',
 }
 
 const numberLabelStyle = {
     display: 'block',
-    marginBottom: 4,
-    fontSize: 13,
-    fontWeight: 500,
-    minHeight: 32,
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: 600,
+    minHeight: 20,
     color: '#0f172a',
 }
 
 const numberInputStyle = {
     width: '100%',
-    padding: '6px 10px',
+    padding: '12px 14px', // Larger padding for mobile touch targets
     borderRadius: 8,
-    border: '1px solid #cbd5e1',
-    fontSize: 14,
+    border: '2px solid #cbd5e1',
+    fontSize: 16, // Larger font for mobile readability
     outline: 'none',
     boxSizing: 'border-box',
+    minHeight: 44, // Minimum touch target size
+    transition: 'all 0.2s ease',
+    background: '#ffffff',
 }
 
 const numberInputFocusStyle = {
     ...numberInputStyle,
-    border: '1px solid #2563eb',
-    boxShadow: '0 0 0 1px rgba(37, 99, 235, 0.2)',
+    border: '2px solid #2563eb',
+    boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
+    background: '#ffffff',
 }
 
 function NumberField({ label, value = '', onChange, error }) {
@@ -123,7 +127,13 @@ function NumberField({ label, value = '', onChange, error }) {
 
     return (
         <div style={numberFieldContainerStyle}>
-            <label style={numberLabelStyle}>{label}</label>
+            <label style={{
+                ...numberLabelStyle,
+                ...(error && { color: '#b91c1c' })
+            }}>
+                {label}
+                {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
+            </label>
             <input
                 type="number"
                 min="0"
@@ -132,17 +142,25 @@ function NumberField({ label, value = '', onChange, error }) {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 style={isFocused ? numberInputFocusStyle : numberInputStyle}
+                aria-invalid={!!error}
+                aria-describedby={error ? `${label}-error` : undefined}
             />
             {error && (
                 <p
+                    id={`${label}-error`}
                     style={{
-                        marginTop: 4,
+                        marginTop: 6,
                         marginBottom: 0,
                         fontSize: 12,
                         color: '#b91c1c',
+                        fontWeight: 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
                     }}
+                    role="alert"
                 >
-                    {error}
+                    <span>⚠</span> {error}
                 </p>
             )}
         </div>
@@ -430,7 +448,7 @@ export default function SchoolInspectionForm({
                 background: '#fff',
                 borderRadius: 12,
                 border: '1px solid #e2e8f0',
-                padding: 16,
+                padding: '20px',
                 boxShadow: '0 1px 3px rgba(15,23,42,0.08)',
             }}
         >
@@ -496,13 +514,14 @@ export default function SchoolInspectionForm({
             </div>
 
             {/* progress bar */}
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 24 }}>
                 <div
                     style={{
-                        height: 6,
+                        height: 8,
                         background: '#e5e7eb',
                         borderRadius: 999,
                         overflow: 'hidden',
+                        position: 'relative',
                     }}
                 >
                     <div
@@ -513,9 +532,23 @@ export default function SchoolInspectionForm({
                                 progressPct === 100
                                     ? '#16a34a'
                                     : '#2563eb',
-                            transition: 'width .25s',
+                            transition: 'width .3s ease',
+                            borderRadius: 999,
                         }}
                     />
+                </div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: 8,
+                    fontSize: 12,
+                    color: '#64748b',
+                }}>
+                    <span>Progress: {filledCount} of {totalCount} fields</span>
+                    <span style={{ fontWeight: 600, color: progressPct === 100 ? '#16a34a' : '#2563eb' }}>
+                        {Math.round(progressPct)}%
+                    </span>
                 </div>
             </div>
 
@@ -525,33 +558,53 @@ export default function SchoolInspectionForm({
                 <>
                     <details open style={sectionBoxStyle}>
                         <summary
-                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                            style={{ 
+                                fontWeight: 600, 
+                                fontSize: 16,
+                                cursor: 'pointer',
+                                color: '#0f172a',
+                                marginBottom: 12,
+                                padding: '4px 0',
+                                listStyle: 'none',
+                            }}
                         >
                             Facilities
                         </summary>
                         <p
                             style={{
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: '#64748b',
+                                marginBottom: 16,
+                                lineHeight: 1.5,
                             }}
                         >
                             Select if available and rate condition from 1–5.
                         </p>
-                        {facilities.map(renderField)}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                            {facilities.map(renderField)}
+                        </div>
                     </details>
 
                     <details open style={sectionBoxStyle}>
                         <summary
-                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                            style={{ 
+                                fontWeight: 600, 
+                                fontSize: 16,
+                                cursor: 'pointer',
+                                color: '#0f172a',
+                                marginBottom: 12,
+                                padding: '4px 0',
+                                listStyle: 'none',
+                            }}
                         >
                             Capacity
                         </summary>
                         <p
                             style={{
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: '#64748b',
-                                marginTop: 4,
-                                marginBottom: 12,
+                                marginBottom: 16,
+                                lineHeight: 1.5,
                             }}
                         >
                             Enter basic counts for classrooms, learners, seats
@@ -564,16 +617,24 @@ export default function SchoolInspectionForm({
 
                     <details open style={sectionBoxStyle}>
                         <summary
-                            style={{ fontWeight: 600, cursor: 'pointer' }}
+                            style={{ 
+                                fontWeight: 600, 
+                                fontSize: 16,
+                                cursor: 'pointer',
+                                color: '#0f172a',
+                                marginBottom: 12,
+                                padding: '4px 0',
+                                listStyle: 'none',
+                            }}
                         >
                             Sanitation & staffing
                         </summary>
                         <p
                             style={{
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: '#64748b',
-                                marginTop: 4,
-                                marginBottom: 12,
+                                marginBottom: 16,
+                                lineHeight: 1.5,
                             }}
                         >
                             Report toilets per group. Total toilets is
@@ -582,29 +643,48 @@ export default function SchoolInspectionForm({
                         <div style={sectionGridStyle}>
                             {sanitation.map(renderField)}
                         </div>
-                        <strong
+                        <div
                             style={{
-                                display: 'block',
-                                marginTop: 10,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                marginTop: 16,
+                                padding: '12px 16px',
+                                background: '#eff6ff',
+                                borderRadius: 8,
+                                border: '1px solid #bfdbfe',
                             }}
                         >
-                            Total toilets: {totalToilets}
-                        </strong>
+                            <strong style={{ fontSize: 14, color: '#1e40af' }}>
+                                Total toilets: 
+                            </strong>
+                            <span style={{ 
+                                fontSize: 16, 
+                                fontWeight: 700, 
+                                color: '#2563eb' 
+                            }}>
+                                {totalToilets}
+                            </span>
+                        </div>
                     </details>
 
                     <div
                         style={{
                             marginTop: '2rem',
+                            paddingTop: '1.5rem',
+                            borderTop: '2px solid #e5e7eb',
                             display: 'flex',
                             justifyContent: 'flex-end',
+                            gap: 12,
                         }}
                     >
                         <Button
                             primary
                             onClick={handleSubmit}
                             disabled={loading}
+                            large
                         >
-                            Submit inspection
+                            {loading ? 'Submitting...' : 'Submit inspection'}
                         </Button>
                     </div>
 
