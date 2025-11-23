@@ -518,6 +518,22 @@ export default function EditInspectionForm({
         // Success feedback is shown via AlertBar, no need for alert
     }
 
+    const handleReset = () => {
+        if (
+            !window.confirm(
+                i18n.t('Are you sure you want to reset all changes? All unsaved modifications will be lost.')
+            )
+        ) {
+            return
+        }
+
+        // Reset formState to originalFormState
+        setFormState({ ...originalFormState })
+        setErrors({})
+        setMissingRequiredLabels([])
+        setShowMissingPopup(false)
+    }
+
     const handleDelete = async () => {
         if (!eventId) {
             alert('Missing eventId for delete')
@@ -1100,6 +1116,13 @@ export default function EditInspectionForm({
                             }}
                         >
                             <div style={{ display: 'flex', gap: 8 }}>
+                                <Button
+                                    onClick={handleReset}
+                                    disabled={saving || deleting}
+                                    large
+                                >
+                                    {i18n.t('Reset changes')}
+                                </Button>
                                 <Button
                                     primary
                                     onClick={handleSave}

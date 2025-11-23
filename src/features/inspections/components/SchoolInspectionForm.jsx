@@ -63,9 +63,16 @@ const saveDraft = (orgUnitId, state) => {
     }
 }
 
- // not used atm
 const clearDraft = orgUnitId => {
     if (typeof window === 'undefined') return
+    const key = getDraftKey(orgUnitId)
+    if (!key) return
+    try {
+        window.localStorage.removeItem(key)
+    } catch (e) {
+        console.warn('Failed to clear draft form state', e)
+    }
+}if (typeof window === 'undefined') return
     const key = getDraftKey(orgUnitId)
     if (!key) return
     try {
@@ -385,6 +392,24 @@ export default function SchoolInspectionForm({
 
         const ok = Object.keys(errorsFound).length === 0
         return { ok, normalizedState }
+    }
+
+    const handleReset = () => {
+        if (
+            !window.confirm(
+                i18n.t('Are you sure you want to reset the form? All entered data will be lost.')
+            )
+        ) {
+            return
+        }
+
+        setFormState({})
+        setErrors({})
+        setMissingRequiredLabels([])
+        setShowMissingPopup(false)
+        if (orgUnitId) {
+            clearDraft(orgUnitId)
+        }
     }
 
     const handleSubmit = async () => {
@@ -885,6 +910,13 @@ export default function SchoolInspectionForm({
                         }}
                         className={formStyles.submitButtonContainer}
                     >
+                        <Button
+                            onClick={handleReset}
+                            disabled={loading}
+                            large
+                        >
+                            {i18n.t('Reset form')}
+                        </Button>
                         <Button
                             primary
                             onClick={handleSubmit}
