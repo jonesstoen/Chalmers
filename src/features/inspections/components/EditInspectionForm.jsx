@@ -248,8 +248,18 @@ export default function EditInspectionForm({
                     next[field.id] = !Number.isNaN(n) ? n > 0 : null
                 }
             } else {
-                next[field.id] =
-                    raw === undefined || raw === null ? '' : raw
+                // For numeric fields, normalize to string format for consistency
+                if (raw === undefined || raw === null || raw === '') {
+                    next[field.id] = ''
+                } else {
+                    const num = Number(raw)
+                    // If it's a valid number, store as string to match how handleChange stores it
+                    if (!Number.isNaN(num)) {
+                        next[field.id] = String(num)
+                    } else {
+                        next[field.id] = String(raw)
+                    }
+                }
             }
 
             if (field.child_query) {
@@ -259,7 +269,15 @@ export default function EditInspectionForm({
                     childRaw !== null &&
                     childRaw !== ''
                 ) {
-                    next[field.child_query.id] = childRaw
+                    // Normalize child values too (condition ratings are numbers)
+                    const childNum = Number(childRaw)
+                    if (!Number.isNaN(childNum)) {
+                        next[field.child_query.id] = String(childNum)
+                    } else {
+                        next[field.child_query.id] = String(childRaw)
+                    }
+                } else {
+                    next[field.child_query.id] = ''
                 }
             }
         })
