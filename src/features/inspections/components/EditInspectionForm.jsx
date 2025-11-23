@@ -287,7 +287,21 @@ export default function EditInspectionForm({
         : 'Not set'
 
     const handleChange = (id, value) => {
-        const newValue = normalizeChange(id, value)
+        // Normalize the value using the same logic as when loading
+        let newValue = normalizeChange(id, value)
+        
+        // For numeric fields, ensure consistent storage format
+        // If it's a number or numeric string, store as string (matching how originals are stored)
+        const field = SCHOOL_INSPECTION_FIELDS.find(f => f.id === id)
+        if (field && field.type !== 'BOOLEAN') {
+            const num = Number(newValue)
+            if (!Number.isNaN(num) && newValue !== '' && newValue !== null) {
+                newValue = String(num) // Store as string to match original format
+            } else if (newValue === '' || newValue === null || newValue === undefined) {
+                newValue = '' // Consistent empty value
+            }
+        }
+        
         setFormState(prev => ({
             ...prev,
             [id]: newValue,
