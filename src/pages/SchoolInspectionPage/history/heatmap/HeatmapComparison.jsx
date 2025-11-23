@@ -4,6 +4,7 @@ import { useLocalRatios } from "./useLocalRatios"
 import InspectionContext from "../../../../context/InspectionContext"
 import RatioCard from "./RatioCard"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"
+import styles from './HeatmapComparison.module.css'
 
 const RATIO_KEYS = [
   { key: "seatsToLearner", label: "Learners / Seat", threshold: v => v <= 1 },
@@ -71,36 +72,19 @@ console.log("REMOTE RAW", remoteData);
     const hasLocalSubmission = localDataArray?.length > 0
     const usingFallback = !hasLocalSubmission
 
-    const columnStyle = {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "1rem",
-    }
-
-    const cardWrapperStyle = { width: "120px", height: "120px" }
-
     return (
         <>
-            <div style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}>
+            <div className={styles.legendContainer}>
                 <FullHeatmapLegend />
             </div>
 
-            <div
-                style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr",
-                    gap: "2rem",
-                    paddingTop: "1rem",
-                    justifyItems: "center",
-                }}
-            >
+            <div className={styles.grid}>
                 {/* MOST RECENT REMOTE */}
-                <div style={columnStyle}>
+                <div className={styles.column}>
                     <h4>Most Recent Inspection</h4>
 
                     {RATIO_KEYS.map(({ key, label }) => (
-                        <div key={key} style={cardWrapperStyle}>
+                        <div key={key} className={styles.cardWrapper}>
                             <RatioCard
                                 ratioKey={key}
                                 label={label}
@@ -112,7 +96,7 @@ console.log("REMOTE RAW", remoteData);
                 </div>
 
                 {/* CHANGE PERCENT */}
-                <div style={columnStyle}>
+                <div className={styles.column}>
                     <h4>
                         {usingFallback
                             ? "Change Since Previous Inspection"
@@ -124,7 +108,7 @@ console.log("REMOTE RAW", remoteData);
                         const curr = localData?.ratios[key]
 
                         if (isNaN(prev) || isNaN(curr))
-                            return <div key={key} style={cardWrapperStyle}>N/A</div>
+                            return <div key={key} className={styles.cardWrapper}>N/A</div>
 
                         const percent = ((curr - prev) / prev) * 100
                         const sign = percent >= 0 ? "+" : ""
@@ -133,15 +117,7 @@ console.log("REMOTE RAW", remoteData);
                         return (
                             <div
                                 key={key}
-                                style={{
-                                    ...cardWrapperStyle,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontWeight: "bold",
-                                    fontSize: "1rem",
-                                    color: good ? "green" : "red",
-                                }}
+                                className={`${styles.cardWrapper} ${styles.percentCard} ${good ? styles.percentCardGood : styles.percentCardBad}`}
                             >
                                 {sign}{percent.toFixed(0)}%
                             </div>
@@ -150,11 +126,11 @@ console.log("REMOTE RAW", remoteData);
                 </div>
 
                 {/* LOCAL OR FALLBACK */}
-                <div style={columnStyle}>
+                <div className={styles.column}>
                     <h4>{hasLocalSubmission ? "Just Submitted" : "Previous Inspection"}</h4>
 
                     {RATIO_KEYS.map(({ key, label }) => (
-                        <div key={key} style={cardWrapperStyle}>
+                        <div key={key} className={styles.cardWrapper}>
                             <RatioCard
                                 ratioKey={key}
                                 label={label}
