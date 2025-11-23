@@ -1,0 +1,31 @@
+.headerContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 6px 10px 6px;
+}
+
+.rootButtons {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+}
+
+.rootButton {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.rootButtonActive {
+    border: 1px solid #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.noRootsMessage {
+    padding: 8px;
+    color: #6b7280;
+}
+

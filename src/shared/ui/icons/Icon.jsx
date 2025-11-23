@@ -1,5 +1,6 @@
 // shared/ui/icons/Icon.jsx
 import React from 'react'
+import styles from './Icon.module.css'
 
 // Import SVG files as URLs (DHIS2 build system imports SVGs as URLs, not React components)
 import ChairIconUrl from './chair.svg'
@@ -42,13 +43,10 @@ export default function Icon({ name, size = 20, color = 'currentColor', style = 
     
     return (
         <span
+            className={styles.iconContainer}
             style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 width: size,
                 height: size,
-                flexShrink: 0,
                 ...style,
             }}
         >
@@ -57,10 +55,8 @@ export default function Icon({ name, size = 20, color = 'currentColor', style = 
                 alt={name}
                 width={size}
                 height={size}
+                className={styles.iconImage}
                 style={{
-                    display: 'block',
-                    width: size,
-                    height: size,
                     filter: colorFilter || 'none',
                 }}
             />
@@ -90,9 +86,8 @@ export function CombinedIcon({ icons = [], size = 20, gap = 4, style = {} }) {
     
     return (
         <span
+            className={styles.combinedIconContainer}
             style={{
-                display: 'inline-flex',
-                alignItems: 'center',
                 gap: gap,
                 ...style,
             }}
