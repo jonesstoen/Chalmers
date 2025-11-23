@@ -117,7 +117,7 @@ function InspectionPanel({
 
     return (
         <>
-            <div style={{ marginBottom: 16 }}>
+            <div className={pageClasses.tabBarContainer}>
                 <TabBar>
                     <Tab
                         selected={activeTab === 'submit'}

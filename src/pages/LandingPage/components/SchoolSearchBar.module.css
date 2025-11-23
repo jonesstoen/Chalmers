@@ -3,19 +3,6 @@
     position: relative;
 }
 
-.searchInputWrapper {
-    padding: 8px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    background: #ffffff;
-    transition: all 0.2s ease;
-}
-
-.searchInputWrapper:focus-within {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
 .dropdown {
     position: absolute;
     top: 100%;

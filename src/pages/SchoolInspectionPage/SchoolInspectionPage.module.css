@@ -97,9 +97,13 @@
     width: 100%;
     position: relative;
     margin-bottom: 24px;
-    padding: 16px;
+}
+
+.tabBarContainer {
+    margin-bottom: 16px;
+    padding: 8px;
     background: #ffffff;
-    border-radius: 12px;
     border: 2px solid #e5e7eb;
+    border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }

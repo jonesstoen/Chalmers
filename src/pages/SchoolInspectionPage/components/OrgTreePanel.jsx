@@ -180,11 +180,13 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
     if (!currentRootId) {
         return (
             <aside className={classes.sidebar}>
-                <div className={classes.sidebarHeader}>
-                    {i18n.t('Organisation units')}
-                </div>
-                <div className={styles.noRootsMessage}>
-                    {i18n.t('No roots available')}
+                <div className={styles.panelFrame}>
+                    <div className={classes.sidebarHeader}>
+                        {i18n.t('Organisation units')}
+                    </div>
+                    <div className={styles.noRootsMessage}>
+                        {i18n.t('No roots available')}
+                    </div>
                 </div>
             </aside>
         )
@@ -192,34 +194,36 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
 
     return (
         <aside className={classes.sidebar}>
-            <div className={styles.headerContainer}>
-                <div className={classes.sidebarHeader}>
-                    {i18n.t('Organisation units')}
+            <div className={styles.panelFrame}>
+                <div className={styles.headerContainer}>
+                    <div className={classes.sidebarHeader}>
+                        {i18n.t('Organisation units')}
+                    </div>
+                    <div className={styles.rootButtons}>
+                        {roots.map((r) => (
+                            <button
+                                key={r.id}
+                                onClick={() => switchRoot(r.id)}
+                                className={`${styles.rootButton} ${currentRootId === r.id ? styles.rootButtonActive : ''}`}
+                            >
+                                {r.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div className={styles.rootButtons}>
-                    {roots.map((r) => (
-                        <button
-                            key={r.id}
-                            onClick={() => switchRoot(r.id)}
-                            className={`${styles.rootButton} ${currentRootId === r.id ? styles.rootButtonActive : ''}`}
-                        >
-                            {r.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
-            <div className={classes.treeScroll}>
-                <OrganisationUnitTree
-                    key={currentRootId}
-                    roots={[currentRootId]}
-                    selected={selectedPaths}
-                    expanded={expanded}
-                    singleSelection
-                    onChange={handleChange}
-                    handleExpand={handleExpand}
-                    handleCollapse={handleCollapse}
-                />
+                <div className={classes.treeScroll}>
+                    <OrganisationUnitTree
+                        key={currentRootId}
+                        roots={[currentRootId]}
+                        selected={selectedPaths}
+                        expanded={expanded}
+                        singleSelection
+                        onChange={handleChange}
+                        handleExpand={handleExpand}
+                        handleCollapse={handleCollapse}
+                    />
+                </div>
             </div>
         </aside>
     )
