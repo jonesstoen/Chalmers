@@ -72,14 +72,6 @@ const clearDraft = orgUnitId => {
     } catch (e) {
         console.warn('Failed to clear draft form state', e)
     }
-}if (typeof window === 'undefined') return
-    const key = getDraftKey(orgUnitId)
-    if (!key) return
-    try {
-        window.localStorage.removeItem(key)
-    } catch (e) {
-        console.warn('Failed to clear draft form state', e)
-    }
 }
 
 // --- layout styles ---
