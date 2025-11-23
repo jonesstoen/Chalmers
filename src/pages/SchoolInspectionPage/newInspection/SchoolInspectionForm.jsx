@@ -1,4 +1,4 @@
-// features/inspections/components/SchoolInspectionForm.jsx
+// pages/SchoolInspectionPage/newInspection/SchoolInspectionForm.jsx
 
 import React, { useContext, useEffect, useState } from 'react'
 import i18n from '@dhis2/d2-i18n'
@@ -13,8 +13,8 @@ import {
     IconError16,
     IconCross16,
 } from '@dhis2/ui'
-import usePostSchoolInspectionEvent from '../hooks/usePostSchoolInspectionEvent'
-import InspectionContext from '../../../context/InspectionContext'
+import usePostSchoolInspectionEvent from './hooks/usePostSchoolInspectionEvent'
+import InspectionContext from '../../../../context/InspectionContext'
 import formStyles from './SchoolInspectionForm.module.css'
 import {
     SCHOOL_INSPECTION_FIELDS,
@@ -22,17 +22,17 @@ import {
     CAPACITY_IDS,
     SANITATION_IDS,
     TOTAL_TOILETS_ID,
-} from '../configs/schoolInspectionConfig'
+} from './configs/schoolInspectionConfig'
 import {
     computeTotalToilets,
     validateSchoolInspection,
     computeProgress,
     normalizeChange,
-} from '../configs/inspectionFormUtils'
-import BooleanChoiceField from './BooleanChoiceField'
-import ConditionRatingField from './ConditionRatingField'
-import Icon, { CombinedIcon } from '../../../shared/ui/icons/Icon'
-import { FIELD_ICONS } from '../configs/fieldIcons'
+} from './configs/inspectionFormUtils'
+import BooleanChoiceField from './components/BooleanChoiceField'
+import ConditionRatingField from './components/ConditionRatingField'
+import Icon, { CombinedIcon } from '../../../../shared/ui/icons/Icon'
+import { FIELD_ICONS } from './configs/fieldIcons'
 
 const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
 
