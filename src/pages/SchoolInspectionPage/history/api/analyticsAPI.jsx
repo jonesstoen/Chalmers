@@ -1,6 +1,6 @@
 // services/api/analyticsAPI.jsx
 import { useMemo } from 'react'
-import {useCacheableQuery} from "../../../shared/cache/cacheableQuery";
+import {useCacheableQuery} from "../../../../shared/cache/cacheableQuery";
 
 const EVENTS_ANALYTICS_QUERY = {
     analytics: {

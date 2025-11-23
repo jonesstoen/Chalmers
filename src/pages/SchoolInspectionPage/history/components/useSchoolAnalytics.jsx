@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
+import { useCacheableQuery } from "../../../../shared/cache/cacheableQuery"
 
 // ---- STATIC QUERY (top-level, no hooks!) ----
 const SCHOOL_ANALYTICS_QUERY = {
