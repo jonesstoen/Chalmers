@@ -1,0 +1,169 @@
+.pageContainer {
+    background: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.onlineStatus {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 12px;
+    color: #16a34a;
+}
+
+.onlineStatusOffline {
+    color: #b45309;
+}
+
+.mainContainer {
+    width: 100%;
+    max-width: 800px;
+    padding: 48px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.welcomeSection {
+    text-align: center;
+}
+
+.welcomeTitle {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #0f172a;
+}
+
+.welcomeText {
+    margin: 0;
+    color: #475569;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.actionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.primaryButton {
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s;
+}
+
+.primaryButton:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+.secondaryButton {
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #0f172a;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.secondaryButton:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.secondaryButtonSubtext {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.searchContainer {
+    width: 100%;
+    margin-top: -4px;
+    position: relative;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.progressSection {
+    margin-top: 8px;
+}
+
+.progressHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.progressTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.progressStats {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.progressBar {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progressBarFill {
+    height: 100%;
+    background: #2563eb;
+    transition: width 0.25s ease-out;
+}
+
+.progressBarFillComplete {
+    background: #16a34a;
+}
+
