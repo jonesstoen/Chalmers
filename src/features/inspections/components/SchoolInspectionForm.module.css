@@ -1,0 +1,26 @@
+/* Mobile-first responsive styles for SchoolInspectionForm */
+
+.submitButtonContainer {
+    /* Base styles handled inline */
+}
+
+.capacityGrid,
+.sanitationGrid {
+    /* Base styles handled inline */
+}
+
+@media (max-width: 600px) {
+    .submitButtonContainer {
+        justify-content: stretch !important;
+    }
+    
+    .submitButtonContainer button {
+        width: 100%;
+    }
+    
+    .capacityGrid,
+    .sanitationGrid {
+        max-width: 100% !important;
+    }
+}
+

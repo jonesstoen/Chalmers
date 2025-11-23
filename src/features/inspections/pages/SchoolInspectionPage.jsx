@@ -8,7 +8,7 @@ import React, {
     useRef,
 } from 'react'
 import i18n from '@dhis2/d2-i18n'
-import { TabBar, Tab, NoticeBox, Tag } from '@dhis2/ui'
+import { TabBar, Tab, NoticeBox, Tag, CircularLoader } from '@dhis2/ui'
 import { useNavigate, useLocation } from 'react-router-dom'
 import classes from '../../../App/App.module.css'
 import pageClasses from './SchoolInspectionPage.module.css'
@@ -30,19 +30,24 @@ function EventSummary({ event }) {
     return (
         <div
             style={{
-                margin: '12px 0',
-                padding: '10px 12px',
-                background: '#fff',
-                border: '1px solid #e5e7eb',
-                borderRadius: 8,
+                margin: '16px 0',
+                padding: '16px',
+                background: '#ffffff',
+                border: '2px solid #e5e7eb',
+                borderRadius: 12,
                 display: 'flex',
                 gap: 12,
                 alignItems: 'center',
                 flexWrap: 'wrap',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
             }}
         >
-            <strong style={{ marginRight: 8 }}>
-                {i18n.t('Selected event')}
+            <strong style={{ 
+                marginRight: 8,
+                fontSize: 14,
+                color: '#0f172a',
+            }}>
+                {i18n.t('Selected event')}:
             </strong>
             <Tag positive>{date.toLocaleDateString()}</Tag>
             <Tag>
@@ -58,7 +63,11 @@ function EventSummary({ event }) {
                     {i18n.t('Seats')}: {event.jcC1uz56IpY ?? '–'}
                 </Tag>
             )}
-            <span style={{ marginLeft: 'auto', color: '#64748b' }}>
+            <span style={{ 
+                marginLeft: 'auto', 
+                color: '#64748b',
+                fontSize: 12,
+            }}>
                 ID: {event.psi}
             </span>
         </div>
@@ -73,15 +82,16 @@ function Header({ isCluster, data, onBack }) {
     const orgUnitId = ou?.id
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                marginBottom: 10,
-            }}
-        >
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    marginBottom: 16,
+                    flexWrap: 'wrap',
+                }}
+            >
             <div
                 style={{
                     display: 'flex',
@@ -89,18 +99,27 @@ function Header({ isCluster, data, onBack }) {
                     gap: 12,
                 }}
             >
-                <h2 style={{ margin: 0 }}>
+                <h2 style={{ 
+                    margin: 0,
+                    fontSize: 24,
+                    fontWeight: 600,
+                    color: '#0f172a',
+                }}>
                     {i18n.t(isCluster ? analytics : inspection)}
                 </h2>
                 {orgUnitId && (
                     <>
                         <span style={{ color: '#64748b' }}>•</span>
-                        <div style={{ color: '#334155' }}>
+                        <div style={{ 
+                            color: '#334155',
+                            fontSize: 16,
+                        }}>
                             <strong>{ou?.displayName || ou?.name}</strong>
                             <span
                                 style={{
                                     marginLeft: 8,
                                     color: '#64748b',
+                                    fontSize: 14,
                                 }}
                             >
                                 ({orgUnitId})
@@ -115,8 +134,10 @@ function Header({ isCluster, data, onBack }) {
                     type="button"
                     className={pageClasses.backButton}
                     onClick={onBack}
+                    aria-label={i18n.t('Back to overview')}
                 >
-                    ← {i18n.t('Back to overview')}
+                    <span style={{ fontSize: 18, lineHeight: 1 }}>←</span>
+                    <span>{i18n.t('Back to overview')}</span>
                 </button>
             )}
         </div>
@@ -146,26 +167,28 @@ function InspectionPanel({
 
     return (
         <>
-            <TabBar>
-                <Tab
-                    selected={activeTab === 'submit'}
-                    onClick={() => setActiveTab('submit')}
-                >
-                    {i18n.t('New inspection')}
-                </Tab>
-                <Tab
-                    selected={activeTab === 'edit'}
-                    onClick={() => setActiveTab('edit')}
-                >
-                    {i18n.t('Edit inspections')}
-                </Tab>
-                <Tab
-                    selected={activeTab === 'tldr'}
-                    onClick={() => setActiveTab('tldr')}
-                >
-                    {i18n.t('History')}
-                </Tab>
-            </TabBar>
+            <div style={{ marginBottom: 16 }}>
+                <TabBar>
+                    <Tab
+                        selected={activeTab === 'submit'}
+                        onClick={() => setActiveTab('submit')}
+                    >
+                        {i18n.t('New inspection')}
+                    </Tab>
+                    <Tab
+                        selected={activeTab === 'edit'}
+                        onClick={() => setActiveTab('edit')}
+                    >
+                        {i18n.t('Edit inspections')}
+                    </Tab>
+                    <Tab
+                        selected={activeTab === 'tldr'}
+                        onClick={() => setActiveTab('tldr')}
+                    >
+                        {i18n.t('History')}
+                    </Tab>
+                </TabBar>
+            </div>
 
 
             <div style={{ marginTop: 16 }}>
@@ -325,9 +348,13 @@ export default function SchoolInspectionPage() {
                         type="button"
                         className={classes.sidebarMobileToggle}
                         onClick={() => setMobileSidebarOpen(open => !open)}
+                        aria-expanded={mobileSidebarOpen}
+                        aria-label={mobileSidebarOpen ? i18n.t('Hide organisation units') : i18n.t('Show organisation units')}
                     >
-                        <span>{i18n.t('Organisation units')}</span>
-                        <span>{mobileSidebarOpen ? '▲' : '▼'}</span>
+                        <span style={{ fontWeight: 600 }}>{i18n.t('Organisation units')}</span>
+                        <span style={{ fontSize: 12, transition: 'transform 0.2s', transform: mobileSidebarOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                            ▼
+                        </span>
                     </button>
 
                     {mobileSidebarOpen && (
@@ -364,9 +391,20 @@ export default function SchoolInspectionPage() {
                     }
                     if (orgUnitLoading) {
                         return (
-                            <NoticeBox>
-                                {i18n.t('Loading school information...')}
-                            </NoticeBox>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 12,
+                                padding: '20px',
+                                background: '#ffffff',
+                                borderRadius: 12,
+                                border: '2px solid #e5e7eb',
+                            }}>
+                                <CircularLoader small />
+                                <span style={{ color: '#475569', fontWeight: 500 }}>
+                                    {i18n.t('Loading school information...')}
+                                </span>
+                            </div>
                         )
                     }
                     if (orgUnitError) {
