@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { Input, CircularLoader, NoticeBox } from '@dhis2/ui'
-import { useSchoolsByRegions } from '../../inspections/hooks/useSchoolsAPi'
+import { useSchoolsByRegions } from '../../../features/inspections/hooks/useSchoolsAPi'
 import {
     IconWorld16,
     IconFolder16,

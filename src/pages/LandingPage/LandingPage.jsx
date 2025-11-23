@@ -1,10 +1,10 @@
-// features/home/LandingPage.jsx
+// pages/LandingPage/LandingPage.jsx
 import React, { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'
-import useFetchAnalytics from '../analytics/api/analyticsAPI'
+import useFetchAnalytics from '../../features/analytics/api/analyticsAPI'
 import MetricTile from './MetricTile'
-import SchoolSearchBar from '../inspections/components/SchoolSearchBar'
+import SchoolSearchBar from './components/SchoolSearchBar'
 
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'

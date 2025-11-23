@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import LandingPage from '../features/home/LandingPage'
+import LandingPage from '../pages/LandingPage/LandingPage'
 
 import InspectionContext from '../context/InspectionContext'
 import AttributeContext from '../context/AttributeContext'
