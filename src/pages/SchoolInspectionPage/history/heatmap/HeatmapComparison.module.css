@@ -1,44 +1,64 @@
 .legendContainer {
     display: flex;
     justify-content: center;
-    margin-top: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem;
-    padding-top: 1rem;
-    justify-items: center;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding-top: 0.5rem;
 }
 
 .column {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.column h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: center;
 }
 
 .cardWrapper {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .percentCard {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    min-height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    font-size: 1rem;
+    font-weight: 600;
+    font-size: 18px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
 }
 
 .percentCardGood {
-    color: green;
+    color: #059669;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
 }
 
 .percentCardBad {
-    color: red;
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
 }
 

@@ -20,9 +20,6 @@ function Result({ OrgId }) {
 
   const submissionDate = new Date().toLocaleDateString("en-GB")
 
-  // All possible data elements (full form)
-  const allDataElements = SCHOOL_INSPECTION_FIELDS.map(f => f.id)
-
   // Organize data elements by category
   const organizedFields = useMemo(() => {
     const facilities = SCHOOL_INSPECTION_FIELDS.filter(f => FACILITY_IDS.includes(f.id))
@@ -51,84 +48,84 @@ function Result({ OrgId }) {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Ratio Comparison Section */}
-      <section className={styles.section}>
+    <div className={styles.pageContainer}>
+      {/* Key Ratios Section - Prominent at top */}
+      <section className={styles.ratiosSection}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Key Ratios Comparison</h2>
-          <p className={styles.sectionDescription}>
-            Compare ratios across inspections to track changes over time
+          <h2 className={styles.mainTitle}>Key Performance Ratios</h2>
+          <p className={styles.mainDescription}>
+            Critical ratios that indicate school capacity and resource adequacy
           </p>
         </div>
-        <HeatmapComparison schoolId={OrgId} />
-      </section>
-
-      {/* Facilities Section */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Facilities & Condition</h2>
-          <p className={styles.sectionDescription}>
-            Track availability and condition ratings for school facilities
-          </p>
-        </div>
-        <div className={styles.graphsGrid}>
-          {organizedFields.facilities.map((field) => (
-            <GraphCard
-              key={field.id}
-              schoolId={OrgId}
-              dataElement={field.id}
-              localPoints={getLocalPoints(field.id)}
-            />
-          ))}
+        <div className={styles.ratiosContainer}>
+          <HeatmapComparison schoolId={OrgId} />
         </div>
       </section>
 
-      {/* Capacity Section */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Capacity Metrics</h2>
-          <p className={styles.sectionDescription}>
-            Monitor classroom capacity, learners, seats, and staffing levels
+      {/* Detailed Metrics - Organized by Category */}
+      <section className={styles.metricsSection}>
+        <h2 className={styles.metricsTitle}>Detailed Metrics Over Time</h2>
+        
+        {/* Capacity Metrics */}
+        <div className={styles.categoryGroup}>
+          <h3 className={styles.categoryTitle}>Capacity & Resources</h3>
+          <p className={styles.categoryDescription}>
+            Classrooms, learners, seats, and teaching staff
           </p>
+          <div className={styles.metricsGrid}>
+            {organizedFields.capacity.map((field) => (
+              <GraphCard
+                key={field.id}
+                schoolId={OrgId}
+                dataElement={field.id}
+                localPoints={getLocalPoints(field.id)}
+              />
+            ))}
+          </div>
         </div>
-        <div className={styles.graphsGrid}>
-          {organizedFields.capacity.map((field) => (
-            <GraphCard
-              key={field.id}
-              schoolId={OrgId}
-              dataElement={field.id}
-              localPoints={getLocalPoints(field.id)}
-            />
-          ))}
-        </div>
-      </section>
 
-      {/* Sanitation Section */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Sanitation</h2>
-          <p className={styles.sectionDescription}>
-            Track toilet facilities for teachers, boys, and girls
+        {/* Sanitation Metrics */}
+        <div className={styles.categoryGroup}>
+          <h3 className={styles.categoryTitle}>Sanitation Facilities</h3>
+          <p className={styles.categoryDescription}>
+            Toilet facilities for teachers, boys, and girls
           </p>
+          <div className={styles.metricsGrid}>
+            {organizedFields.sanitation.map((field) => (
+              <GraphCard
+                key={field.id}
+                schoolId={OrgId}
+                dataElement={field.id}
+                localPoints={getLocalPoints(field.id)}
+              />
+            ))}
+            {results.length > 0 && submittedMap[SANITATION_IDS[0]] && (
+              <GraphCard
+                key={TOTAL_TOILETS_ID}
+                schoolId={OrgId}
+                dataElement={TOTAL_TOILETS_ID}
+                localPoints={getLocalPoints(TOTAL_TOILETS_ID)}
+              />
+            )}
+          </div>
         </div>
-        <div className={styles.graphsGrid}>
-          {organizedFields.sanitation.map((field) => (
-            <GraphCard
-              key={field.id}
-              schoolId={OrgId}
-              dataElement={field.id}
-              localPoints={getLocalPoints(field.id)}
-            />
-          ))}
-          {/* Show total toilets if we have any sanitation data */}
-          {results.length > 0 && submittedMap[SANITATION_IDS[0]] && (
-            <GraphCard
-              key={TOTAL_TOILETS_ID}
-              schoolId={OrgId}
-              dataElement={TOTAL_TOILETS_ID}
-              localPoints={getLocalPoints(TOTAL_TOILETS_ID)}
-            />
-          )}
+
+        {/* Facilities Metrics */}
+        <div className={styles.categoryGroup}>
+          <h3 className={styles.categoryTitle}>Facilities & Condition</h3>
+          <p className={styles.categoryDescription}>
+            Availability and condition of school facilities
+          </p>
+          <div className={styles.metricsGrid}>
+            {organizedFields.facilities.map((field) => (
+              <GraphCard
+                key={field.id}
+                schoolId={OrgId}
+                dataElement={field.id}
+                localPoints={getLocalPoints(field.id)}
+              />
+            ))}
+          </div>
         </div>
       </section>
     </div>
@@ -141,12 +138,15 @@ function GraphCard({ schoolId, dataElement, localPoints }) {
 
   return (
     <div className={styles.graphCard}>
-      <SchoolGraph
-        schoolId={schoolId}
-        dataElements={[dataElement]}
-        label={name}
-        localPoints={localPoints}
-      />
+      <h4 className={styles.graphCardTitle}>{name}</h4>
+      <div className={styles.graphCardContent}>
+        <SchoolGraph
+          schoolId={schoolId}
+          dataElements={[dataElement]}
+          label={name}
+          localPoints={localPoints}
+        />
+      </div>
     </div>
   )
 }
