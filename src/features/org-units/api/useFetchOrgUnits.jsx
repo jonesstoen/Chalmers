@@ -2,13 +2,11 @@
 import { useMemo } from "react"
 import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
 
-// ---------------------------------------------------------------------------
-// STATIC QUERY – must be static for DHIS2 useDataQuery
-// ---------------------------------------------------------------------------
+// Query definition - must be static for DHIS2
 const ORG_UNIT_QUERY = {
     ou: {
         resource: "organisationUnits",
-        id: ({ id }) => id, // Function that returns the id from variables
+        id: ({ id }) => id,
         params: () => ({
             fields: [
                 "id",
@@ -25,25 +23,14 @@ const ORG_UNIT_QUERY = {
     },
 }
 
-// ---------------------------------------------------------------------------
-// HOOK
-// ---------------------------------------------------------------------------
 export default function useFetchOrgUnits(orgIds = []) {
-    // Always sanitize the input
     const safeOrgIds = Array.isArray(orgIds) ? orgIds : []
-
-    // Select *one* org unit (same behaviour as your original hook)
-    // Filter out empty strings and null values
     const validIds = safeOrgIds.filter(id => id && typeof id === 'string' && id.trim() !== '')
     const selectedId = validIds.length > 0 ? validIds[0] : null
 
-    // -----------------------------------------------------------------------
-    // VARIABLES — only create when we have a valid selectedId
-    // -----------------------------------------------------------------------
     const variables = useMemo(
         () => {
             if (!selectedId) {
-                // Return empty object - lazy will prevent execution
                 return {}
             }
             return {
@@ -53,9 +40,6 @@ export default function useFetchOrgUnits(orgIds = []) {
         [selectedId]
     )
 
-    // -----------------------------------------------------------------------
-    // DATAKEY — exact same pattern as analytics hook
-    // -----------------------------------------------------------------------
     const dataKey = useMemo(
         () =>
             JSON.stringify({
@@ -65,9 +49,7 @@ export default function useFetchOrgUnits(orgIds = []) {
         [selectedId]
     )
 
-    // -----------------------------------------------------------------------
-    // Make the query — use cacheableQuery (checks cache first, then fetches if needed)
-    // -----------------------------------------------------------------------
+    // Fetch with cache - checks cache first, fetches if missing
     const {
         data: rawData,
         loading,
@@ -75,44 +57,37 @@ export default function useFetchOrgUnits(orgIds = []) {
         refetch,
         source,
     } = useCacheableQuery(
-        "data", // cacheKey
+        "data",
         dataKey,
         ORG_UNIT_QUERY,
         variables,
-        !selectedId // forceLazy: true when no selectedId (skip query)
+        !selectedId // Skip query if no selectedId
     )
     
-    // Extract the org unit from the response
-    // When querying by ID, DHIS2 returns { ou: { organisationUnits: [orgUnit] } } 
-    // We need to extract the org unit from the array that matches our selectedId
+    // DHIS2 sometimes returns { ou: { organisationUnits: [orgUnit] } } instead of { ou: orgUnit }
+    // Extract the actual org unit from the response
     let data = rawData
     if (rawData?.ou) {
-        // Check if ou has organisationUnits array (list response)
         if (rawData.ou.organisationUnits && Array.isArray(rawData.ou.organisationUnits)) {
             if (rawData.ou.organisationUnits.length > 0) {
-                // Find the org unit that matches our selectedId (in case array has multiple)
                 const matchingOu = rawData.ou.organisationUnits.find(ou => ou.id === selectedId) 
-                    || rawData.ou.organisationUnits[0] // Fallback to first if no match
+                    || rawData.ou.organisationUnits[0]
                 
                 data = {
                     ou: matchingOu
                 }
             } else {
-                // Empty array - no data
                 data = { ou: null }
             }
         } else if (rawData.ou.id) {
-            // ou is already the org unit object (single item response)
-            // Use it as is
+            // Already the org unit object, use as-is
             data = rawData
         } else {
-            // Unexpected structure
             console.warn('⚠️ [useFetchOrgUnits] Unexpected data structure:', rawData.ou)
             data = { ou: null }
         }
     }
     
-    // Single consolidated log for debugging
     if (selectedId) {
         console.log('[useFetchOrgUnits]', {
             selectedId,
@@ -122,13 +97,10 @@ export default function useFetchOrgUnits(orgIds = []) {
             isCluster: !!(data?.ou?.children?.length > 0),
             loading,
             error: error?.message,
-            source // Shows if data came from cache or network
+            source
         })
     }
 
-    // -----------------------------------------------------------------------
-    // Output — when no selectedId, behave like "no data"
-    // -----------------------------------------------------------------------
     return {
         data: selectedId ? data : null,
         loading: selectedId ? loading : false,

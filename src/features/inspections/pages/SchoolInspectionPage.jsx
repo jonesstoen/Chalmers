@@ -135,7 +135,7 @@ function InspectionPanel({
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
-    // Defensive check: if we don't have org unit data, show a message
+    // Show loading if org unit data not ready
     if (!ou || !orgUnitId) {
         return (
             <NoticeBox title={i18n.t('Loading school information')}>
