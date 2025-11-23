@@ -1,4 +1,4 @@
-import useFetchOrgUnits from "../../features/org-units/api/useFetchOrgUnits"
+import useFetchOrgUnits from "../../pages/SchoolInspectionPage/api/useFetchOrgUnits"
 
 function useOrgIds(ordID_array){
     const orgUnits = useFetchOrgUnits(ordID_array)
