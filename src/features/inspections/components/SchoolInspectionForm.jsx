@@ -80,7 +80,6 @@ const sectionBoxStyle = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
 }
 
-// Responsive grid - mobile-first: single column on small screens
 // Single column grid - one field per line
 const sectionGridStyle = {
     display: 'grid',
