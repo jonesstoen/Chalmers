@@ -61,6 +61,7 @@
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .changePercent {
@@ -81,5 +82,73 @@
 .changeCardBad {
     border-color: #fecaca;
     background: #fef2f2;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .column {
+        padding: 1rem;
+    }
+    
+    .column h4 {
+        font-size: 14px;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .card {
+        padding: 0.875rem;
+    }
+    
+    .label {
+        font-size: 13px;
+    }
+    
+    .value {
+        font-size: 18px;
+    }
+    
+    .changeCard {
+        padding: 0.875rem;
+    }
+    
+    .changeLabel {
+        font-size: 13px;
+    }
+    
+    .changeValue {
+        font-size: 16px;
+    }
+    
+    .changePercent {
+        font-size: 18px;
+    }
+    
+    .changeAbsolute {
+        font-size: 13px;
+    }
+    
+    .legendContainer {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .column {
+        padding: 0.875rem;
+    }
+    
+    .card {
+        padding: 0.75rem;
+    }
+    
+    .changeCard {
+        padding: 0.75rem;
+    }
 }
 
