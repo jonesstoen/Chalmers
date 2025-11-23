@@ -51,13 +51,15 @@ const getIcon = type => {
 
     return (
         <div className={styles.container}>
-            <Input
-                placeholder="Search for a school or cluster..."
-                value={query}
-                onChange={({ value }) => setQuery(value)}
-                dense={false}
-                aria-label="Search for schools or clusters"
-            />
+            <div className={styles.searchInputWrapper}>
+                <Input
+                    placeholder="Search for a school or cluster..."
+                    value={query}
+                    onChange={({ value }) => setQuery(value)}
+                    dense={false}
+                    aria-label="Search for schools or clusters"
+                />
+            </div>
 
             {query && (
                 <div
