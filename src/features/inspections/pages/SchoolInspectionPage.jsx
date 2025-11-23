@@ -135,26 +135,14 @@ function InspectionPanel({
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
-    // Debug logging
-    console.log('📋 [InspectionPanel] Check:', {
-        hasOu: !!ou,
-        hasOrgUnitId: !!orgUnitId,
-        orgUnitId,
-        orgUnitName,
-        ouKeys: ou ? Object.keys(ou) : []
-    })
-
     // Defensive check: if we don't have org unit data, show a message
     if (!ou || !orgUnitId) {
-        console.log('⚠️ [InspectionPanel] Missing data, showing loading message')
         return (
             <NoticeBox title={i18n.t('Loading school information')}>
                 {i18n.t('Please wait while school information is being loaded...')}
             </NoticeBox>
         )
     }
-    
-    console.log('✅ [InspectionPanel] Has data, rendering form')
 
     return (
         <>
@@ -252,17 +240,6 @@ export default function SchoolInspectionPage() {
     const orgTreePanelRef = useRef(null)
 
     const { data, selectedId, loading: orgUnitLoading, error: orgUnitError } = useFetchOrgUnits(selected)
-    
-    // Debug logging
-    if (selectedId) {
-        console.log('🏫 [SchoolInspectionPage] State:', {
-            selectedId,
-            orgUnitLoading,
-            hasData: !!data,
-            dataOu: data?.ou,
-            orgUnitError: orgUnitError?.message
-        })
-    }
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext) // eslint-disable-line
 
     const navigate = useNavigate()
@@ -308,19 +285,6 @@ export default function SchoolInspectionPage() {
     const ou = data?.ou
     // isAggregate is true if the org unit has children (it's a cluster, not a school)
     const isAggregate = !!(ou?.children && Array.isArray(ou.children) && ou.children.length > 0)
-    
-    // Debug logging
-    if (selectedId) {
-        console.log('🔍 [SchoolInspectionPage] Render check:', {
-            selectedId,
-            orgUnitLoading,
-            hasData: !!data,
-            hasOu: !!data?.ou,
-            ou,
-            isAggregate,
-            orgUnitError: !!orgUnitError
-        })
-    }
 
     const handleBackToLanding = useCallback(() => {
         navigate('/')
@@ -389,22 +353,6 @@ export default function SchoolInspectionPage() {
                 />
 
                 {(() => {
-                    // Debug: Log which branch we're taking
-                    if (selectedId) {
-                        console.log('🎯 [SchoolInspectionPage] Rendering branch:', {
-                            hasSelectedId: !!selectedId,
-                            orgUnitLoading,
-                            hasError: !!orgUnitError,
-                            hasDataOu: !!data?.ou,
-                            isAggregate,
-                            willShow: !selectedId ? 'pick' : 
-                                     orgUnitLoading ? 'loading' :
-                                     orgUnitError ? 'error' :
-                                     data?.ou && isAggregate ? 'analytics' :
-                                     data?.ou && !isAggregate ? 'inspection' : 'no-data'
-                        })
-                    }
-                    
                     if (!selectedId) {
                         return (
                             <NoticeBox title={i18n.t('Pick a School or Cluster')}>

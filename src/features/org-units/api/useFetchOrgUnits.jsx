@@ -67,30 +67,8 @@ export default function useFetchOrgUnits(orgIds = []) {
     )
 
     // -----------------------------------------------------------------------
-    // LAZY MODE — block fetch when no OU is selected
-    // -----------------------------------------------------------------------
-    const lazy = !selectedId
-
-    // Debug logging (remove after fixing)
-    if (selectedId) {
-        console.log('[useFetchOrgUnits] Fetching org unit:', {
-            selectedId,
-            variables,
-            lazy,
-            dataKey
-        })
-    }
-
-    // -----------------------------------------------------------------------
     // Make the query — use static query with variables
     // -----------------------------------------------------------------------
-    console.log('🔍 [useFetchOrgUnits] About to call useDataQuery:', {
-        selectedId,
-        variables,
-        lazy,
-        queryId: variables.id
-    })
-    
     const {
         data: networkData,
         loading,
@@ -99,23 +77,6 @@ export default function useFetchOrgUnits(orgIds = []) {
     } = useDataQuery(ORG_UNIT_QUERY, {
         variables,
         skip: !selectedId, // Skip when no selectedId (instead of lazy)
-    })
-    
-    console.log('📊 [useFetchOrgUnits] useDataQuery result:', {
-        hasNetworkData: !!networkData,
-        networkDataKeys: networkData ? Object.keys(networkData) : [],
-        networkDataOu: networkData?.ou,
-        loading,
-        error: error?.message || error,
-        errorFull: error
-    })
-    
-    // Debug: Log what we're returning
-    console.log('✅ [useFetchOrgUnits] Returning:', {
-        hasData: !!networkData,
-        loading,
-        error: !!error,
-        selectedId
     })
     
     // Extract the org unit from the response
@@ -150,31 +111,16 @@ export default function useFetchOrgUnits(orgIds = []) {
     
     const source = "network"
     
-    console.log('🔧 [useFetchOrgUnits] Data extraction:', {
-        originalKeys: networkData ? Object.keys(networkData) : [],
-        originalOuKeys: networkData?.ou ? Object.keys(networkData.ou) : [],
-        originalOuHasArray: !!(networkData?.ou?.organisationUnits),
-        originalOuArrayLength: networkData?.ou?.organisationUnits?.length,
-        originalOuArrayItems: networkData?.ou?.organisationUnits?.map(ou => ({ id: ou.id, name: ou.name || ou.displayName })) || [],
-        extractedOuKeys: data?.ou ? Object.keys(data.ou) : [],
-        extractedOuId: data?.ou?.id,
-        extractedOuName: data?.ou?.name || data?.ou?.displayName,
-        extractedOuChildren: data?.ou?.children?.length || 0,
-        selectedId // The ID we requested
-    })
-
-    // Debug logging (remove after fixing)
+    // Single consolidated log for debugging
     if (selectedId) {
-        console.log('[useFetchOrgUnits] Query result:', {
+        console.log('[useFetchOrgUnits]', {
             selectedId,
-            hasData: !!data,
-            dataKeys: data ? Object.keys(data) : [],
-            dataOu: data?.ou,
-            dataFull: data, // Log full data structure
+            hasData: !!data?.ou,
+            orgUnitId: data?.ou?.id,
+            orgUnitName: data?.ou?.name || data?.ou?.displayName,
+            isCluster: !!(data?.ou?.children?.length > 0),
             loading,
-            error: error?.message,
-            source,
-            variables
+            error: error?.message
         })
     }
 
