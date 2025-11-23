@@ -1,0 +1,124 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.labelDisabled {
+    color: #94a3b8;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badgeModified {
+    color: #d97706;
+    background: #fef3c7;
+}
+
+.badgeError {
+    color: #b91c1c;
+    background: #fee2e2;
+    margin-left: 4px;
+}
+
+.fieldContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fieldContainerDisabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.ratingContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ratingLabel {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.ratingLabelLeft {
+    margin-right: 4px;
+}
+
+.ratingLabelRight {
+    margin-left: 4px;
+}
+
+.ratingButtons {
+    display: flex;
+    gap: 8px;
+}
+
+.ratingButton {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ratingButtonActive {
+    border: 2px solid #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.ratingButtonDisabled {
+    cursor: not-allowed;
+}
+
+.ratingButton:not(.ratingButtonActive):not(.ratingButtonDisabled):hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.errorMessage {
+    margin: 0;
+    font-size: 12px;
+    color: #b91c1c;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
