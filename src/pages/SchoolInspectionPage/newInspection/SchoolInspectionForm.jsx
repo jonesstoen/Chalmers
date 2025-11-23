@@ -77,15 +77,26 @@ const clearDraft = orgUnitId => {
 
 function NumberField({ label, value = '', onChange, error, iconNames }) {
     const [isFocused, setIsFocused] = React.useState(false)
-    const numericValue = value === '' || value === null || value === undefined ? 0 : Number(value) || 0
+    // Treat blank/null/undefined as 0 for calculations, but preserve blank state
+    const isBlank = value === '' || value === null || value === undefined
+    const numericValue = isBlank ? 0 : Number(value) || 0
 
     const handleIncrement = () => {
-        onChange(String(numericValue + 1))
+        // If blank, go to 0 first, otherwise increment
+        if (isBlank) {
+            onChange('0')
+        } else {
+            onChange(String(numericValue + 1))
+        }
     }
 
     const handleDecrement = () => {
-        // Allow going down to 0
-        onChange(String(Math.max(0, numericValue - 1)))
+        // If blank or 0, stay at 0 (or go to blank if already 0)
+        if (isBlank || numericValue === 0) {
+            onChange('')
+        } else {
+            onChange(String(numericValue - 1))
+        }
     }
 
     return (
@@ -132,7 +143,7 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                 />
                 <Button
                     onClick={handleDecrement}
-                    disabled={numericValue < 0}
+                    disabled={isBlank && numericValue === 0}
                     icon={<IconSubtract16 />}
                     small
                     aria-label={`Decrease ${label}`}
