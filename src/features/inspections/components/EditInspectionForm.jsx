@@ -477,24 +477,30 @@ export default function EditInspectionForm({
         if (value === null || value === undefined || value === '') {
             return null
         }
-        // Convert to string and trim for consistent comparison
-        const str = String(value).trim()
-        // If it's a number string, compare as number to avoid "5" vs "5.0" issues
-        const num = Number(str)
-        if (!Number.isNaN(num) && str === String(num)) {
+        
+        // For booleans, normalize to true/false/null
+        if (value === true || value === 'true' || value === 1) return true
+        if (value === false || value === 'false' || value === 0) return false
+        
+        // Try to convert to number first
+        const num = Number(value)
+        if (!Number.isNaN(num) && value !== '') {
+            // If it's a valid number, return it as a number for comparison
+            // This handles "5" vs 5 vs "5.0" all as the same
             return num
         }
-        // For booleans, normalize to true/false/null
-        if (value === true || value === 'true') return true
-        if (value === false || value === 'false') return false
-        // Otherwise return as string
-        return str
+        
+        // Otherwise return as trimmed string
+        return String(value).trim()
     }
 
     // Helper function to check if a field has changed from original
     const hasFieldChanged = (fieldId) => {
         const current = formState[fieldId]
         const original = originalFormState[fieldId]
+        
+        // Quick check: if they're exactly equal, no change
+        if (current === original) return false
         
         // Normalize both values for comparison
         const currentNormalized = normalizeForComparison(current)
