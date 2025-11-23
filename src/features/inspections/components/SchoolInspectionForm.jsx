@@ -391,11 +391,12 @@ export default function SchoolInspectionForm({
                     <div
                         style={{
                             display: 'flex',
-                            gap: '1rem',
+                            gap: '1.5rem',
                             flexWrap: 'wrap',
+                            alignItems: 'flex-start',
                         }}
                     >
-                        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                        <div style={{ flex: '1 1 auto', minWidth: '200px', maxWidth: '300px' }}>
                             <BooleanChoiceField
                                 label={label}
                                 value={value}
@@ -428,7 +429,7 @@ export default function SchoolInspectionForm({
 
         if (type === 'BOOLEAN') {
             return (
-                <div key={id} style={{ marginBottom: '1rem' }}>
+                <div key={id} style={{ marginBottom: '1.5rem' }}>
                     <BooleanChoiceField
                         label={label}
                         value={value}

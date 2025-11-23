@@ -427,37 +427,41 @@ export default function EditInspectionForm({
         // BOOLEAN + condition-rating
         if (type === 'BOOLEAN' && hasChild) {
             return (
-                <div key={id} style={{ marginBottom: '1.25rem' }}>
+                <div key={id} style={{ marginBottom: '1.5rem' }}>
                     <div
                         style={{
                             display: 'flex',
-                            gap: '1rem',
+                            gap: '1.5rem',
                             flexWrap: 'wrap',
+                            alignItems: 'flex-start',
                         }}
                     >
-                        <BooleanChoiceField
-                            label={label}
-                            value={value}
-                            onChange={v => {
-                                handleChange(id, v)
-                                if (v === false || v === 'false') {
-                                    handleChange(childId, null)
+                        <div style={{ flex: '1 1 auto', minWidth: '200px', maxWidth: '300px' }}>
+                            <BooleanChoiceField
+                                label={label}
+                                value={value}
+                                onChange={v => {
+                                    handleChange(id, v)
+                                    if (v === false || v === 'false') {
+                                        handleChange(childId, null)
+                                    }
+                                }}
+                                error={errors[id]}
+                                trueLabel="Available"
+                                falseLabel="Not available"
+                            />
+                        </div>
+                        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                            <ConditionRatingField
+                                label={child_query.label}
+                                value={numericChildValue}
+                                onChange={num =>
+                                    handleChange(childId, num)
                                 }
-                            }}
-                            error={errors[id]}
-                            trueLabel="Available"
-                            falseLabel="Not available"
-                        />
-
-                        <ConditionRatingField
-                            label={child_query.label}
-                            value={numericChildValue}
-                            onChange={num =>
-                                handleChange(childId, num)
-                            }
-                            disabled={!isTrue}
-                            error={errors[childId]}
-                        />
+                                disabled={!isTrue}
+                                error={errors[childId]}
+                            />
+                        </div>
                     </div>
                 </div>
             )
@@ -466,7 +470,7 @@ export default function EditInspectionForm({
         // Ren BOOLEAN
         if (type === 'BOOLEAN') {
             return (
-                <div key={id} style={{ marginBottom: '1rem' }}>
+                <div key={id} style={{ marginBottom: '1.5rem' }}>
                     <BooleanChoiceField
                         label={label}
                         value={value}

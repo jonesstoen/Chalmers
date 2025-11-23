@@ -49,74 +49,85 @@ export default function ConditionRatingField({
             >
                 <div style={{ 
                     display: 'flex', 
+                    alignItems: 'center',
                     gap: 8,
                     flexWrap: 'wrap',
                 }}>
-                    {options.map(num => {
-                        const isActive = numericValue === num
-                        return (
-                            <button
-                                key={num}
-                                type="button"
-                                onClick={() => onChange(num)}
-                                onMouseEnter={(e) => {
-                                    if (!isActive && !disabled) {
-                                        e.currentTarget.style.transform = 'scale(1.1)'
-                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.3)'
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'scale(1)'
-                                    e.currentTarget.style.boxShadow = isActive 
-                                        ? '0 2px 4px rgba(37, 99, 235, 0.2)' 
-                                        : '0 1px 2px rgba(0, 0, 0, 0.1)'
-                                }}
-                                style={{
-                                    width: 44, // Minimum touch target
-                                    height: 44,
-                                    borderRadius: '8px',
-                                    border: isActive
-                                        ? '2px solid #2563eb'
-                                        : '2px solid #cbd5e1',
-                                    background: isActive ? '#2563eb' : '#ffffff',
-                                    color: isActive ? '#ffffff' : '#0f172a',
-                                    fontSize: 16,
-                                    fontWeight: isActive ? 600 : 500,
-                                    lineHeight: '1',
-                                    cursor: disabled ? 'not-allowed' : 'pointer',
-                                    padding: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s ease',
-                                    boxShadow: isActive 
-                                        ? '0 2px 4px rgba(37, 99, 235, 0.2)' 
-                                        : '0 1px 2px rgba(0, 0, 0, 0.1)',
-                                }}
-                                aria-label={`Rating ${num}: ${ratingLabels[num]}`}
-                                aria-pressed={isActive}
-                            >
-                                {num}
-                            </button>
-                        )
-                    })}
-                </div>
-                
-                {/* Show current rating label if selected */}
-                {numericValue && !disabled && (
-                    <div style={{
+                    {/* Poor label */}
+                    <span style={{
                         fontSize: 12,
-                        color: '#2563eb',
+                        color: '#64748b',
                         fontWeight: 500,
-                        padding: '4px 8px',
-                        background: '#eff6ff',
-                        borderRadius: 4,
-                        display: 'inline-block',
-                        alignSelf: 'flex-start',
+                        marginRight: 4,
                     }}>
-                        {ratingLabels[numericValue]}
+                        Poor
+                    </span>
+                    
+                    {/* Rating buttons */}
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: 8,
+                    }}>
+                        {options.map(num => {
+                            const isActive = numericValue === num
+                            return (
+                                <button
+                                    key={num}
+                                    type="button"
+                                    onClick={() => onChange(num)}
+                                    onMouseEnter={(e) => {
+                                        if (!isActive && !disabled) {
+                                            e.currentTarget.style.transform = 'scale(1.1)'
+                                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.3)'
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1)'
+                                        e.currentTarget.style.boxShadow = isActive 
+                                            ? '0 2px 4px rgba(37, 99, 235, 0.2)' 
+                                            : '0 1px 2px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                    style={{
+                                        width: 44, // Minimum touch target
+                                        height: 44,
+                                        borderRadius: '8px',
+                                        border: isActive
+                                            ? '2px solid #2563eb'
+                                            : '2px solid #cbd5e1',
+                                        background: isActive ? '#2563eb' : '#ffffff',
+                                        color: isActive ? '#ffffff' : '#0f172a',
+                                        fontSize: 16,
+                                        fontWeight: isActive ? 600 : 500,
+                                        lineHeight: '1',
+                                        cursor: disabled ? 'not-allowed' : 'pointer',
+                                        padding: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: isActive 
+                                            ? '0 2px 4px rgba(37, 99, 235, 0.2)' 
+                                            : '0 1px 2px rgba(0, 0, 0, 0.1)',
+                                    }}
+                                    aria-label={`Rating ${num}: ${ratingLabels[num]}`}
+                                    aria-pressed={isActive}
+                                >
+                                    {num}
+                                </button>
+                            )
+                        })}
                     </div>
-                )}
+                    
+                    {/* Excellent label */}
+                    <span style={{
+                        fontSize: 12,
+                        color: '#64748b',
+                        fontWeight: 500,
+                        marginLeft: 4,
+                    }}>
+                        Excellent
+                    </span>
+                </div>
             </div>
 
             {error && (
