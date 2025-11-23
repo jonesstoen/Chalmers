@@ -546,28 +546,28 @@ export default function SchoolInspectionForm({
                 <div
                     style={{
                         position: 'fixed',
-                        bottom: 0,
+                        bottom: 16,
                         left: 0,
                         right: 0,
                         zIndex: 1000,
-                        padding: '16px',
+                        padding: '0 16px',
                         display: 'flex',
                         justifyContent: 'center',
+                        pointerEvents: 'none',
                     }}
                 >
                     <div
                         style={{
                             background: '#fef3c7',
-                            border: '2px solid #fbbf24',
-                            borderBottom: 'none',
-                            borderTopLeftRadius: 12,
-                            borderTopRightRadius: 12,
-                            boxShadow: '0 -4px 12px rgba(217, 119, 6, 0.2)',
+                            border: '3px solid #f59e0b',
+                            borderRadius: 12,
+                            boxShadow: '0 8px 24px rgba(217, 119, 6, 0.3), 0 0 0 1px rgba(217, 119, 6, 0.1)',
                             maxWidth: 600,
                             width: '100%',
-                            maxHeight: '50vh',
+                            maxHeight: '60vh',
                             overflow: 'auto',
                             position: 'relative',
+                            pointerEvents: 'auto',
                         }}
                     >
                         {/* Close button */}
@@ -601,7 +601,7 @@ export default function SchoolInspectionForm({
                         </button>
 
                         <div style={{
-                            padding: '20px 48px 20px 24px',
+                            padding: '20px 48px 24px 24px',
                         }}>
                             <div style={{
                                 display: 'flex',
