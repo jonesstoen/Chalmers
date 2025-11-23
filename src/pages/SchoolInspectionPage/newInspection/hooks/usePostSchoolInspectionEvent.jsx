@@ -9,13 +9,12 @@ function usePostSchoolInspectionEvent() {
             program_id: 'UxK2o06ScIe', // School inspection program
             programStage: 'eJiBjm9Rl7E', // CHK programstage
             orgUnit_id,
+            dataValues,  // ✅ FIXED: correct property name
             period: date ?? new Date().toISOString().split('T')[0],
             status: 'COMPLETED',
-            dataValueObjectArray: dataValues,
         })
-    
+
     return [submit, status]
 }
-
 
 export default usePostSchoolInspectionEvent

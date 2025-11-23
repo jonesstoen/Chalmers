@@ -1,75 +1,110 @@
-import { useDataQuery } from '@dhis2/app-runtime'
+import { useMemo } from "react"
+import { useCacheableQuery } from "../cache/cacheableQuery"
 
-// Build dynamic query
-const buildQuery = (regionIds) => {
-    const q = {}
-
-    regionIds.forEach((id, index) => {
-        // Fetch the region node itself
-        q[`root_${index}`] = {
-            resource: 'organisationUnits',
-            id,
-            params: {
-
-fields: 'id,displayName,level,children[id],path',
-            },
-        }
-
-        // Fetch ALL descendants
-        q[`desc_${index}`] = {
-            resource: 'organisationUnits',
-            params: {
-                filter: [`path:like:${id}`],
-
-fields: 'id,displayName,level,children[id],path',
-                paging: false,
-            },
-        }
-    })
-
-    return q
+// -----------------------------------------------------------
+// STATIC QUERY STRUCTURE (required for DHIS2)
+// The only dynamic part must be variables, not the shape.
+// -----------------------------------------------------------
+const STATIC_QUERY = {
+    roots: {
+        resource: "organisationUnits",
+        id: ({ ids }) => ids[0], // replaced dynamically
+        params: ({ }) => ({
+            fields: "id,displayName,level,children[id],path",
+        }),
+    },
+    descendants: {
+        resource: "organisationUnits",
+        params: ({ ids }) => ({
+            filter: `path:like:${ids[0]}`,
+            fields: "id,displayName,level,children[id],path",
+            paging: false,
+        }),
+    },
 }
 
+/**
+ * Cached region/school loader
+ */
 export function useSchoolsByRegions(regionIds = []) {
-    const query = buildQuery(regionIds)
+    const safeIds = Array.isArray(regionIds) ? regionIds : []
+    const validIds = safeIds.filter(id => id && typeof id === "string")
 
-    const { loading, error, data } = useDataQuery(query, {
-        variables: {},
-        skip: regionIds.length === 0,
-    })
+    // Nothing to load
+    if (validIds.length === 0) {
+        return { schools: [], loading: false, error: null }
+    }
 
+    // -----------------------------------------------------------
+    // Create a stable dataKey for caching
+    // -----------------------------------------------------------
+    const dataKey = useMemo(
+        () =>
+            JSON.stringify({
+                type: "regionTree",
+                ids: [...validIds].sort(), // deterministic key
+            }),
+        [validIds]
+    )
+
+    // -----------------------------------------------------------
+    // Build variables — the ONLY dynamic part
+    // -----------------------------------------------------------
+    const variables = useMemo(
+        () => ({
+            ids: validIds,
+        }),
+        [validIds]
+    )
+
+    // -----------------------------------------------------------
+    // RUN USECACHEABLEQUERY
+    // -----------------------------------------------------------
+    const { data, loading, error, source } = useCacheableQuery(
+        "data",
+        dataKey,
+        STATIC_QUERY,
+        variables,
+        false // not lazy
+    )
+
+    //------------------------------------------------------------
+    // No data yet
+    //------------------------------------------------------------
     if (loading || error || !data) {
         return { schools: [], loading, error }
     }
 
-    // ---- Extract roots (regions) ----
-    const roots = Object.keys(data)
-        .filter(k => k.startsWith('root_'))
-        .map(k => ({
-            ...data[k],
-            type: 'region'
-        }))
+    //------------------------------------------------------------
+    // Normalize structure (matches your original logic)
+    //------------------------------------------------------------
 
-    // ---- Extract descendants ----
+    const root = data.roots // a single org unit (not array)
+    const descendants =
+        data.descendants?.organisationUnits || []
 
-  // Remove descendants that ARE already roots
-const descendants = Object.keys(data)
-    .filter(k => k.startsWith('desc_'))
-    .flatMap(k => data[k].organisationUnits || [])
-    .filter(u => !regionIds.includes(u.id))
+    // Filter out the region itself so it isn’t included twice
+    const filteredDesc = descendants.filter(
+        u => !validIds.includes(u.id)
+    )
 
-    // ---- Tag clusters & schools ----
-    const taggedDescendants = descendants.map(u => ({
+    const taggedDescendants = filteredDesc.map(u => ({
         ...u,
-        type: u.children && u.children.length > 0 ? 'cluster' : 'school'
+        type: u.children && u.children.length > 0 ? "cluster" : "school",
     }))
 
-    // ---- Merge everything ----
-    const merged = [...roots, ...taggedDescendants]
+    const finalList = [
+        {
+            ...root,
+            type: "region",
+        },
+        ...taggedDescendants,
+    ]
 
     return {
-        schools: merged,   // Your search bar expects "schools"
+        schools: finalList,
         loading,
         error,
+        source, // cache | stale-cache | network
     }
 }
