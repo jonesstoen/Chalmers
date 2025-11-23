@@ -94,7 +94,10 @@ export default function BooleanChoiceField({
             }}>
                 <button
                     type="button"
-                    onClick={() => onChange(true)}
+                    onClick={() => {
+                        // Toggle: if already true, set to null (unselect)
+                        onChange(isTrue ? null : true)
+                    }}
                     onMouseEnter={(e) => {
                         if (!isTrue) {
                             e.currentTarget.style.transform = 'scale(1.02)'
@@ -111,7 +114,10 @@ export default function BooleanChoiceField({
                 </button>
                 <button
                     type="button"
-                    onClick={() => onChange(false)}
+                    onClick={() => {
+                        // Toggle: if already false, set to null (unselect)
+                        onChange(isFalse ? null : false)
+                    }}
                     onMouseEnter={(e) => {
                         if (!isFalse) {
                             e.currentTarget.style.transform = 'scale(1.02)'

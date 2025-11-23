@@ -691,22 +691,34 @@ export default function EditInspectionForm({
                         duration={10000}
                         onHidden={() => setShowMissingPopup(false)}
                     >
-                        <div>
-                            <strong style={{ display: 'block', marginBottom: 8 }}>
+                        <div style={{ padding: '4px 0' }}>
+                            <strong style={{ 
+                                display: 'block', 
+                                marginBottom: 8,
+                                fontSize: 14,
+                                color: '#92400e',
+                            }}>
                                 {i18n.t('Please complete all required fields')}
                             </strong>
-                            <div style={{ fontSize: 13 }}>
+                            <div style={{ 
+                                fontSize: 13,
+                                color: '#78350f',
+                                marginBottom: 8,
+                            }}>
                                 {i18n.t('The following {{count}} field(s) need to be filled before saving:', { count: missingRequiredLabels.length })}
                             </div>
                             <ul
                                 style={{
-                                    margin: '8px 0 0 20px',
+                                    margin: '4px 0 0 20px',
                                     padding: 0,
                                     fontSize: 13,
+                                    color: '#78350f',
                                 }}
                             >
                                 {missingRequiredLabels.map(label => (
-                                    <li key={label} style={{ marginBottom: 4 }}>{label}</li>
+                                    <li key={label} style={{ marginBottom: 6, lineHeight: 1.5 }}>
+                                        {label}
+                                    </li>
                                 ))}
                             </ul>
                         </div>
