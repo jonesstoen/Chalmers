@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Button, CircularLoader } from '@dhis2/ui'
 import { usePopulateSchoolInspections } from '../api/populateSchoolInspections'
+import styles from './PopulateDataButton.module.css'
 
 export default function PopulateDataButton() {
     const [loading, setLoading] = useState(false)
@@ -26,21 +27,21 @@ export default function PopulateDataButton() {
     }
     
     return (
-        <div style={{ marginTop: '2rem', padding: '1rem', border: '2px dashed #ccc', borderRadius: 8 }}>
+        <div className={styles.container}>
             <h4>🧪 Test Data Generator</h4>
-            <p style={{ fontSize: '0.9rem', color: '#666' }}>
+            <p className={styles.description}>
                 Generate sample school inspection data for all schools in the system.
             </p>
             
             {loading && (
-                <div style={{ margin: '1rem 0' }}>
+                <div className={styles.loadingContainer}>
                     <CircularLoader small />
                     <p>Populating school inspections... This may take a few minutes.</p>
                 </div>
             )}
             
             {result && !result.error && (
-                <div style={{ margin: '1rem 0', padding: '1rem', background: '#e8f5e9', borderRadius: 4 }}>
+                <div className={styles.successMessage}>
                     <strong>✅ Population Complete!</strong>
                     <ul>
                         <li>Total schools: {result.total}</li>
@@ -51,7 +52,7 @@ export default function PopulateDataButton() {
             )}
             
             {result?.error && (
-                <div style={{ margin: '1rem 0', padding: '1rem', background: '#ffebee', borderRadius: 4 }}>
+                <div className={styles.errorMessage}>
                     <strong>❌ Error:</strong> {result.error}
                 </div>
             )}

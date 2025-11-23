@@ -28,25 +28,8 @@ function EventSummary({ event }) {
     const date = new Date(event.eventdate)
 
     return (
-        <div
-            style={{
-                margin: '16px 0',
-                padding: '16px',
-                background: '#ffffff',
-                border: '2px solid #e5e7eb',
-                borderRadius: 12,
-                display: 'flex',
-                gap: 12,
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-            }}
-        >
-            <strong style={{ 
-                marginRight: 8,
-                fontSize: 14,
-                color: '#0f172a',
-            }}>
+        <div className={pageClasses.eventSummary}>
+            <strong className={pageClasses.eventSummaryLabel}>
                 {i18n.t('Selected event')}:
             </strong>
             <Tag positive>{date.toLocaleDateString()}</Tag>
@@ -63,11 +46,7 @@ function EventSummary({ event }) {
                     {i18n.t('Seats')}: {event.jcC1uz56IpY ?? '–'}
                 </Tag>
             )}
-            <span style={{ 
-                marginLeft: 'auto', 
-                color: '#64748b',
-                fontSize: 12,
-            }}>
+            <span className={pageClasses.eventSummaryId}>
                 ID: {event.psi}
             </span>
         </div>
@@ -82,46 +61,17 @@ function Header({ isCluster, data, onBack }) {
     const orgUnitId = ou?.id
 
     return (
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    marginBottom: 16,
-                    flexWrap: 'wrap',
-                }}
-            >
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: 12,
-                }}
-            >
-                <h2 style={{ 
-                    margin: 0,
-                    fontSize: 24,
-                    fontWeight: 600,
-                    color: '#0f172a',
-                }}>
+            <div className={pageClasses.header}>
+            <div className={pageClasses.headerLeft}>
+                <h2 className={pageClasses.headerTitle}>
                     {i18n.t(isCluster ? analytics : inspection)}
                 </h2>
                 {orgUnitId && (
                     <>
-                        <span style={{ color: '#64748b' }}>•</span>
-                        <div style={{ 
-                            color: '#334155',
-                            fontSize: 16,
-                        }}>
+                        <span className={pageClasses.headerSeparator}>•</span>
+                        <div className={pageClasses.headerOrgName}>
                             <strong>{ou?.displayName || ou?.name}</strong>
-                            <span
-                                style={{
-                                    marginLeft: 8,
-                                    color: '#64748b',
-                                    fontSize: 14,
-                                }}
-                            >
+                            <span className={pageClasses.headerOrgId}>
                                 ({orgUnitId})
                             </span>
                         </div>
@@ -136,7 +86,7 @@ function Header({ isCluster, data, onBack }) {
                     onClick={onBack}
                     aria-label={i18n.t('Back to overview')}
                 >
-                    <span style={{ fontSize: 18, lineHeight: 1 }}>←</span>
+                    <span>←</span>
                     <span>{i18n.t('Back to overview')}</span>
                 </button>
             )}
@@ -167,7 +117,7 @@ function InspectionPanel({
 
     return (
         <>
-            <div style={{ marginBottom: 16 }}>
+            <div className={pageClasses.tabBarContainer}>
                 <TabBar>
                     <Tab
                         selected={activeTab === 'submit'}
@@ -322,11 +272,7 @@ export default function SchoolInspectionPage() {
     return (
         <div className={pageClasses.pageWrapper}>
             {/* School Search Bar - standalone element */}
-            <div style={{
-                width: '100%',
-                position: 'relative',
-                marginBottom: 16,
-            }}>
+            <div className={pageClasses.searchBarContainer}>
                 <SchoolSearchBar onSelect={handleSearchSelect} />
             </div>
 

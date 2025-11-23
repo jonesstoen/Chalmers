@@ -5,6 +5,7 @@ import { useDataQuery } from '@dhis2/app-runtime'
 import useFetchAnalytics from '../SchoolInspectionPage/history/api/analyticsAPI'
 import MetricTile from './MetricTile'
 import SchoolSearchBar from './components/SchoolSearchBar'
+import styles from './LandingPage.module.css'
 
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
@@ -95,114 +96,32 @@ export default function LandingPage() {
     const progressPct = Math.round(progressRatio * 100)
 
     return (
-        <div
-            style={{
-                background: '#f1f5f9',
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '24px',
-            }}
-        >
+        <div className={styles.pageContainer}>
             {/* Online status at top */}
-            <p
-                style={{
-                    position: 'absolute',
-                    top: 24,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    margin: 0,
-                    fontSize: 12,
-                    color: isOnline ? '#16a34a' : '#b45309',
-                }}
-            >
+            <p className={`${styles.onlineStatus} ${!isOnline ? styles.onlineStatusOffline : ''}`}>
                 {isOnline
                     ? 'Online — changes sync automatically.'
                     : 'Offline — changes will sync when you are back online.'}
             </p>
 
             {/* Main centered container */}
-            <div
-                style={{
-                    width: '100%',
-                    maxWidth: 800,
-                    padding: '48px',
-                    border: '1px solid #e5e7eb',
-                    background: '#ffffff',
-                    borderRadius: 16,
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 32,
-                }}
-            >
+            <div className={styles.mainContainer}>
                 {/* Welcome text */}
-                <div style={{ textAlign: 'center' }}>
-                    <h1
-                        style={{
-                            fontSize: 32,
-                            fontWeight: 700,
-                            marginBottom: 12,
-                            color: '#0f172a',
-                        }}
-                    >
+                <div className={styles.welcomeSection}>
+                    <h1 className={styles.welcomeTitle}>
                         Welcome
                     </h1>
-                    <p
-                        style={{
-                            margin: 0,
-                            color: '#475569',
-                            fontSize: 16,
-                            lineHeight: 1.6,
-                        }}
-                    >
+                    <p className={styles.welcomeText}>
                         Get started by opening the inspector, resuming your last
                         school, or searching for a school.
                     </p>
                 </div>
 
                 {/* Centered buttons and search */}
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 12,
-                        width: '100%',
-                        maxWidth: 400,
-                        margin: '0 auto',
-                    }}
-                >
+                <div className={styles.actionsContainer}>
                     <button
                         onClick={openSchoolInspection}
-                        style={{
-                            padding: '16px 24px',
-                            borderRadius: 12,
-                            border: 'none',
-                            background: '#2563eb',
-                            color: '#fff',
-                            fontWeight: 600,
-                            fontSize: 16,
-                            cursor: 'pointer',
-                            width: '100%',
-                            minHeight: 56,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.background = '#1d4ed8'
-                            e.currentTarget.style.boxShadow =
-                                '0 4px 6px rgba(37, 99, 235, 0.3)'
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.background = '#2563eb'
-                            e.currentTarget.style.boxShadow =
-                                '0 2px 4px rgba(37, 99, 235, 0.2)'
-                        }}
+                        className={styles.primaryButton}
                         aria-label="Open Inspector"
                     >
                         Open inspector
@@ -211,43 +130,12 @@ export default function LandingPage() {
                     {lastOu && (
                         <button
                             onClick={() => openSchool(lastOu)}
-                            style={{
-                                padding: '16px 24px',
-                                borderRadius: 12,
-                                border: '1px solid #e5e7eb',
-                                background: '#fff',
-                                color: '#0f172a',
-                                fontWeight: 500,
-                                fontSize: 16,
-                                cursor: 'pointer',
-                                width: '100%',
-                                minHeight: 56,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: 4,
-                                transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.background = '#f8fafc'
-                                e.currentTarget.style.borderColor = '#cbd5e1'
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.background = '#fff'
-                                e.currentTarget.style.borderColor = '#e5e7eb'
-                            }}
+                            className={styles.secondaryButton}
                             title="Open your last visited school"
                         >
                             <span>Resume last school</span>
                             {lastOuInfo && (
-                                <span
-                                    style={{
-                                        fontSize: 14,
-                                        color: '#64748b',
-                                        fontWeight: 400,
-                                    }}
-                                >
+                                <span className={styles.secondaryButtonSubtext}>
                                     📍 Last visited:{' '}
                                     {lastOuInfo.displayName || lastOuInfo.name}
                                 </span>
@@ -255,13 +143,7 @@ export default function LandingPage() {
                         </button>
                     )}
 
-                    <div
-                        style={{
-                            width: '100%',
-                            marginTop: -4,
-                            position: 'relative',
-                        }}
-                    >
+                    <div className={styles.searchContainer}>
                         <SchoolSearchBar
                             onSelect={school => openSchool(school.id)}
                         />
@@ -269,14 +151,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Metrics at bottom */}
-                <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: 16,
-                        marginTop: 8,
-                    }}
-                >
+                <div className={styles.metricsGrid}>
                     <MetricTile
                         title="📊 Inspections this month"
                         value={loading ? '…' : String(inspectionsThisMonth)}
@@ -295,50 +170,20 @@ export default function LandingPage() {
                 </div>
 
                 {/* Monthly progress */}
-                <div style={{ marginTop: 8 }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'baseline',
-                            marginBottom: 8,
-                        }}
-                    >
-                        <span
-                            style={{
-                                fontSize: 14,
-                                fontWeight: 600,
-                                color: '#0f172a',
-                            }}
-                        >
+                <div className={styles.progressSection}>
+                    <div className={styles.progressHeader}>
+                        <span className={styles.progressTitle}>
                             Monthly inspection progress
                         </span>
-                        <span
-                            style={{
-                                fontSize: 13,
-                                color: '#64748b',
-                            }}
-                        >
+                        <span className={styles.progressStats}>
                             {inspectionsThisMonth} / {MONTHLY_INSPECTION_TARGET}{' '}
                             ({progressPct}%)
                         </span>
                     </div>
-                    <div
-                        style={{
-                            height: 10,
-                            background: '#e5e7eb',
-                            borderRadius: 999,
-                            overflow: 'hidden',
-                        }}
-                    >
+                    <div className={styles.progressBar}>
                         <div
-                            style={{
-                                height: '100%',
-                                width: `${progressPct}%`,
-                                background:
-                                    progressPct >= 100 ? '#16a34a' : '#2563eb',
-                                transition: 'width .25s ease-out',
-                            }}
+                            className={`${styles.progressBarFill} ${progressPct >= 100 ? styles.progressBarFillComplete : ''}`}
+                            style={{ width: `${progressPct}%` }}
                         />
                     </div>
                 </div>

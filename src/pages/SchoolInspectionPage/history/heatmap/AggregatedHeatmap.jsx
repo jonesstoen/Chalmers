@@ -2,6 +2,7 @@
 import React from "react"
 import RatioCard from "./RatioCard"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"
+import styles from './AggregatedHeatmap.module.css'
 
 // Same ratio config as school-level:
 const RATIO_KEYS = [
@@ -15,39 +16,23 @@ export default function AggregatedHeatmap({ ratios, totals }) {
   if (!ratios) return null
 
   return (
-    <div style={{ margin: "2rem 0" }}>
+    <div className={styles.container}>
       {/* Legend */}
       <FullHeatmapLegend />
 
-      <h3
-        style={{
-          textAlign: "center",
-          marginBottom: "1.2rem",
-          marginTop: "1.5rem",
-        }}
-      >
+      <h3 className={styles.title}>
         Cluster Heatmap (Aggregated Ratios)
       </h3>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "1.5rem",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className={styles.cardsContainer}>
         {RATIO_KEYS.map(({ key, label, threshold }) => (
- <RatioCard
-    key={key}
-    ratioKey={key}
-    label={label}
-    value={ratios[key]}
-    totals={totals}
-/>
-
-
-
+          <RatioCard
+            key={key}
+            ratioKey={key}
+            label={label}
+            value={ratios[key]}
+            totals={totals}
+          />
         ))}
       </div>
     </div>

@@ -1,0 +1,30 @@
+.container {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+}
+
+.description {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.loadingContainer {
+    margin: 1rem 0;
+}
+
+.successMessage {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #e8f5e9;
+    border-radius: 4px;
+}
+
+.errorMessage {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffebee;
+    border-radius: 4px;
+}
+

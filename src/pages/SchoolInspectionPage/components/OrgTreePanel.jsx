@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, useImperativeHandle, forwardRe
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
 import classes from '../../../App/App.module.css'
+import styles from './OrgTreePanel.module.css'
 
 const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }, ref) {
     const safeInitialRoot = initialRootId ?? roots?.[0]?.id
@@ -179,11 +180,13 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
     if (!currentRootId) {
         return (
             <aside className={classes.sidebar}>
-                <div className={classes.sidebarHeader}>
-                    {i18n.t('Organisation units')}
-                </div>
-                <div style={{ padding: 8, color: '#6b7280' }}>
-                    {i18n.t('No roots available')}
+                <div className={styles.panelFrame}>
+                    <div className={classes.sidebarHeader}>
+                        {i18n.t('Organisation units')}
+                    </div>
+                    <div className={styles.noRootsMessage}>
+                        {i18n.t('No roots available')}
+                    </div>
                 </div>
             </aside>
         )
@@ -191,43 +194,36 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
 
     return (
         <aside className={classes.sidebar}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 6px 10px 6px' }}>
-                <div className={classes.sidebarHeader}>
-                    {i18n.t('Organisation units')}
+            <div className={styles.panelFrame}>
+                <div className={styles.headerContainer}>
+                    <div className={classes.sidebarHeader}>
+                        {i18n.t('Organisation units')}
+                    </div>
+                    <div className={styles.rootButtons}>
+                        {roots.map((r) => (
+                            <button
+                                key={r.id}
+                                onClick={() => switchRoot(r.id)}
+                                className={`${styles.rootButton} ${currentRootId === r.id ? styles.rootButtonActive : ''}`}
+                            >
+                                {r.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-                    {roots.map((r) => (
-                        <button
-                            key={r.id}
-                            onClick={() => switchRoot(r.id)}
-                            style={{
-                                border: '1px solid ' + (currentRootId === r.id ? '#2563eb' : '#e5e7eb'),
-                                background: '#fff',
-                                padding: '6px 10px',
-                                borderRadius: 8,
-                                cursor: 'pointer',
-                                boxShadow: currentRootId === r.id
-                                    ? '0 0 0 2px rgba(37,99,235,.15)'
-                                    : 'none',
-                            }}
-                        >
-                            {r.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
 
-            <div className={classes.treeScroll}>
-                <OrganisationUnitTree
-                    key={currentRootId}
-                    roots={[currentRootId]}
-                    selected={selectedPaths}
-                    expanded={expanded}
-                    singleSelection
-                    onChange={handleChange}
-                    handleExpand={handleExpand}
-                    handleCollapse={handleCollapse}
-                />
+                <div className={classes.treeScroll}>
+                    <OrganisationUnitTree
+                        key={currentRootId}
+                        roots={[currentRootId]}
+                        selected={selectedPaths}
+                        expanded={expanded}
+                        singleSelection
+                        onChange={handleChange}
+                        handleExpand={handleExpand}
+                        handleCollapse={handleCollapse}
+                    />
+                </div>
             </div>
         </aside>
     )
