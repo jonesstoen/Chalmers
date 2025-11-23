@@ -103,23 +103,35 @@ console.log("REMOTE RAW", remoteData);
                             : "Change Since Last Time"}
                     </h4>
 
-                    {RATIO_KEYS.map(({ key, threshold }) => {
+                    {RATIO_KEYS.map(({ key, label, threshold }) => {
                         const prev = remoteData?.ratios[key]
                         const curr = localData?.ratios[key]
 
                         if (isNaN(prev) || isNaN(curr))
-                            return <div key={key} className={styles.cardWrapper}>N/A</div>
+                            return (
+                                <div key={key} className={styles.changeCard}>
+                                    <div className={styles.changeLabel}>{label}</div>
+                                    <div className={styles.changeValue}>N/A</div>
+                                </div>
+                            )
 
                         const percent = ((curr - prev) / prev) * 100
+                        const absoluteChange = curr - prev
                         const sign = percent >= 0 ? "+" : ""
                         const good = threshold(curr)
 
                         return (
                             <div
                                 key={key}
-                                className={`${styles.cardWrapper} ${styles.percentCard} ${good ? styles.percentCardGood : styles.percentCardBad}`}
+                                className={`${styles.changeCard} ${good ? styles.changeCardGood : styles.changeCardBad}`}
                             >
-                                {sign}{percent.toFixed(0)}%
+                                <div className={styles.changeLabel}>{label}</div>
+                                <div className={styles.changeValue}>
+                                    <span className={styles.changePercent}>{sign}{percent.toFixed(0)}%</span>
+                                    <span className={styles.changeAbsolute}>
+                                        ({sign}{absoluteChange.toFixed(1)})
+                                    </span>
+                                </div>
                             </div>
                         )
                     })}

@@ -33,32 +33,53 @@
 
 .cardWrapper {
     width: 100%;
-    display: flex;
-    justify-content: center;
 }
 
-.percentCard {
+.changeCard {
     width: 100%;
-    min-height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 18px;
-    border-radius: 8px;
+    padding: 1rem;
     background: #ffffff;
     border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.percentCardGood {
-    color: #059669;
-    background: #ecfdf5;
+.changeLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0;
+}
+
+.changeValue {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.changePercent {
+    font-size: 20px;
+}
+
+.changeAbsolute {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.changeCardGood {
     border-color: #a7f3d0;
+    background: #f0fdf4;
 }
 
-.percentCardBad {
-    color: #dc2626;
-    background: #fef2f2;
+.changeCardBad {
     border-color: #fecaca;
+    background: #fef2f2;
 }
 
