@@ -63,29 +63,15 @@ function Header({ isCluster, data, onBack }) {
     return (
             <div className={pageClasses.header}>
             <div className={pageClasses.headerLeft}>
-                <h2 style={{ 
-                    margin: 0,
-                    fontSize: 24,
-                    fontWeight: 600,
-                    color: '#0f172a',
-                }}>
+                <h2 className={pageClasses.headerTitle}>
                     {i18n.t(isCluster ? analytics : inspection)}
                 </h2>
                 {orgUnitId && (
                     <>
-                        <span style={{ color: '#64748b' }}>•</span>
-                        <div style={{ 
-                            color: '#334155',
-                            fontSize: 16,
-                        }}>
+                        <span className={pageClasses.headerSeparator}>•</span>
+                        <div className={pageClasses.headerOrgName}>
                             <strong>{ou?.displayName || ou?.name}</strong>
-                            <span
-                                style={{
-                                    marginLeft: 8,
-                                    color: '#64748b',
-                                    fontSize: 14,
-                                }}
-                            >
+                            <span className={pageClasses.headerOrgId}>
                                 ({orgUnitId})
                             </span>
                         </div>
@@ -100,7 +86,7 @@ function Header({ isCluster, data, onBack }) {
                     onClick={onBack}
                     aria-label={i18n.t('Back to overview')}
                 >
-                    <span style={{ fontSize: 18, lineHeight: 1 }}>←</span>
+                    <span>←</span>
                     <span>{i18n.t('Back to overview')}</span>
                 </button>
             )}
@@ -286,11 +272,7 @@ export default function SchoolInspectionPage() {
     return (
         <div className={pageClasses.pageWrapper}>
             {/* School Search Bar - standalone element */}
-            <div style={{
-                width: '100%',
-                position: 'relative',
-                marginBottom: 16,
-            }}>
+            <div className={pageClasses.searchBarContainer}>
                 <SchoolSearchBar onSelect={handleSearchSelect} />
             </div>
 
