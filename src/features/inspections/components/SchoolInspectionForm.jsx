@@ -167,13 +167,6 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                 alignItems: 'center',
                 gap: 8,
             }}>
-                <Button
-                    onClick={handleDecrement}
-                    disabled={numericValue <= 0}
-                    icon={<IconSubtract16 />}
-                    small
-                    aria-label={`Decrease ${label}`}
-                />
                 <input
                     type="number"
                     min="0"
@@ -187,6 +180,13 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     }}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${label}-error` : undefined}
+                />
+                <Button
+                    onClick={handleDecrement}
+                    disabled={numericValue <= 0}
+                    icon={<IconSubtract16 />}
+                    small
+                    aria-label={`Decrease ${label}`}
                 />
                 <Button
                     onClick={handleIncrement}
