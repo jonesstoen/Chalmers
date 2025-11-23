@@ -2,7 +2,7 @@
 import React, { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'
-import useFetchAnalytics from '../../features/analytics/api/analyticsAPI'
+import useFetchAnalytics from '../SchoolInspectionPage/history/api/analyticsAPI'
 import MetricTile from './MetricTile'
 import SchoolSearchBar from './components/SchoolSearchBar'
 

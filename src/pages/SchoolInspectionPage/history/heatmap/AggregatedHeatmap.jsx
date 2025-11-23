@@ -1,4 +1,4 @@
-// features/analytics/components/AggregatedHeatmapComparison.jsx
+// pages/SchoolInspectionPage/history/heatmap/AggregatedHeatmap.jsx
 import React from "react"
 import RatioCard from "./RatioCard"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"

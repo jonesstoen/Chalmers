@@ -1,5 +1,5 @@
 import { useDataQuery } from '@dhis2/app-runtime'
-import useFetchAnalytics from '../../features/analytics/api/analyticsAPI'
+import useFetchAnalytics from '../../pages/SchoolInspectionPage/history/api/analyticsAPI'
 import useFetchOrgUnits from '../../pages/SchoolInspectionPage/api/useFetchOrgUnits'
 import useFetchDatasets from './datasetsAPI'
 

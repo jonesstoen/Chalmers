@@ -1,7 +1,7 @@
 import React, { useContext } from "react"
 import { useProcessedRatios } from "./useProcessedRatios"
 import { useLocalRatios } from "./useLocalRatios"
-import InspectionContext from "../../../context/InspectionContext"
+import InspectionContext from "../../../../context/InspectionContext"
 import RatioCard from "./RatioCard"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"
 

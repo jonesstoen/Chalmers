@@ -1,8 +1,8 @@
-// AggregatedAnalyticsPanel.jsx
-import ClusterGraph from "./ClusterGraph"
+// pages/SchoolInspectionPage/history/components/AggregatedAnalyticsPanel.jsx
+import ClusterGraph from "../graphs/ClusterGraph"
 import AggregatedHeatmap from "../heatmap/AggregatedHeatmap.jsx"
-import { CAPACITY_IDS, SANITATION_IDS, TOTAL_TOILETS_ID } from "../../inspections/configs/schoolInspectionConfig"
-import { dataElementIdToDescription } from "../../inspections/configs/inspectionFormUtils"
+import { CAPACITY_IDS, SANITATION_IDS, TOTAL_TOILETS_ID } from "../../newInspection/configs/schoolInspectionConfig"
+import { dataElementIdToDescription } from "../../newInspection/configs/inspectionFormUtils"
 import { useAggregatedSchoolAnalytics } from "../hooks/useAggregatedSchoolAnalytics"
 
 // ------------------- GRAPH CARD --------------------

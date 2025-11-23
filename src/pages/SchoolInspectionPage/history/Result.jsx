@@ -1,9 +1,9 @@
 import { useContext } from "react"
 import InspectionContext from "../../../../context/InspectionContext"
-import SchoolGraph from "../../../analytics/components/SchoolGraph"
-import HeatmapComparison from "../../../analytics/heatmap/HeatmapComparison"
-import { dataElementIdToDescription } from "../../configs/inspectionFormUtils"
-import { SCHOOL_INSPECTION_FIELDS } from "../../configs/schoolInspectionConfig"
+import SchoolGraph from "./graphs/SchoolGraph"
+import HeatmapComparison from "./heatmap/HeatmapComparison"
+import { dataElementIdToDescription } from "../newInspection/configs/inspectionFormUtils"
+import { SCHOOL_INSPECTION_FIELDS } from "../newInspection/configs/schoolInspectionConfig"
 
 function Result({ OrgId }) {
   const [inspectionDict] = useContext(InspectionContext)
