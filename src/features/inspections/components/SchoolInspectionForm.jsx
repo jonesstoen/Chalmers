@@ -11,6 +11,7 @@ import {
     IconAdd16,
     IconWarning16,
     IconError16,
+    IconCross16,
 } from '@dhis2/ui'
 import usePostSchoolInspectionEvent from '../hooks/usePostSchoolInspectionEvent'
 import InspectionContext from '../../../context/InspectionContext'
@@ -566,10 +567,41 @@ export default function SchoolInspectionForm({
                             width: '100%',
                             maxHeight: '50vh',
                             overflow: 'auto',
+                            position: 'relative',
                         }}
                     >
+                        {/* Close button */}
+                        <button
+                            type="button"
+                            onClick={() => setShowMissingPopup(false)}
+                            style={{
+                                position: 'absolute',
+                                top: 12,
+                                right: 12,
+                                width: 32,
+                                height: 32,
+                                borderRadius: 6,
+                                border: 'none',
+                                background: '#f1f5f9',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#e2e8f0'
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#f1f5f9'
+                            }}
+                            aria-label={i18n.t('Close')}
+                        >
+                            <IconCross16 />
+                        </button>
+
                         <div style={{
-                            padding: '20px 24px',
+                            padding: '20px 48px 20px 24px',
                         }}>
                             <div style={{
                                 display: 'flex',
