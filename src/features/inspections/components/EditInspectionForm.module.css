@@ -1,10 +1,5 @@
 /* Mobile-first responsive styles for EditInspectionForm */
 
-.capacityGrid,
-.sanitationGrid {
-    /* Base styles handled inline */
-}
-
 @media (max-width: 600px) {
     .capacityGrid,
     .sanitationGrid {
