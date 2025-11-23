@@ -74,61 +74,6 @@ const clearDraft = orgUnitId => {
     }
 }
 
-// --- layout styles ---
-const sectionBoxStyle = {
-    background: '#ffffff',
-    padding: 20,
-    borderRadius: 12,
-    border: '2px solid #e5e7eb',
-    marginBottom: '1.5rem',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-}
-
-// Single column grid - one field per line
-const sectionGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    rowGap: 20,
-    alignItems: 'flex-start',
-    marginTop: 8,
-    marginBottom: 8,
-    maxWidth: 500, // Natural width limit
-}
-
-const numberFieldContainerStyle = {
-    marginBottom: 0, // Grid handles spacing
-    width: '100%',
-    maxWidth: '100%',
-}
-
-const numberLabelStyle = {
-    display: 'block',
-    marginBottom: 10,
-    fontSize: 15,
-    fontWeight: 600,
-    minHeight: 24,
-    color: '#0f172a',
-}
-
-const numberInputStyle = {
-    width: '100%',
-    padding: '14px 16px', // Larger padding
-    borderRadius: 8,
-    border: '2px solid #cbd5e1',
-    fontSize: 16, // Larger font for mobile readability
-    outline: 'none',
-    boxSizing: 'border-box',
-    minHeight: 44, // Minimum touch target size
-    transition: 'all 0.2s ease',
-    background: '#ffffff',
-}
-
-const numberInputFocusStyle = {
-    ...numberInputStyle,
-    border: '2px solid #2563eb',
-    boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
-    background: '#ffffff',
-}
 
 function NumberField({ label, value = '', onChange, error, iconNames }) {
     const [isFocused, setIsFocused] = React.useState(false)
@@ -145,22 +90,8 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
     }
 
     return (
-        <div style={{
-            ...numberFieldContainerStyle,
-            ...(error && {
-                padding: '12px',
-                borderRadius: 8,
-                background: '#fef2f2',
-                border: '2px solid #f87171',
-            }),
-        }}>
-            <label style={{
-                ...numberLabelStyle,
-                ...(error && { color: '#b91c1c' }),
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-            }}>
+        <div className={`${formStyles.numberFieldContainer} ${error ? formStyles.numberFieldContainerError : ''}`}>
+            <label className={`${formStyles.numberLabel} ${error ? formStyles.numberLabelError : ''}`}>
                 {iconNames && iconNames.length > 0 && (
                     <CombinedIcon 
                         icons={iconNames} 
@@ -188,11 +119,7 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     </span>
                 )}
             </label>
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-            }}>
+            <div className={formStyles.numberInputContainer}>
                 <input
                     type="number"
                     min="0"
@@ -200,14 +127,7 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     onChange={e => onChange(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    style={{
-                        ...(isFocused ? numberInputFocusStyle : numberInputStyle),
-                        ...(error && {
-                            borderColor: '#f87171',
-                            background: '#ffffff',
-                        }),
-                        flex: 1,
-                    }}
+                    className={`${formStyles.numberInput} ${error ? formStyles.numberInputError : ''}`}
                     aria-invalid={!!error}
                     aria-describedby={error ? `${label}-error` : undefined}
                 />
@@ -228,16 +148,7 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
             {error && (
                 <p
                     id={`${label}-error`}
-                    style={{
-                        marginTop: 8,
-                        marginBottom: 0,
-                        fontSize: 12,
-                        color: '#b91c1c',
-                        fontWeight: 500,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                    }}
+                    className={formStyles.numberError}
                     role="alert"
                 >
                     <IconError16 />
@@ -471,16 +382,9 @@ export default function SchoolInspectionForm({
 
         if (type === 'BOOLEAN' && child_query) {
             return (
-                <div key={id} style={{ marginBottom: '1.5rem' }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            gap: '1.5rem',
-                            flexWrap: 'wrap',
-                            alignItems: 'flex-start',
-                        }}
-                    >
-                        <div style={{ flex: '1 1 auto', minWidth: '200px', maxWidth: '300px' }}>
+                <div key={id} className={formStyles.fieldWrapper}>
+                    <div className={formStyles.fieldWrapperFlex}>
+                        <div className={formStyles.fieldWrapperFlexItem}>
                             <BooleanChoiceField
                                 label={label}
                                 value={value}
@@ -496,7 +400,7 @@ export default function SchoolInspectionForm({
                                 falseLabel="Not available"
                             />
                         </div>
-                        <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                        <div className={formStyles.fieldWrapperFlexItemWide}>
                             <ConditionRatingField
                                 label={child_query.label}
                                 value={numericChildValue}
@@ -514,7 +418,7 @@ export default function SchoolInspectionForm({
 
         if (type === 'BOOLEAN') {
             return (
-                <div key={id} style={{ marginBottom: '1.5rem' }}>
+                <div key={id} className={formStyles.fieldWrapper}>
                     <BooleanChoiceField
                         label={label}
                         value={value}
@@ -548,119 +452,36 @@ export default function SchoolInspectionForm({
     )
 
     return (
-        <div
-            style={{
-                marginTop: '1rem',
-                background: '#fff',
-                borderRadius: 12,
-                border: '1px solid #e2e8f0',
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(15,23,42,0.08)',
-            }}
-        >
+        <div className={formStyles.formContainer}>
             {/* Validation error notification at bottom */}
             {showMissingPopup && missingRequiredLabels.length > 0 && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        bottom: 16,
-                        left: 0,
-                        right: 0,
-                        zIndex: 1000,
-                        padding: '0 16px',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        pointerEvents: 'none',
-                    }}
-                >
-                    <div
-                        style={{
-                            background: '#fef3c7',
-                            border: '3px solid #f59e0b',
-                            borderRadius: 12,
-                            boxShadow: '0 8px 24px rgba(217, 119, 6, 0.3), 0 0 0 1px rgba(217, 119, 6, 0.1)',
-                            maxWidth: 600,
-                            width: '100%',
-                            maxHeight: '60vh',
-                            overflow: 'auto',
-                            position: 'relative',
-                            pointerEvents: 'auto',
-                        }}
-                    >
+                <div className={formStyles.popupOverlay}>
+                    <div className={formStyles.popup}>
                         {/* Close button */}
                         <button
                             type="button"
                             onClick={() => setShowMissingPopup(false)}
-                            style={{
-                                position: 'absolute',
-                                top: 12,
-                                right: 12,
-                                width: 32,
-                                height: 32,
-                                borderRadius: 6,
-                                border: 'none',
-                                background: '#f1f5f9',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#e2e8f0'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#f1f5f9'
-                            }}
+                            className={formStyles.popupCloseButton}
                             aria-label={i18n.t('Close')}
                         >
                             <IconCross16 />
                         </button>
 
-                        <div style={{
-                            padding: '20px 48px 24px 24px',
-                        }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: 12,
-                            }}>
-                                <div style={{
-                                    flexShrink: 0,
-                                    marginTop: 2,
-                                }}>
+                        <div className={formStyles.popupContent}>
+                            <div className={formStyles.popupHeader}>
+                                <div className={formStyles.popupIcon}>
                                     <IconWarning16 />
                                 </div>
-                                <div style={{ flex: 1 }}>
-                                    <strong style={{ 
-                                        display: 'block', 
-                                        marginBottom: 10,
-                                        fontSize: 15,
-                                        fontWeight: 600,
-                                        color: '#92400e',
-                                    }}>
+                                <div className={formStyles.popupText}>
+                                    <strong className={formStyles.popupTitle}>
                                         {i18n.t('Please complete all required fields')}
                                     </strong>
-                                    <div style={{ 
-                                        fontSize: 13,
-                                        color: '#78350f',
-                                        marginBottom: 12,
-                                        lineHeight: 1.5,
-                                    }}>
+                                    <div className={formStyles.popupDescription}>
                                         {i18n.t('The following {{count}} field(s) need to be filled:', { count: missingRequiredLabels.length })}
                                     </div>
-                                    <ul
-                                        style={{
-                                            margin: 0,
-                                            padding: 0,
-                                            paddingLeft: 20,
-                                            fontSize: 13,
-                                            color: '#78350f',
-                                            lineHeight: 1.6,
-                                        }}
-                                    >
+                                    <ul className={formStyles.popupList}>
                                         {missingRequiredLabels.map(label => (
-                                            <li key={label} style={{ marginBottom: 6 }}>
+                                            <li key={label} className={formStyles.popupListItem}>
                                                 {label}
                                             </li>
                                         ))}
@@ -673,98 +494,40 @@ export default function SchoolInspectionForm({
             )}
 
             {/* Header */}
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: 16,
-                    flexWrap: 'wrap',
-                    gap: 12,
-                }}
-            >
-                <div style={{ flex: '1 1 auto', minWidth: 0 }}>
-                    <h3 style={{ 
-                        margin: 0,
-                        fontSize: 20,
-                        lineHeight: 1.3,
-                    }}>
+            <div className={formStyles.header}>
+                <div className={formStyles.headerLeft}>
+                    <h3 className={formStyles.headerTitle}>
                         {i18n.t('School inspection')} – {orgUnitName || orgUnitId}
                     </h3>
-                    <p
-                        style={{
-                            margin: '4px 0 0',
-                            fontSize: 12,
-                            color: '#64748b',
-                        }}
-                    >
+                    <p className={formStyles.headerSubtitle}>
                         {i18n.t('Inspection date')}: {inspectionDateLabel}
                     </p>
                 </div>
-                <div
-                    style={{
-                        fontSize: 12,
-                        color: '#64748b',
-                        fontWeight: 500,
-                        whiteSpace: 'nowrap',
-                    }}
-                >
+                <div className={formStyles.headerStats}>
                     {filledCount} / {totalCount} {i18n.t('fields completed')}
                 </div>
             </div>
 
             {/* progress bar */}
-            <div style={{ marginBottom: 24 }}>
-                <div
-                    style={{
-                        height: 8,
-                        background: '#e5e7eb',
-                        borderRadius: 999,
-                        overflow: 'hidden',
-                        position: 'relative',
-                    }}
-                >
+            <div className={formStyles.progressSection}>
+                <div className={formStyles.progressBar}>
                     <div
-                        style={{
-                            height: '100%',
-                            width: `${progressPct}%`,
-                            background:
-                                progressPct === 100
-                                    ? '#16a34a'
-                                    : '#2563eb',
-                            transition: 'width .3s ease',
-                            borderRadius: 999,
-                        }}
+                        className={`${formStyles.progressBarFill} ${progressPct === 100 ? formStyles.progressBarFillComplete : ''}`}
+                        style={{ width: `${progressPct}%` }}
                     />
                 </div>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: 8,
-                    fontSize: 12,
-                    color: '#64748b',
-                }}>
+                <div className={formStyles.progressStats}>
                     <span>Progress: {filledCount} of {totalCount} fields</span>
-                    <span style={{ fontWeight: 600, color: progressPct === 100 ? '#16a34a' : '#2563eb' }}>
+                    <span className={`${formStyles.progressPercentage} ${progressPct === 100 ? formStyles.progressPercentageComplete : ''}`}>
                         {Math.round(progressPct)}%
                     </span>
                 </div>
             </div>
 
             {loading && (
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '16px',
-                    background: '#eff6ff',
-                    borderRadius: 8,
-                    border: '1px solid #bfdbfe',
-                    marginBottom: 20,
-                }}>
+                <div className={formStyles.loadingIndicator}>
                     <CircularLoader small />
-                    <span style={{ color: '#1e40af', fontWeight: 500 }}>
+                    <span className={formStyles.loadingText}>
                         {i18n.t('Submitting inspection...')}
                     </span>
                 </div>
@@ -772,136 +535,53 @@ export default function SchoolInspectionForm({
 
             {!loading && (
                 <>
-                    <details open style={sectionBoxStyle}>
-                        <summary
-                            style={{ 
-                                fontWeight: 600, 
-                                fontSize: 16,
-                                cursor: 'pointer',
-                                color: '#0f172a',
-                                marginBottom: 12,
-                                padding: '4px 0',
-                                listStyle: 'none',
-                            }}
-                        >
+                    <details open className={formStyles.sectionBox}>
+                        <summary className={formStyles.sectionSummary}>
                             Facilities
                         </summary>
-                        <p
-                            style={{
-                                fontSize: 13,
-                                color: '#64748b',
-                                marginBottom: 16,
-                                lineHeight: 1.5,
-                            }}
-                        >
+                        <p className={formStyles.sectionDescription}>
                             Select if available and rate condition from 1–5.
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        <div className={formStyles.facilitiesContainer}>
                             {facilities.map(renderField)}
                         </div>
                     </details>
 
-                    <details open style={sectionBoxStyle}>
-                        <summary
-                            style={{ 
-                                fontWeight: 600, 
-                                fontSize: 16,
-                                cursor: 'pointer',
-                                color: '#0f172a',
-                                marginBottom: 12,
-                                padding: '4px 0',
-                                listStyle: 'none',
-                            }}
-                        >
+                    <details open className={formStyles.sectionBox}>
+                        <summary className={formStyles.sectionSummary}>
                             Capacity
                         </summary>
-                        <p
-                            style={{
-                                fontSize: 13,
-                                color: '#64748b',
-                                marginBottom: 16,
-                                lineHeight: 1.5,
-                            }}
-                        >
+                        <p className={formStyles.sectionDescription}>
                             Enter basic counts for classrooms, learners, seats
                             and teachers.
                         </p>
-                        <div 
-                            style={sectionGridStyle}
-                            className={formStyles.capacityGrid}
-                        >
+                        <div className={`${formStyles.sectionGrid} ${formStyles.capacityGrid}`}>
                             {capacity.map(renderField)}
                         </div>
                     </details>
 
-                    <details open style={sectionBoxStyle}>
-                        <summary
-                            style={{ 
-                                fontWeight: 600, 
-                                fontSize: 16,
-                                cursor: 'pointer',
-                                color: '#0f172a',
-                                marginBottom: 12,
-                                padding: '4px 0',
-                                listStyle: 'none',
-                            }}
-                        >
+                    <details open className={formStyles.sectionBox}>
+                        <summary className={formStyles.sectionSummary}>
                             Sanitation & staffing
                         </summary>
-                        <p
-                            style={{
-                                fontSize: 13,
-                                color: '#64748b',
-                                marginBottom: 16,
-                                lineHeight: 1.5,
-                            }}
-                        >
+                        <p className={formStyles.sectionDescription}>
                             Report toilets per group. Total toilets is
                             calculated automatically.
                         </p>
-                        <div 
-                            style={sectionGridStyle}
-                            className={formStyles.sanitationGrid}
-                        >
+                        <div className={`${formStyles.sectionGrid} ${formStyles.sanitationGrid}`}>
                             {sanitation.map(renderField)}
                         </div>
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 8,
-                                marginTop: 16,
-                                padding: '12px 16px',
-                                background: '#eff6ff',
-                                borderRadius: 8,
-                                border: '1px solid #bfdbfe',
-                            }}
-                        >
-                            <strong style={{ fontSize: 14, color: '#1e40af' }}>
+                        <div className={formStyles.totalToiletsBox}>
+                            <strong className={formStyles.totalToiletsLabel}>
                                 Total toilets: 
                             </strong>
-                            <span style={{ 
-                                fontSize: 16, 
-                                fontWeight: 700, 
-                                color: '#2563eb' 
-                            }}>
+                            <span className={formStyles.totalToiletsValue}>
                                 {totalToilets}
                             </span>
                         </div>
                     </details>
 
-                    <div
-                        style={{
-                            marginTop: '2rem',
-                            paddingTop: '1.5rem',
-                            borderTop: '2px solid #e5e7eb',
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: 12,
-                            flexWrap: 'wrap',
-                        }}
-                        className={formStyles.submitButtonContainer}
-                    >
+                    <div className={formStyles.submitButtonContainer}>
                         <Button
                             onClick={handleReset}
                             disabled={loading}
@@ -924,7 +604,7 @@ export default function SchoolInspectionForm({
                             <AlertBar success duration={8000}>
                                 <div>
                                     <strong>{i18n.t('Inspection submitted successfully!')}</strong>
-                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                    <div className={formStyles.alertMessage}>
                                         {i18n.t('{{count}} fields saved', { count: lastSubmitted.length })}
                                     </div>
                                 </div>
@@ -937,7 +617,7 @@ export default function SchoolInspectionForm({
                             <AlertBar critical duration={10000}>
                                 <div>
                                     <strong>{i18n.t('Error submitting inspection')}</strong>
-                                    <div style={{ marginTop: 4, fontSize: 13 }}>
+                                    <div className={formStyles.alertMessage}>
                                         {error.message || i18n.t('An unexpected error occurred. Please try again.')}
                                     </div>
                                 </div>

@@ -1,9 +1,456 @@
 /* Mobile-first responsive styles for EditInspectionForm */
 
+.formContainer {
+    margin-top: 1rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    position: relative;
+}
+
+.popupOverlay {
+    position: fixed;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 0 16px;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.popup {
+    background: #fef3c7;
+    border: 3px solid #f59e0b;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(217, 119, 6, 0.3), 0 0 0 1px rgba(217, 119, 6, 0.1);
+    max-width: 600px;
+    width: 100%;
+    max-height: 60vh;
+    overflow: auto;
+    position: relative;
+    pointer-events: auto;
+}
+
+.popupCloseButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: #f1f5f9;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.popupCloseButton:hover {
+    background: #e2e8f0;
+}
+
+.popupContent {
+    padding: 20px 48px 24px 24px;
+}
+
+.popupHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.popupIcon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.popupText {
+    flex: 1;
+}
+
+.popupTitle {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.popupDescription {
+    font-size: 13px;
+    color: #78350f;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.popupList {
+    margin: 0;
+    padding: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.6;
+}
+
+.popupListItem {
+    margin-bottom: 6px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.headerTitle {
+    margin: 0;
+}
+
+.headerSubtitle {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.headerSubtext {
+    margin: 0;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.headerStats {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.progressSection {
+    margin-bottom: 24px;
+}
+
+.progressBar {
+    height: 8px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    overflow: hidden;
+    position: relative;
+}
+
+.progressBarFill {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+    background: #2563eb;
+}
+
+.progressBarFillComplete {
+    background: #16a34a;
+}
+
+.progressStats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.progressPercentage {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.progressPercentageComplete {
+    color: #16a34a;
+}
+
+.loadingIndicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #eff6ff;
+    border-radius: 8px;
+    border: 1px solid #bfdbfe;
+    margin-bottom: 20px;
+}
+
+.loadingText {
+    color: #1e40af;
+    font-weight: 500;
+}
+
+.sectionBox {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sectionSummary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    color: #0f172a;
+    list-style: none;
+    outline: none;
+    margin-bottom: 12px;
+    padding: 4px 0;
+}
+
+.sectionDescription {
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.facilitiesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sectionGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 20px;
+    align-items: flex-start;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    max-width: 500px;
+}
+
+.totalToiletsBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #eff6ff;
+    border-radius: 8px;
+    border: 1px solid #bfdbfe;
+}
+
+.totalToiletsLabel {
+    font-size: 14px;
+    color: #1e40af;
+}
+
+.totalToiletsValue {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.actionsContainer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-top: 8px;
+    margin-top: auto;
+    background: linear-gradient(to top, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.85), transparent);
+}
+
+.actionsButtons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.actionsButtonsInner {
+    display: flex;
+    gap: 8px;
+}
+
+.alertMessage {
+    margin-top: 4px;
+    font-size: 13px;
+}
+
+/* NumberField styles */
+.numberFieldContainer {
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.numberFieldContainerChanged {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef3c7;
+    border: 2px solid #fbbf24;
+}
+
+.numberFieldContainerError {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 2px solid #f87171;
+}
+
+.numberLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    min-height: 20px;
+    color: #0f172a;
+}
+
+.numberLabelError {
+    color: #b91c1c;
+}
+
+.numberInputContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.numberInput {
+    flex: 1;
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 2px solid #cbd5e1;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+    min-height: 44px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.numberInput:focus {
+    border: 2px solid #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.numberInputChanged {
+    border-color: #fbbf24;
+}
+
+.numberInputError {
+    border-color: #f87171;
+}
+
+.numberError {
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-size: 12px;
+    color: #b91c1c;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fieldWrapper {
+    margin-bottom: 1.5rem;
+}
+
+.fieldWrapperChanged {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef3c7;
+    border: 2px solid #fbbf24;
+}
+
+.fieldWrapperError {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 2px solid #f87171;
+}
+
+.fieldWrapperFlex {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.fieldWrapperFlexItem {
+    flex: 1 1 auto;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.fieldWrapperFlexItemChanged {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef3c7;
+    border: 2px solid #fbbf24;
+}
+
+.fieldWrapperFlexItemError {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 2px solid #f87171;
+}
+
+.fieldWrapperFlexItemWide {
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.fieldWrapperFlexItemWideChanged {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef3c7;
+    border: 2px solid #fbbf24;
+}
+
+.fieldWrapperFlexItemWideError {
+    padding: 12px;
+    border-radius: 8px;
+    background: #fef2f2;
+    border: 2px solid #f87171;
+}
+
+.badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badgeModified {
+    color: #d97706;
+    background: #fef3c7;
+}
+
+.badgeError {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
 @media (max-width: 600px) {
     .capacityGrid,
     .sanitationGrid {
         max-width: 100% !important;
     }
 }
-
