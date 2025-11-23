@@ -1,5 +1,5 @@
 // pages/SchoolInspectionPage/newInspection/configs/inspectionFormUtils.jsx
-import { CHILD_FIELD_IDS, SCHOOL_INSPECTION_FIELDS } from './schoolInspectionConfig'
+import { CHILD_FIELD_IDS, SCHOOL_INSPECTION_FIELDS, TOTAL_TOILETS_ID } from './schoolInspectionConfig'
 
 export const computeTotalToilets = (formState) =>
     (Number(formState['I13NTyLrHBm']) || 0) +
@@ -40,7 +40,7 @@ export const computeProgress = (formState) => {
 
     SCHOOL_INSPECTION_FIELDS.forEach(field => {
         // Skip auto-calculated fields
-        if (field.id === 'iytoDmoTUWY') { // TOTAL_TOILETS_ID
+        if (field.id === TOTAL_TOILETS_ID) {
             return
         }
 
