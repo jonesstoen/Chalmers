@@ -1,57 +1,75 @@
-import { useEffect, useState } from 'react'
-import { useDataEngine } from '@dhis2/app-runtime'
-/* Brukes ikke
-export function useSchoolsByRegions(regionIds = []) {
-    const engine = useDataEngine()
-    const [schools, setSchools] = useState([])
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
+import { useDataQuery } from '@dhis2/app-runtime'
 
-    useEffect(() => {
-        if (!regionIds.length) return
+// Build dynamic query
+const buildQuery = (regionIds) => {
+    const q = {}
 
-        async function fetchAndMergeSchools() {
-            setLoading(true)
-            setError(null)
+    regionIds.forEach((id, index) => {
+        // Fetch the region node itself
+        q[`root_${index}`] = {
+            resource: 'organisationUnits',
+            id,
+            params: {
 
-            try {
-                // Run a separate query for each region in parallel
-                const queries = regionIds.map((id) =>
-                    engine.query({
-                        schools: {
-                            resource: 'organisationUnits',
-                            params: {
-                                filter: [`path:like:${id}`],
-                                fields: 'id,displayName,level,children[id]',
-                                paging: false,
-                            },
-                        },
-                    })
-                )
-
-                const results = await Promise.all(queries)
-
-                // Flatten and merge results
-                const allUnits = results.flatMap(
-                    (r) => r.schools.organisationUnits || []
-                )
-
-                // Keep only leaf nodes (actual schools)
-                const leafNodes = allUnits.filter(
-                    (u) => !u.children || u.children.length === 0
-                )
-
-                setSchools(leafNodes)
-            } catch (err) {
-                setError(err)
-            } finally {
-                setLoading(false)
-            }
+fields: 'id,displayName,level,children[id],path',
+            },
         }
 
-        fetchAndMergeSchools()
-    }, [engine, regionIds])
+        // Fetch ALL descendants
+        q[`desc_${index}`] = {
+            resource: 'organisationUnits',
+            params: {
+                filter: [`path:like:${id}`],
 
-    return { schools, loading, error }
+fields: 'id,displayName,level,children[id],path',
+                paging: false,
+            },
+        }
+    })
+
+    return q
 }
-*/
+
+export function useSchoolsByRegions(regionIds = []) {
+    const query = buildQuery(regionIds)
+
+    const { loading, error, data } = useDataQuery(query, {
+        variables: {},
+        skip: regionIds.length === 0,
+    })
+
+    if (loading || error || !data) {
+        return { schools: [], loading, error }
+    }
+
+    // ---- Extract roots (regions) ----
+    const roots = Object.keys(data)
+        .filter(k => k.startsWith('root_'))
+        .map(k => ({
+            ...data[k],
+            type: 'region'
+        }))
+
+    // ---- Extract descendants ----
+
+  // Remove descendants that ARE already roots
+const descendants = Object.keys(data)
+    .filter(k => k.startsWith('desc_'))
+    .flatMap(k => data[k].organisationUnits || [])
+    .filter(u => !regionIds.includes(u.id))
+
+    // ---- Tag clusters & schools ----
+    const taggedDescendants = descendants.map(u => ({
+        ...u,
+        type: u.children && u.children.length > 0 ? 'cluster' : 'school'
+    }))
+
+    // ---- Merge everything ----
+    const merged = [...roots, ...taggedDescendants]
+
+    return {
+        schools: merged,   // Your search bar expects "schools"
+        loading,
+        error,
+    }
+}

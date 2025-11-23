@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Button, CircularLoader } from '@dhis2/ui'
-import { usePopulateSchoolInspections } from '../hooks/populateSchoolInspections'
+import { usePopulateSchoolInspections } from '../../shared/api/populateSchoolInspections'
 
 export default function PopulateDataButton() {
     const [loading, setLoading] = useState(false)
