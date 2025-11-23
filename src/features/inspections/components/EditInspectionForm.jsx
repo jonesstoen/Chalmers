@@ -471,20 +471,36 @@ export default function EditInspectionForm({
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
 
+    // Helper function to normalize a value for comparison
+    const normalizeForComparison = (value) => {
+        // Handle null, undefined, empty string as null
+        if (value === null || value === undefined || value === '') {
+            return null
+        }
+        // Convert to string and trim for consistent comparison
+        const str = String(value).trim()
+        // If it's a number string, compare as number to avoid "5" vs "5.0" issues
+        const num = Number(str)
+        if (!Number.isNaN(num) && str === String(num)) {
+            return num
+        }
+        // For booleans, normalize to true/false/null
+        if (value === true || value === 'true') return true
+        if (value === false || value === 'false') return false
+        // Otherwise return as string
+        return str
+    }
+
     // Helper function to check if a field has changed from original
     const hasFieldChanged = (fieldId) => {
         const current = formState[fieldId]
         const original = originalFormState[fieldId]
         
-        // Handle different value types
-        if (current === original) return false
-        if (current === null && (original === null || original === undefined || original === '')) return false
-        if ((current === null || current === undefined || current === '') && original === null) return false
+        // Normalize both values for comparison
+        const currentNormalized = normalizeForComparison(current)
+        const originalNormalized = normalizeForComparison(original)
         
-        // Normalize for comparison
-        const currentNormalized = current === null || current === undefined || current === '' ? null : String(current)
-        const originalNormalized = original === null || original === undefined || original === '' ? null : String(original)
-        
+        // Use strict equality for comparison
         return currentNormalized !== originalNormalized
     }
 
