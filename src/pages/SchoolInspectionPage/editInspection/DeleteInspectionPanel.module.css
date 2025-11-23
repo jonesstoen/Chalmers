@@ -1,0 +1,15 @@
+.container {
+    border: 1px solid #fee2e2;
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.title {
+    margin-top: 0;
+}
+
+.error {
+    color: crimson;
+}
+

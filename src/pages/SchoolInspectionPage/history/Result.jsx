@@ -4,6 +4,7 @@ import SchoolGraph from "./graphs/SchoolGraph"
 import HeatmapComparison from "./heatmap/HeatmapComparison"
 import { dataElementIdToDescription } from "../newInspection/configs/inspectionFormUtils"
 import { SCHOOL_INSPECTION_FIELDS } from "../newInspection/configs/schoolInspectionConfig"
+import styles from './Result.module.css'
 
 function Result({ OrgId }) {
   const [inspectionDict] = useContext(InspectionContext)
@@ -21,14 +22,7 @@ const allDataElements = SCHOOL_INSPECTION_FIELDS.map(f => f.id)
           <HeatmapComparison schoolId={OrgId} />
 
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-          gap: "1.5rem",
-        }}
-      >
-        
+      <div className={styles.graphsGrid}>
         {/* CASE 1: User just submitted something → use localPoints */}
         {results.length > 0 &&
           results.map(({ dataElement, value }) => (
@@ -68,14 +62,7 @@ function GraphCard({ schoolId, dataElement, localPoints }) {
   const name = dataElementIdToDescription(dataElement)
 
   return (
-    <div
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: "12px",
-        padding: "1rem",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-      }}
-    >
+    <div className={styles.graphCard}>
       <SchoolGraph
         schoolId={schoolId}
         dataElements={[dataElement]}

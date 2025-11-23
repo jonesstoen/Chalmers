@@ -28,25 +28,8 @@ function EventSummary({ event }) {
     const date = new Date(event.eventdate)
 
     return (
-        <div
-            style={{
-                margin: '16px 0',
-                padding: '16px',
-                background: '#ffffff',
-                border: '2px solid #e5e7eb',
-                borderRadius: 12,
-                display: 'flex',
-                gap: 12,
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-            }}
-        >
-            <strong style={{ 
-                marginRight: 8,
-                fontSize: 14,
-                color: '#0f172a',
-            }}>
+        <div className={pageClasses.eventSummary}>
+            <strong className={pageClasses.eventSummaryLabel}>
                 {i18n.t('Selected event')}:
             </strong>
             <Tag positive>{date.toLocaleDateString()}</Tag>
@@ -63,11 +46,7 @@ function EventSummary({ event }) {
                     {i18n.t('Seats')}: {event.jcC1uz56IpY ?? '–'}
                 </Tag>
             )}
-            <span style={{ 
-                marginLeft: 'auto', 
-                color: '#64748b',
-                fontSize: 12,
-            }}>
+            <span className={pageClasses.eventSummaryId}>
                 ID: {event.psi}
             </span>
         </div>
@@ -82,23 +61,8 @@ function Header({ isCluster, data, onBack }) {
     const orgUnitId = ou?.id
 
     return (
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    marginBottom: 16,
-                    flexWrap: 'wrap',
-                }}
-            >
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: 12,
-                }}
-            >
+            <div className={pageClasses.header}>
+            <div className={pageClasses.headerLeft}>
                 <h2 style={{ 
                     margin: 0,
                     fontSize: 24,
