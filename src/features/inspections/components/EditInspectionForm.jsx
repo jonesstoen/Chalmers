@@ -9,6 +9,8 @@ import {
     AlertBar,
     IconSubtract16,
     IconAdd16,
+    IconWarning16,
+    IconError16,
 } from '@dhis2/ui'
 import { useUpdateSchoolInspectionEvent } from '../hooks/useUpdateSchoolInspection'
 import { useDeleteSchoolInspectionEvent } from '../hooks/useDeleteSchoolInspection'
@@ -111,10 +113,16 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
         <div style={{
             ...numberFieldContainerStyle,
             ...(hasChanged && {
-                padding: '8px',
+                padding: '12px',
                 borderRadius: 8,
                 background: '#fef3c7',
                 border: '2px solid #fbbf24',
+            }),
+            ...(error && {
+                padding: '12px',
+                borderRadius: 8,
+                background: '#fef2f2',
+                border: '2px solid #f87171',
             }),
         }}>
             <label style={{
@@ -142,11 +150,31 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                         padding: '2px 6px',
                         borderRadius: 4,
                         marginLeft: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
                     }}>
-                        Changed
+                        <IconWarning16 />
+                        Modified
                     </span>
                 )}
-                {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
+                {error && (
+                    <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: '#b91c1c',
+                        background: '#fee2e2',
+                        padding: '2px 6px',
+                        borderRadius: 4,
+                        marginLeft: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                    }}>
+                        <IconError16 />
+                        Required
+                    </span>
+                )}
             </label>
             <div style={{
                 display: 'flex',
@@ -164,6 +192,10 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                         ...(isFocused ? numberInputFocusStyle : numberInputStyle),
                         ...(hasChanged && {
                             borderColor: '#fbbf24',
+                            background: '#ffffff',
+                        }),
+                        ...(error && {
+                            borderColor: '#f87171',
                             background: '#ffffff',
                         }),
                         flex: 1,
@@ -189,18 +221,19 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                 <p
                     id={`${label}-error`}
                     style={{
-                        marginTop: 6,
+                        marginTop: 8,
                         marginBottom: 0,
                         fontSize: 12,
                         color: '#b91c1c',
                         fontWeight: 500,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 4,
+                        gap: 6,
                     }}
                     role="alert"
                 >
-                    <span>⚠</span> {error}
+                    <IconError16 />
+                    <span>{error}</span>
                 </p>
             )}
         </div>
@@ -574,10 +607,16 @@ export default function EditInspectionForm({
                             minWidth: '200px', 
                             maxWidth: '300px',
                             ...(hasFieldChanged(id) && {
-                                padding: '8px',
+                                padding: '12px',
                                 borderRadius: 8,
                                 background: '#fef3c7',
                                 border: '2px solid #fbbf24',
+                            }),
+                            ...(errors[id] && {
+                                padding: '12px',
+                                borderRadius: 8,
+                                background: '#fef2f2',
+                                border: '2px solid #f87171',
                             }),
                         }}>
                             <BooleanChoiceField
@@ -600,10 +639,16 @@ export default function EditInspectionForm({
                             flex: '1 1 auto', 
                             minWidth: '200px',
                             ...(hasFieldChanged(childId) && {
-                                padding: '8px',
+                                padding: '12px',
                                 borderRadius: 8,
                                 background: '#fef3c7',
                                 border: '2px solid #fbbf24',
+                            }),
+                            ...(errors[childId] && {
+                                padding: '12px',
+                                borderRadius: 8,
+                                background: '#fef2f2',
+                                border: '2px solid #f87171',
                             }),
                         }}>
                             <ConditionRatingField
@@ -628,10 +673,16 @@ export default function EditInspectionForm({
                 <div key={id} style={{
                     marginBottom: '1.5rem',
                     ...(hasFieldChanged(id) && {
-                        padding: '8px',
+                        padding: '12px',
                         borderRadius: 8,
                         background: '#fef3c7',
                         border: '2px solid #fbbf24',
+                    }),
+                    ...(errors[id] && {
+                        padding: '12px',
+                        borderRadius: 8,
+                        background: '#fef2f2',
+                        border: '2px solid #f87171',
                     }),
                 }}>
                     <BooleanChoiceField
@@ -686,17 +737,31 @@ export default function EditInspectionForm({
         >
             {/* Validation error alert */}
             {showMissingPopup && missingRequiredLabels.length > 0 && (
-                <AlertStack>
-                    <AlertBar
-                        warning
-                        duration={10000}
-                        onHidden={() => setShowMissingPopup(false)}
-                    >
-                        <div style={{ padding: '4px 0' }}>
+                <div style={{
+                    marginBottom: 20,
+                    padding: '16px 20px',
+                    background: '#fef3c7',
+                    border: '2px solid #fbbf24',
+                    borderRadius: 12,
+                    boxShadow: '0 2px 8px rgba(217, 119, 6, 0.15)',
+                }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 12,
+                    }}>
+                        <div style={{
+                            flexShrink: 0,
+                            marginTop: 2,
+                        }}>
+                            <IconWarning16 />
+                        </div>
+                        <div style={{ flex: 1 }}>
                             <strong style={{ 
                                 display: 'block', 
-                                marginBottom: 8,
-                                fontSize: 14,
+                                marginBottom: 10,
+                                fontSize: 15,
+                                fontWeight: 600,
                                 color: '#92400e',
                             }}>
                                 {i18n.t('Please complete all required fields')}
@@ -704,27 +769,30 @@ export default function EditInspectionForm({
                             <div style={{ 
                                 fontSize: 13,
                                 color: '#78350f',
-                                marginBottom: 8,
+                                marginBottom: 12,
+                                lineHeight: 1.5,
                             }}>
                                 {i18n.t('The following {{count}} field(s) need to be filled before saving:', { count: missingRequiredLabels.length })}
                             </div>
                             <ul
                                 style={{
-                                    margin: '4px 0 0 20px',
+                                    margin: 0,
                                     padding: 0,
+                                    paddingLeft: 20,
                                     fontSize: 13,
                                     color: '#78350f',
+                                    lineHeight: 1.6,
                                 }}
                             >
                                 {missingRequiredLabels.map(label => (
-                                    <li key={label} style={{ marginBottom: 6, lineHeight: 1.5 }}>
+                                    <li key={label} style={{ marginBottom: 8 }}>
                                         {label}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                    </AlertBar>
-                </AlertStack>
+                    </div>
+                </div>
             )}
 
             {/* Header */}

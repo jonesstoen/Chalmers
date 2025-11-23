@@ -1,5 +1,6 @@
 // features/inspections/components/BooleanChoiceField.jsx
 import React from 'react'
+import { IconError16, IconWarning16 } from '@dhis2/ui'
 
 export default function BooleanChoiceField({
                                                label,
@@ -79,11 +80,31 @@ export default function BooleanChoiceField({
                             background: '#fef3c7',
                             padding: '2px 6px',
                             borderRadius: 4,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
                         }}>
-                            Changed
+                            <IconWarning16 />
+                            Modified
                         </span>
                     )}
-                    {error && <span style={{ color: '#b91c1c', marginLeft: 4 }}>*</span>}
+                    {error && (
+                        <span style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: '#b91c1c',
+                            background: '#fee2e2',
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            marginLeft: 4,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                        }}>
+                            <IconError16 />
+                            Required
+                        </span>
+                    )}
                 </label>
             )}
 
@@ -143,11 +164,12 @@ export default function BooleanChoiceField({
                         fontWeight: 500,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 4,
+                        gap: 6,
                     }}
                     role="alert"
                 >
-                    <span>⚠</span> {error}
+                    <IconError16 />
+                    <span>{error}</span>
                 </p>
             )}
         </div>
