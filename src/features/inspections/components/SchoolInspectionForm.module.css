@@ -20,8 +20,7 @@
     
     .capacityGrid,
     .sanitationGrid {
-        grid-template-columns: 1fr !important;
-        column-gap: 12px !important;
+        max-width: 100% !important;
     }
 }
 

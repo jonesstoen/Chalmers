@@ -45,20 +45,21 @@ const sectionBoxStyle = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
 }
 
-// Grid for 2 fields per line
+// Single column grid - one field per line
 const sectionGridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    columnGap: 20,
+    gridTemplateColumns: '1fr',
     rowGap: 20,
     alignItems: 'flex-start',
     marginTop: 8,
     marginBottom: 8,
+    maxWidth: 500, // Natural width limit
 }
 
 const numberFieldContainerStyle = {
     marginBottom: 0, // Grid handles spacing
     width: '100%',
+    maxWidth: '100%',
 }
 
 const numberLabelStyle = {
@@ -72,7 +73,7 @@ const numberLabelStyle = {
 
 const numberInputStyle = {
     width: '100%',
-    padding: '12px 14px', // Larger padding for mobile touch targets
+    padding: '14px 16px', // Larger padding
     borderRadius: 8,
     border: '2px solid #cbd5e1',
     fontSize: 16, // Larger font for mobile readability
@@ -105,7 +106,8 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                 {iconNames && iconNames.length > 0 && (
                     <CombinedIcon 
                         icons={iconNames} 
-                        size={20} 
+                        size={24} 
+                        gap={6}
                         style={{ color: error ? '#b91c1c' : '#2563eb' }}
                     />
                 )}
