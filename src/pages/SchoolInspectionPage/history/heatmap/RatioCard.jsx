@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import ModernTooltip from "../components/ModernTooltip"
+import styles from './RatioCard.module.css'
 
 const mapThreshold = {
     seatsToLearner: 1,
@@ -37,41 +38,20 @@ Ratio: ${isNaN(value) ? "N/A" : value.toFixed(2)}
     const bg = smoothColor(value, thresholdValue, goodLower)
 
     return (
-        <div style={{ position: "relative", width: "120px" }}>
+        <div className={styles.container}>
             <ModernTooltip visible={hover} text={tooltipText} />
 
             <div
                 onMouseEnter={() => setHover(true)}
                 onMouseLeave={() => setHover(false)}
-                style={{
-                    width: "120px",
-                    height: "120px",
-                    borderRadius: "14px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    gap: "0.3rem",
-                    background: bg,
-                    color: "#111",
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    padding: "0.4rem",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                    cursor: "pointer",
-                    transition: "background 0.2s ease-in-out",
-                }}
+                className={styles.card}
+                style={{ background: bg }}
             >
-                <div style={{ fontSize: "0.85rem", lineHeight: "1.1" }}>
+                <div className={styles.label}>
                     {label}
                 </div>
 
-                <div style={{
-                    fontSize: "1.45rem",
-                    fontWeight: "700",
-                    marginTop: "0.1rem",
-                }}>
+                <div className={styles.value}>
                     {isNaN(value) ? "N/A" : value.toFixed(2)}
                 </div>
             </div>
