@@ -5,72 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-23T14:24:50.125Z\n"
-"PO-Revision-Date: 2025-11-23T14:24:50.125Z\n"
-
-msgid ""
-"Are you sure you want to reset all changes? All unsaved modifications will "
-"be lost."
-msgstr ""
-"Are you sure you want to reset all changes? All unsaved modifications will "
-"be lost."
-
-msgid "Close"
-msgstr "Close"
-
-msgid "Please complete all required fields"
-msgstr "Please complete all required fields"
-
-msgid "Saving changes..."
-msgstr "Saving changes..."
-
-msgid "Deleting inspection..."
-msgstr "Deleting inspection..."
-
-msgid "Reset changes"
-msgstr "Reset changes"
-
-msgid "Changes saved successfully!"
-msgstr "Changes saved successfully!"
-
-msgid "Error saving changes"
-msgstr "Error saving changes"
-
-msgid "An unexpected error occurred. Please try again."
-msgstr "An unexpected error occurred. Please try again."
-
-msgid "Error deleting inspection"
-msgstr "Error deleting inspection"
-
-msgid "Are you sure you want to reset the form? All entered data will be lost."
-msgstr "Are you sure you want to reset the form? All entered data will be lost."
-
-msgid "School inspection"
-msgstr "School inspection"
-
-msgid "Inspection date"
-msgstr "Inspection date"
-
-msgid "fields completed"
-msgstr "fields completed"
-
-msgid "Submitting inspection..."
-msgstr "Submitting inspection..."
-
-msgid "Reset form"
-msgstr "Reset form"
-
-msgid "Submitting..."
-msgstr "Submitting..."
-
-msgid "Submit inspection"
-msgstr "Submit inspection"
-
-msgid "Inspection submitted successfully!"
-msgstr "Inspection submitted successfully!"
-
-msgid "Error submitting inspection"
-msgstr "Error submitting inspection"
+"POT-Creation-Date: 2025-11-23T15:50:46.882Z\n"
+"PO-Revision-Date: 2025-11-23T15:50:46.882Z\n"
 
 msgid "Selected event"
 msgstr "Selected event"
@@ -151,3 +87,67 @@ msgstr ""
 
 msgid "No roots available"
 msgstr "No roots available"
+
+msgid ""
+"Are you sure you want to reset all changes? All unsaved modifications will "
+"be lost."
+msgstr ""
+"Are you sure you want to reset all changes? All unsaved modifications will "
+"be lost."
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Please complete all required fields"
+msgstr "Please complete all required fields"
+
+msgid "Saving changes..."
+msgstr "Saving changes..."
+
+msgid "Deleting inspection..."
+msgstr "Deleting inspection..."
+
+msgid "Reset changes"
+msgstr "Reset changes"
+
+msgid "Changes saved successfully!"
+msgstr "Changes saved successfully!"
+
+msgid "Error saving changes"
+msgstr "Error saving changes"
+
+msgid "An unexpected error occurred. Please try again."
+msgstr "An unexpected error occurred. Please try again."
+
+msgid "Error deleting inspection"
+msgstr "Error deleting inspection"
+
+msgid "Are you sure you want to reset the form? All entered data will be lost."
+msgstr "Are you sure you want to reset the form? All entered data will be lost."
+
+msgid "School inspection"
+msgstr "School inspection"
+
+msgid "Inspection date"
+msgstr "Inspection date"
+
+msgid "fields completed"
+msgstr "fields completed"
+
+msgid "Submitting inspection..."
+msgstr "Submitting inspection..."
+
+msgid "Reset form"
+msgstr "Reset form"
+
+msgid "Submitting..."
+msgstr "Submitting..."
+
+msgid "Submit inspection"
+msgstr "Submit inspection"
+
+msgid "Inspection submitted successfully!"
+msgstr "Inspection submitted successfully!"
+
+msgid "Error submitting inspection"
+msgstr "Error submitting inspection"

@@ -13,7 +13,8 @@ build
 # --- OS junk ---
 .DS_Store
 Thumbs.db
-Icon?
+# macOS resource fork files (but not our Icon.jsx files)
+/Icon?
 ehthumbs.db
 
 # --- Editors & IDEs ---
