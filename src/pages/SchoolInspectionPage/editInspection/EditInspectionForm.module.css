@@ -138,16 +138,17 @@
     top: 0;
     z-index: 100;
     background: #ffffff;
-    padding: 16px 0;
+    padding: 16px 12px;
     border-bottom: 1px solid #e5e7eb;
 }
 
 .progressBar {
-    height: 8px;
+    height: 12px;
     border-radius: 999px;
     background: #e5e7eb;
     overflow: hidden;
     position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .progressBarFill {
@@ -156,23 +157,27 @@
     border-radius: 999px;
     transition: width 0.3s ease;
     background: #2563eb;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
 }
 
 .progressBarFillComplete {
     background: #16a34a;
+    box-shadow: 0 1px 3px rgba(22, 163, 74, 0.3);
 }
 
 .progressStats {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 8px;
-    font-size: 12px;
-    color: #64748b;
+    margin-top: 12px;
+    font-size: 14px;
+    color: #334155;
+    font-weight: 500;
 }
 
 .progressPercentage {
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 16px;
     color: #2563eb;
 }
 
@@ -226,17 +231,29 @@
 .facilitiesContainer {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0;
+}
+
+.facilitiesContainer > *:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .sectionGrid {
     display: grid;
     grid-template-columns: 1fr;
-    row-gap: 20px;
+    row-gap: 0;
     align-items: flex-start;
     margin-top: 8px;
     margin-bottom: 8px;
     max-width: 500px;
+}
+
+.sectionGrid > *:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .totalToiletsBox {
@@ -266,9 +283,10 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding-top: 8px;
+    padding: 8px 12px;
     margin-top: auto;
     background: linear-gradient(to top, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.85), transparent);
+    z-index: 200;
 }
 
 .actionsButtons {
@@ -277,11 +295,52 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .actionsButtonsInner {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.buttonTextFull {
+    display: inline;
+}
+
+.buttonTextShort {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .actionsContainer {
+        padding: 8px;
+    }
+    
+    .actionsButtons {
+        justify-content: stretch;
+    }
+    
+    .actionsButtonsInner {
+        flex-direction: row;
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .actionsButtonsInner > button {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .buttonTextFull {
+        display: none;
+    }
+    
+    .buttonTextShort {
+        display: inline;
+    }
 }
 
 .alertMessage {
@@ -374,7 +433,7 @@
 }
 
 .fieldWrapper {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
 }
 
 .fieldWrapperChanged {
@@ -415,8 +474,9 @@
 }
 
 .fieldWrapperFlexItemWide {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 200px;
+    max-width: 350px;
 }
 
 .fieldWrapperFlexItemWideChanged {

@@ -629,7 +629,8 @@ export default function SchoolInspectionForm({
                                     disabled={loading}
                                     large
                                 >
-                                    {i18n.t('Reset form')}
+                                    <span className={formStyles.buttonTextFull}>{i18n.t('Reset form')}</span>
+                                    <span className={formStyles.buttonTextShort}>Reset</span>
                                 </Button>
                                 <Button
                                     primary
@@ -638,7 +639,8 @@ export default function SchoolInspectionForm({
                                     large
                                     style={{ minWidth: 140 }}
                                 >
-                                    {i18n.t('Submit inspection')}
+                                    <span className={formStyles.buttonTextFull}>{i18n.t('Submit inspection')}</span>
+                                    <span className={formStyles.buttonTextShort}>Submit</span>
                                 </Button>
                             </div>
                         </div>

@@ -106,3 +106,14 @@
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
+@media (max-width: 600px) {
+    .tabBarContainer {
+        padding: 4px;
+    }
+    
+    .tabBarContainer > div > button {
+        font-size: 13px;
+        padding: 12px 8px;
+    }
+}
