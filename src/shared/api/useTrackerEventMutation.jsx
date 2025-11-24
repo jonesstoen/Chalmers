@@ -2,82 +2,94 @@ import {
     useDataMutation,
     useDhis2ConnectionStatus,
     useOnlineStatus,
-} from "@dhis2/app-runtime";
-import { useMemo, useCallback } from "react";
-import { outboxCache } from "../cache/config";
+} from "@dhis2/app-runtime"
+import { useMemo, useCallback } from "react"
+import { outboxCache } from "../cache/config"
 
 export default function usePostEvent(type = "POST") {
-    const browserOnline = useOnlineStatus();
+    const { isConnected } = useDhis2ConnectionStatus()
+    const browserOnline = useOnlineStatus()
+    const isOffline = !isConnected || !browserOnline
 
-    const isOffline = !browserOnline;
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0]
 
-    const CREATE = { resource: "tracker", type: "create", params: { async: false, importStrategy: "CREATE" } };
-    const UPDATE = { resource: "tracker", type: "create", params: { async: false, importStrategy: "UPDATE" } };
-    const DELETE = { resource: "tracker", type: "create", params: { async: false, importStrategy: "DELETE" } };
-
+    // DHIS2 requires a STATIC mutation with a DATA WRAPPER
     const STATIC_QUERY = useMemo(() => {
-        if (type === "POST") return CREATE;
-        if (type === "PUT") return UPDATE;
-        if (type === "DELETE") return DELETE;
-        throw new Error("Invalid mutation type");
-    }, [type]);
+        return {
+            resource: "tracker",
+            type: "create",
+            params: {
+                async: false,
+                importStrategy:
+                    type === "POST"
+                        ? "CREATE"
+                        : type === "PUT"
+                            ? "UPDATE"
+                            : "DELETE",
+            },
+            // DHIS2 expects data: ({events}) => ({events})
+            data: ({ events }) => ({ events }),
+        }
+    }, [type])
 
-    const [onlineMutate, onlineState] = useDataMutation(STATIC_QUERY);
+    const [onlineMutate, onlineState] = useDataMutation(STATIC_QUERY)
 
     const wrappedMutate = useCallback(
-        async (variables) => {
-            if (!isOffline) {
-                const payload =
-                    type === "POST"
-                        ? {
-                            events: [
-                                {
-                                    program: variables.program_id,
-                                    programStage: variables.programStage,
-                                    orgUnit: variables.orgUnit_id,
-                                    occurredAt: `${variables.period ?? today}T00:00:00.000`,
-                                    status: variables.status ?? "COMPLETED",
-                                    dataValues: variables.dataValues,
-                                },
-                            ],
-                        }
-                        : type === "PUT"
-                            ? {
-                                events: [
-                                    {
-                                        event: variables.eventId,
-                                        program: variables.program_id,
-                                        programStage: variables.programStage,
-                                        orgUnit: variables.orgUnit_id,
-                                        occurredAt: variables.occurredAt,
-                                        status: variables.status ?? "COMPLETED",
-                                        dataValues: variables.dataValues,
-                                    },
-                                ],
-                            }
-                            : {
-                                events: [{ event: variables.eventId }],
-                            };
+        async (vars) => {
+            console.log("offline:", isOffline)
 
-                return await onlineMutate({ data: payload });
+            // Build event payload OUTSIDE the mutation
+            let events
+
+            if (type === "POST") {
+                events = [
+                    {
+                        program: vars.program_id,
+                        programStage: vars.programStage,
+                        orgUnit: vars.orgUnit_id,
+                        occurredAt: `${vars.period ?? today}T00:00:00`,
+                        status: vars.status ?? "COMPLETED",
+                        dataValues: vars.dataValues,
+                    },
+                ]
+            } else if (type === "PUT") {
+                events = [
+                    {
+                        event: vars.eventId,
+                        program: vars.program_id,
+                        programStage: vars.programStage,
+                        orgUnit: vars.orgUnit_id,
+                        occurredAt: vars.occurredAt,
+                        status: vars.status ?? "COMPLETED",
+                        dataValues: vars.dataValues,
+                    },
+                ]
+            } else {
+                events = [{ event: vars.eventId }]
             }
 
+            // ONLINE: send correct shape
+            if (!isOffline) {
+                console.log("POSTING ONLINE →", { events })
+                return await onlineMutate({ events })
+            }
+
+            // OFFLINE: cache
             const cacheKey =
                 type === "POST"
-                    ? `event:${type}:${variables.program_id}:${variables.programStage}:${variables.orgUnit_id}:${today}`
-                    : `event:${type}:${variables.eventId}`;
+                    ? `event:${type}:${vars.program_id}:${vars.programStage}:${vars.orgUnit_id}:${vars.period ?? today}`
+                    : `event:${type}:${vars.eventId}`
+            await outboxCache.setItem(cacheKey, { type, events, ts: Date.now() })
 
-            await outboxCache.setItem(cacheKey, {
-                type,
-                variables,
-                timestamp: Date.now(),
-            });
+            console.log("📦 stored offline:", cacheKey)
 
-            return { offline: true, message: "Saved offline (outbox)." };
+            return {
+                offline: true,
+                message: "Saved offline and will sync later.",
+            }
         },
-        [isOffline, type, today, onlineMutate]
-    );
+        [isOffline, onlineMutate, type, today]
+    )
 
-    return [wrappedMutate, onlineState];
+    return [wrappedMutate, onlineState]
 }

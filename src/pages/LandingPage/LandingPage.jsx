@@ -1,4 +1,3 @@
-// pages/LandingPage/LandingPage.jsx
 import React, { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'

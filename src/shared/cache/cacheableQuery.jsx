@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { useDataQuery } from "@dhis2/app-runtime";
-import { dataCache, outboxCache } from "./config";
+import { useEffect, useMemo, useState } from "react"
+import { useDataQuery } from "@dhis2/app-runtime"
+import { dataCache, outboxCache } from "./config"
 
 export function useCacheableQuery(
     cacheKey,
@@ -9,74 +9,94 @@ export function useCacheableQuery(
     variables = {},
     forceLazy = false
 ) {
+    // Singletons from config
     const cacheMap = {
         data: dataCache,
         outbox: outboxCache,
-    };
+    }
 
-    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey]);
+    // This is safe if cacheMap values are stable top-level instances
+    const cache = useMemo(() => cacheMap[cacheKey], [cacheKey])
 
-    const [cachedData, setCachedData] = useState(null);
-    const [cacheStatus, setCacheStatus] = useState("none");
-    const [cacheChecked, setCacheChecked] = useState(false);
+    const [cachedData, setCachedData] = useState(null)
+    const [cacheStatus, setCacheStatus] = useState("none")
+    const [cacheChecked, setCacheChecked] = useState(false)
+    const [initialLazy, setInitialLazy] = useState(true) // prevents oscillation
 
-    // Load from cache
+    //
+    // 1. READ CACHE
+    //
     useEffect(() => {
-        let cancelled = false;
+        let cancelled = false
 
-        (async () => {
-            setCacheChecked(false);
+        setCacheChecked(false)
 
-            const item = await cache.getItem(dataKey);
+        ;(async () => {
+            const item = await cache.getItem(dataKey)
 
-            if (cancelled) return;
+            if (cancelled) return
 
-            if (item && item.value != null) {
-                const stale = isCacheStale(item.timestamp);
-                setCachedData(item.value);
-                setCacheStatus(stale ? "stale-cache" : "cache");
+            if (item?.value != null) {
+                const stale = isCacheStale(item.timestamp)
+                setCachedData(item.value)
+                setCacheStatus(stale ? "stale-cache" : "cache")
             } else {
-                setCachedData(null);
-                setCacheStatus("none");
+                setCachedData(null)
+                setCacheStatus("none")
             }
 
-            setCacheChecked(true);
-        })();
+            setCacheChecked(true)
+        })()
 
         return () => {
-            cancelled = true;
-        };
-    }, [dataKey, cache]);
+            cancelled = true
+        }
+    }, [dataKey, cache])
 
+    //
+    // 2. NETWORK QUERY (lazy only until cache checked)
+    //
     const { data: networkData, loading, error, refetch } = useDataQuery(query, {
         variables,
-        lazy: forceLazy || !cacheChecked,
-    });
+        lazy: initialLazy || forceLazy,
+    })
 
-    // Fetch if needed
+    // Stop lazy once cache has been evaluated
     useEffect(() => {
-        if (!cacheChecked) return;
-        if (forceLazy) return;
-        if (cachedData != null) return;
-        if (networkData) return;
+        if (cacheChecked && !forceLazy) {
+            setInitialLazy(false)
+        }
+    }, [cacheChecked, forceLazy])
 
-        void refetch();
-    }, [cacheChecked, cachedData, networkData, forceLazy, refetch]);
-
-    // Write fresh network data to cache
+    //
+    // 3. REFETCH IF CACHE EMPTY (only after cache check)
+    //
     useEffect(() => {
-        if (!networkData) return;
+        if (!cacheChecked) return
+        if (forceLazy) return
+        if (cachedData != null) return
 
-        (async () => {
+        // IMPORTANT: refetch is stable enough to call,
+        // but not stable enough to include in the deps
+        refetch()
+    }, [cacheChecked, cachedData, forceLazy])
+
+    //
+    // 4. WRITE NETWORK DATA TO CACHE
+    //
+    useEffect(() => {
+        if (!networkData) return
+
+            ;(async () => {
             await cache.setItem(dataKey, {
                 value: networkData,
                 timestamp: Date.now(),
-            });
+            })
 
-            setCachedData(networkData);
-            setCacheStatus("network");
-        })();
-    }, [networkData, dataKey, cache]);
+            setCachedData(networkData)
+            setCacheStatus("network")
+        })()
+    }, [networkData, dataKey, cache])
 
     return {
         data: networkData || cachedData,
@@ -84,9 +104,9 @@ export function useCacheableQuery(
         error,
         refetch,
         source: cacheStatus,
-    };
+    }
 }
 
 function isCacheStale(timestamp) {
-    return Date.now() - timestamp > 16 * 60 * 60 * 1000;
+    return Date.now() - timestamp > 16 * 60 * 60 * 1000
 }

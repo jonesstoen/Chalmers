@@ -7,7 +7,6 @@ import {
     IconHome16
 } from '@dhis2/ui'
 
-
 export default function SchoolSearchBar({ onSelect}) {
     const regionIds = useMemo(() => ['RlPlK44dtoo', 'Bp3y61WbHwn'], [])
 

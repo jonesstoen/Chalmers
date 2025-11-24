@@ -1,6 +1,3 @@
-// Script to populate school inspection data for all schools in Edutopia
-// This creates sample inspection data for testing purposes
-
 import { useDataEngine, useDataQuery } from '@dhis2/app-runtime'
 
 const SCHOOL_INSPECTION_PROGRAM = 'UxK2o06ScIe'

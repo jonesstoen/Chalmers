@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import { CircularLoader, NoticeBox } from '@dhis2/ui'
-import { useDataQuery } from '@dhis2/app-runtime'
 import useSchoolAnalyticsWrapper from '../hooks/useSchoolEvents'
 import classes from './InspectionTimeline.module.css'
+import {useCacheableQuery} from "../../../../shared/cache/cacheableQuery";
 
 const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },
@@ -21,16 +21,19 @@ const F = {
     seats: 'jcC1uz56IpY',
 }
 
-// Query to fetch organisation unit details
-const ouQuery = {
+// ----------------------------------------------------
+// STATIC OU QUERY (REQUIRED BY DHIS2)
+// ----------------------------------------------------
+const OU_QUERY = {
     ou: {
         resource: 'organisationUnits',
         id: ({ id }) => id,
-        params: { fields: 'displayName,name' },
+        params: () => ({
+            fields: 'displayName,name',
+        }),
     },
 }
 
-// Bool med tooltip
 const Bool = ({ v }) => (
     <span
         className={v ? classes.boolOk : classes.boolBad}
@@ -52,7 +55,6 @@ const Badge = ({ v }) => (
     </span>
 )
 
-// Liten chip for status-kolonnen
 const StatusChip = ({ status }) => {
     if (!status) return null
     const key = status.toLowerCase()
@@ -69,31 +71,14 @@ const StatusChip = ({ status }) => {
 
 function Th({ label, active, asc, onClick, first }) {
     const baseClass = `${classes.th} ${first ? classes.firstColTh : ''}`
-
-    let icon = null
-    if (active) {
-        icon = (
-            <span className={classes.sortIcon}>
-                {asc ? '▲' : '▼'}
-            </span>
-        )
-    } else {
-        icon = (
-            <span className={classes.sortIconInactive}>
-                ⬍
-            </span>
-        )
-    }
-
     return (
-        <th
-            onClick={onClick}
-            className={baseClass}
-            title="Click to sort"
-            scope="col"
-        >
+        <th className={baseClass} onClick={onClick} title="Click to sort">
             <span className={classes.thLabel}>{label}</span>
-            {icon}
+            {active ? (
+                <span className={classes.sortIcon}>{asc ? '▲' : '▼'}</span>
+            ) : (
+                <span className={classes.sortIconInactive}>⬍</span>
+            )}
         </th>
     )
 }
@@ -107,13 +92,35 @@ function toBool(v) {
 export default function InspectionTimeline({ schoolId, onSelect }) {
     const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
 
-    const ouVars = useMemo(() => ({ id: schoolId || '' }), [schoolId])
-    const { data: ouData } = useDataQuery(ouQuery, {
-        variables: ouVars,
-        lazy: !schoolId,
-    })
-    const schoolName = ouData?.ou?.displayName || ouData?.ou?.name || schoolId
+    // ----------------------------------------------------
+    // CACHED OU LOOKUP
+    // ----------------------------------------------------
+    const ouVariables = useMemo(() => ({ id: schoolId || '__none__' }), [schoolId])
 
+    const ouDataKey = useMemo(
+        () =>
+            JSON.stringify({
+                type: 'orgUnitBasic',
+                id: schoolId || '__none__',
+            }),
+        [schoolId]
+    )
+
+    const {
+        data: ouData,
+        source: ouSource,
+    } = useCacheableQuery(
+        'data',
+        ouDataKey,
+        OU_QUERY,
+        ouVariables,
+        !schoolId // lazy
+    )
+
+    const schoolName =
+        ouData?.ou?.displayName || ouData?.ou?.name || schoolId
+
+    // Sorting
     const [sortKey, setSortKey] = useState('eventdate')
     const [sortAsc, setSortAsc] = useState(true)
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -140,24 +147,14 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
             const A = a?.[sortKey]
             const B = b?.[sortKey]
 
-            // Sorter dato som Date
             if (sortKey === 'eventdate') {
-                const dA = A ? new Date(A).getTime() : 0
-                const dB = B ? new Date(B).getTime() : 0
-                const diff = dA - dB
+                const diff = new Date(A).getTime() - new Date(B).getTime()
                 return sortAsc ? diff : -diff
             }
 
-            //  Numeriske felt: sorter som tall
             if (numericKeys.has(sortKey)) {
-                const nA =
-                    A === undefined || A === null || A === ''
-                        ? NaN
-                        : Number(A)
-                const nB =
-                    B === undefined || B === null || B === ''
-                        ? NaN
-                        : Number(B)
+                const nA = Number(A)
+                const nB = Number(B)
 
                 if (Number.isNaN(nA) && Number.isNaN(nB)) return 0
                 if (Number.isNaN(nA)) return sortAsc ? 1 : -1
@@ -167,16 +164,12 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                 return sortAsc ? diff : -diff
             }
 
-            // fallback: string-compare
-            const sA = (A ?? '').toString()
-            const sB = (B ?? '').toString()
-            const c = sA.localeCompare(sB)
+            const c = (A ?? '').toString().localeCompare((B ?? '').toString())
             return sortAsc ? c : -c
         })
         return list
     }, [events, sortKey, sortAsc, numericKeys])
 
-    // early returns
     if (!schoolId) return null
     if (loading) return <CircularLoader />
     if (error)
@@ -192,7 +185,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
             </NoticeBox>
         )
 
-    // små aggregater til “summary” over tabellen
     const numEvents = events.length
 
     const latestByDate = [...events].sort(
@@ -224,7 +216,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                 Inspection Events for {schoolName}
             </h3>
 
-            {/* liten info-rad over tabellen */}
             <div className={classes.summaryRow}>
                 <span>
                     Events: <strong>{numEvents}</strong>
@@ -232,9 +223,7 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                 <span>
                     Last inspection: <strong>{latestDateLabel}</strong>
                 </span>
-                <span className={classes.sortHint}>
-                    Tip: Click column headers to sort
-                </span>
+                <span className={classes.sortHint}>Tip: Click column headers to sort</span>
             </div>
 
             <table className={classes.table}>
