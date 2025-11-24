@@ -281,13 +281,18 @@
     margin-bottom: 0;
     width: 100%;
     max-width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .numberFieldContainerError {
-    padding: 12px;
-    border-radius: 8px;
     background: #fef2f2;
-    border: 2px solid #f87171;
+    border-color: #f87171;
+    box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25);
 }
 
 .numberLabel {
