@@ -19,7 +19,7 @@ export function useLocalRatios(localSubmission) {
         teachers,
         toilets,
         ratios: {
-          seatsToLearner: learners ? seats / learners : NaN,
+          seatsToLearner: learners ?  learners / seats : NaN,
           learnerToClassroom: classrooms ? learners / classrooms : NaN,
           learnerToTeacher: teachers ? learners / teachers : NaN,
           learnerToToilet: toilets ? learners / toilets : NaN,

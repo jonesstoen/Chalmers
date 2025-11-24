@@ -10,11 +10,11 @@
 }
 
 .gradientBar {
-    width: 240px;
-    height: 14px;
-    border-radius: 6px;
-    margin: 0 auto;
-    background: linear-gradient(to right, #d9534f, #e0e0e0, #4caf50);
+  width: 240px;
+  height: 14px;
+  border-radius: 6px;
+  margin: 0 auto;
+  background: linear-gradient(to right, hsl(0, 70%, 47%), hsl(0, 0%, 88%), hsl(120, 70%, 47%));
 }
 
 .labels {
@@ -25,6 +25,7 @@
     font-size: 0.7rem;
     color: #555;
 }
+
 
 .chipsContainer {
     margin-top: 1rem;

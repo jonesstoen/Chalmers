@@ -21,7 +21,7 @@ export function FullHeatmapLegend() {
             {/* Small threshold chips below */}
             <div className={styles.chipsContainer}>
                 {[
-                    ["Learners / Seat", "≥ 1"],
+                    ["Learners / Seat", "≤ 1"],
                     ["Learners / Classroom", "≤ 53"],
                     ["Learners / Teacher", "≤ 45"],
                     ["Learners / Toilet", "≤ 25"],

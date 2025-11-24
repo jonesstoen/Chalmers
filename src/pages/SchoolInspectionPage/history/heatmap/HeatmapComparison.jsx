@@ -20,7 +20,7 @@ const mapThreshold = {
 }
 
 const goodWhenLower = {
-    seatsToLearner: false,
+    seatsToLearner: true,
     learnerToClassroom: true,
     learnerToTeacher: true,
     learnerToToilet: true,
@@ -78,29 +78,21 @@ export default function HeatmapComparison({ schoolId }) {
 
     const localDataArray = useLocalRatios(localSubmission)
 
-    const remoteData =
-        remoteDataArray?.length > 0
-            ? remoteDataArray[remoteDataArray.length - 1]
-            : null
+    const comparison_array = remoteDataArray.slice(-2)
 
-    const secondLatestRemote =
-        remoteDataArray?.length > 1
-            ? remoteDataArray[remoteDataArray.length - 2]
-            : null
+    if (localDataArray) comparison_array.push(localDataArray[0])
+    
+    const hasRemoteSub = remoteDataArray?.length > 0
+    const hasLocalSubmission = localDataArray?.length > 0
 
-    const localData =
-        localDataArray?.length > 0 ? localDataArray[0] : secondLatestRemote
+    const prev = comparison_array[comparison_array.length - 2]
+    const curr = comparison_array[comparison_array.length -1]
+
 
     if (loading) return <p>Loading ratios…</p>
     if (error) return <p>Error: {error.message}</p>
-    if (!remoteData) return <p>No remote data available</p>
+    if (!hasRemoteSub) return <p>No remote data available</p>
 
-    // ---- TOTALS are guaranteed correct here ----
-    const remoteTotals = extractTotals(remoteData)
-    const localTotals = extractTotals(localData)
-
-    const hasLocalSubmission = localDataArray?.length > 0
-    const usingFallback = !hasLocalSubmission
 
     return (
         <>
@@ -109,10 +101,10 @@ export default function HeatmapComparison({ schoolId }) {
             </div>
 
             <div className={styles.ratiosContainer}>
-                {RATIO_KEYS.map(({ key, label, threshold }) => {
-                    const prevValue = remoteData?.ratios[key]
-                    const currValue = localData?.ratios[key]
-                    
+                {RATIO_KEYS.map(({ key, label, _ }) => {
+                    const prevValue = prev?.ratios[key]
+                    const currValue = curr?.ratios[key]
+                    console.debug(`${label} Current ${currValue}: previous ${prevValue}` )
                     // Calculate change
                     let percentChange = null
                     let absoluteChange = null
@@ -131,12 +123,12 @@ export default function HeatmapComparison({ schoolId }) {
                         <div key={key} className={styles.ratioRow}>
                             <div className={styles.ratioLabel}>{label}</div>
                             <div className={styles.ratioValues}>
-                                {/* Most Recent */}
+                                {/* Most Recent remote / Just Submitted */}
                                 <div 
                                     className={styles.valueSection}
                                     style={{ background: prevColor }}
                                 >
-                                    <div className={styles.sectionLabel}>Most Recent</div>
+                                    <div className={styles.sectionLabel}>Previous</div>
                                     <div className={styles.sectionValue}>
                                         {isNaN(prevValue) || prevValue == null ? "N/A" : prevValue.toFixed(1)}
                                     </div>
@@ -145,9 +137,7 @@ export default function HeatmapComparison({ schoolId }) {
                                 {/* Change */}
                                 <div className={styles.valueSection}>
                                     <div className={styles.sectionLabel}>
-                                        {usingFallback
-                                            ? "Change Since Previous"
-                                            : "Change Since Last"}
+                                        {"Change"}
                                     </div>
                                     <div className={styles.sectionValue}>
                                         {percentChange != null ? (
@@ -165,13 +155,13 @@ export default function HeatmapComparison({ schoolId }) {
                                     </div>
                                 </div>
 
-                                {/* Previous / Just Submitted */}
+                                {/* Previous */}
                                 <div 
                                     className={styles.valueSection}
                                     style={{ background: currColor }}
                                 >
                                     <div className={styles.sectionLabel}>
-                                        {hasLocalSubmission ? "Just Submitted" : "Previous"}
+                                        {hasLocalSubmission ? "Just Submitted" : "Most Recent"}
                                     </div>
                                     <div className={styles.sectionValue}>
                                         {isNaN(currValue) || currValue == null ? "N/A" : currValue.toFixed(1)}
