@@ -456,8 +456,9 @@
 }
 
 .fieldWrapperFlexItemWide {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 200px;
+    max-width: 350px;
 }
 
 .fieldWrapperFlexItemWideChanged {
