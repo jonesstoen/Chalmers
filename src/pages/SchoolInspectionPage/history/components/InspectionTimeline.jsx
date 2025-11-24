@@ -1,9 +1,29 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { CircularLoader, NoticeBox } from '@dhis2/ui'
 import useSchoolAnalyticsWrapper from '../hooks/useSchoolEvents'
 import classes from './InspectionTimeline.module.css'
-import {useCacheableQuery} from "../../../../shared/cache/cacheableQuery";
+import { useCacheableQuery } from '../../../../shared/cache/cacheableQuery'
 
+// ----------------------------
+// STATIC OU QUERY
+// ----------------------------
+function buildOuParams() {
+    return {
+        fields: 'displayName,name',
+    }
+}
+
+const OU_QUERY = {
+    ou: {
+        resource: 'organisationUnits',
+        id: ({ id }) => id,
+        params: buildOuParams,   // stable function
+    },
+}
+
+// ----------------------------
+// FIELD IDS (STATIC)
+// ----------------------------
 const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },
     elec: { on: 'IKiSAA19Xvl', cond: 'MH2eDd7qWxR' },
@@ -21,19 +41,9 @@ const F = {
     seats: 'jcC1uz56IpY',
 }
 
-// ----------------------------------------------------
-// STATIC OU QUERY (REQUIRED BY DHIS2)
-// ----------------------------------------------------
-const OU_QUERY = {
-    ou: {
-        resource: 'organisationUnits',
-        id: ({ id }) => id,
-        params: () => ({
-            fields: 'displayName,name',
-        }),
-    },
-}
-
+// ----------------------------
+// SMALL PRESENTATION COMPONENTS
+// ----------------------------
 const Bool = ({ v }) => (
     <span
         className={v ? classes.boolOk : classes.boolBad}
@@ -59,20 +69,13 @@ const StatusChip = ({ status }) => {
     if (!status) return null
     const key = status.toLowerCase()
     const extra = classes['statusChip_' + key] || ''
-    return (
-        <span
-            className={`${classes.statusChip} ${extra}`}
-            title={status}
-        >
-            {status}
-        </span>
-    )
+    return <span className={`${classes.statusChip} ${extra}`}>{status}</span>
 }
 
 function Th({ label, active, asc, onClick, first }) {
-    const baseClass = `${classes.th} ${first ? classes.firstColTh : ''}`
+    const base = `${classes.th} ${first ? classes.firstColTh : ''}`
     return (
-        <th className={baseClass} onClick={onClick} title="Click to sort">
+        <th className={base} onClick={onClick} title="Click to sort">
             <span className={classes.thLabel}>{label}</span>
             {active ? (
                 <span className={classes.sortIcon}>{asc ? '▲' : '▼'}</span>
@@ -83,19 +86,31 @@ function Th({ label, active, asc, onClick, first }) {
     )
 }
 
+// ----------------------------
+// HELPERS
+// ----------------------------
 function toBool(v) {
     if (v === true || v === 'true') return true
     const n = Number(v)
     return !Number.isNaN(n) && n > 0
 }
 
+// ----------------------------
+// MAIN COMPONENT
+// ----------------------------
 export default function InspectionTimeline({ schoolId, onSelect }) {
+    // ----------------------------
+    // 1. FETCH EVENTS (primary data)
+    // ----------------------------
     const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
 
-    // ----------------------------------------------------
-    // CACHED OU LOOKUP
-    // ----------------------------------------------------
-    const ouVariables = useMemo(() => ({ id: schoolId || '__none__' }), [schoolId])
+    // ----------------------------
+    // 2. Fetch OU name (cached)
+    // ----------------------------
+    const ouVariables = useMemo(
+        () => ({ id: schoolId || '__none__' }),
+        [schoolId]
+    )
 
     const ouDataKey = useMemo(
         () =>
@@ -106,21 +121,20 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         [schoolId]
     )
 
-    const {
-        data: ouData,
-        source: ouSource,
-    } = useCacheableQuery(
+    const { data: ouData } = useCacheableQuery(
         'data',
         ouDataKey,
         OU_QUERY,
         ouVariables,
-        !schoolId // lazy
+        !schoolId               // lazy if no id
     )
 
     const schoolName =
         ouData?.ou?.displayName || ouData?.ou?.name || schoolId
 
-    // Sorting
+    // ----------------------------
+    // 3. Sorting state
+    // ----------------------------
     const [sortKey, setSortKey] = useState('eventdate')
     const [sortAsc, setSortAsc] = useState(true)
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -141,35 +155,77 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         []
     )
 
+    // ----------------------------
+    // 4. Sorting computation
+    // ----------------------------
     const sorted = useMemo(() => {
-        const list = Array.isArray(events) ? [...events] : []
+        if (!Array.isArray(events)) return []
+
+        const list = [...events]
+
         list.sort((a, b) => {
             const A = a?.[sortKey]
             const B = b?.[sortKey]
 
+            // Date sorting
             if (sortKey === 'eventdate') {
-                const diff = new Date(A).getTime() - new Date(B).getTime()
+                const diff =
+                    new Date(A).getTime() - new Date(B).getTime()
                 return sortAsc ? diff : -diff
             }
 
+            // Numerics
             if (numericKeys.has(sortKey)) {
                 const nA = Number(A)
                 const nB = Number(B)
-
                 if (Number.isNaN(nA) && Number.isNaN(nB)) return 0
                 if (Number.isNaN(nA)) return sortAsc ? 1 : -1
                 if (Number.isNaN(nB)) return sortAsc ? -1 : 1
-
                 const diff = nA - nB
                 return sortAsc ? diff : -diff
             }
 
+            // Text
             const c = (A ?? '').toString().localeCompare((B ?? '').toString())
             return sortAsc ? c : -c
         })
+
         return list
     }, [events, sortKey, sortAsc, numericKeys])
 
+    // ----------------------------
+    // 5. Sorting toggler
+    // ----------------------------
+    const toggleSort = useCallback(
+        key => {
+            if (sortKey === key) setSortAsc(v => !v)
+            else {
+                setSortKey(key)
+                setSortAsc(true)
+            }
+        },
+        [sortKey]
+    )
+
+    // ----------------------------
+    // 6. Event selection
+    // ----------------------------
+    const pick = useCallback(
+        ev => {
+            setSelectedEvent(ev)
+            onSelect?.(ev)
+        },
+        [onSelect]
+    )
+
+    const isSortedCol = useCallback(
+        key => sortKey === key,
+        [sortKey]
+    )
+
+    // ----------------------------
+    // 7. Conditions
+    // ----------------------------
     if (!schoolId) return null
     if (loading) return <CircularLoader />
     if (error)
@@ -185,8 +241,10 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
             </NoticeBox>
         )
 
+    // ----------------------------
+    // 8. Summary
+    // ----------------------------
     const numEvents = events.length
-
     const latestByDate = [...events].sort(
         (a, b) => new Date(b.eventdate) - new Date(a.eventdate)
     )[0]
@@ -194,22 +252,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
     const latestDateLabel = latestByDate
         ? new Date(latestByDate.eventdate).toLocaleDateString()
         : '–'
-
-    const toggleSort = key => {
-        if (sortKey === key) setSortAsc(v => !v)
-        else {
-            setSortKey(key)
-            setSortAsc(true)
-        }
-    }
-
-    const pick = ev => {
-        setSelectedEvent(ev)
-        onSelect?.(ev)
-    }
-
-    const isSortedCol = key => sortKey === key
-
     return (
         <div style={{ padding: '0.75rem', overflowX: 'auto' }}>
             <h3 style={{ margin: '0 0 .25rem' }}>

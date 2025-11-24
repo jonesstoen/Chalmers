@@ -5,13 +5,13 @@ import { useCacheableQuery } from "../../../../shared/cache/cacheableQuery"
 // STABLE PARAMS BUILDER (moved out of query object)
 // ------------------------------------------------------------
 function buildAnalyticsParams({
-                                  programId,
-                                  stageId,
-                                  schoolId,
-                                  startDate,
-                                  endDate,
-                                  dataElements = [],
-                              }) {
+        programId,
+        stageId,
+        schoolId,
+        startDate,
+        endDate,
+        dataElements = [],
+    }) {
     const baseDimensions = [
         `ou:${schoolId}`,
         ...dataElements.filter(Boolean)
@@ -43,13 +43,13 @@ const SCHOOL_ANALYTICS_QUERY = {
 }
 
 export function useSchoolAnalytics({
-                                       programId,
-                                       stageId,
-                                       schoolId,
-                                       startDate,
-                                       endDate,
-                                       dataElements = [],
-                                   }) {
+        programId,
+        stageId,
+        schoolId,
+        startDate,
+        endDate,
+        dataElements = [],
+    }) {
 
     // --------------------------
     // STABLE VARIABLES
