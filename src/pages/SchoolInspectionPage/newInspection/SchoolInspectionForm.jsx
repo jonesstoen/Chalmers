@@ -35,6 +35,13 @@ import { CombinedIcon } from '../../../shared/ui/icons/Icon'
 import { FIELD_ICONS } from './configs/fieldIcons'
 
 const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
+const FIELD_LABEL_LOOKUP = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
+    acc[field.id] = field.label
+    if (field.child_query) {
+        acc[field.child_query.id] = field.child_query.label
+    }
+    return acc
+}, {})
 
 const getDraftKey = orgUnitId =>
     orgUnitId ? `${DRAFT_KEY_PREFIX}${orgUnitId}` : null
@@ -178,6 +185,37 @@ export default function SchoolInspectionForm({
     const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
     const [showMissingPopup, setShowMissingPopup] = useState(false)
 
+    const isEmptyValue = useCallback(
+        value => value === undefined || value === null || value === '',
+        []
+    )
+
+    const clearFieldError = useCallback(
+        (fieldId, value, { forceClearError = false } = {}) => {
+            const shouldClear = forceClearError || !isEmptyValue(value)
+
+            if (!shouldClear) {
+                return
+            }
+
+            setErrors(prev => {
+                if (!prev[fieldId]) return prev
+                const next = { ...prev }
+                delete next[fieldId]
+                return next
+            })
+
+            setMissingRequiredLabels(prev => {
+                if (prev.length === 0) return prev
+                const label = FIELD_LABEL_LOOKUP[fieldId]
+                if (!label) return prev
+                const filtered = prev.filter(item => item !== label)
+                return filtered.length === prev.length ? prev : filtered
+            })
+        },
+        [isEmptyValue]
+    )
+
     const [submitInspection, { loading, error, data }] =
         usePostSchoolInspectionEvent()
     const [inspectionDict, setInspectionDict] = useContext(InspectionContext)
@@ -210,13 +248,19 @@ export default function SchoolInspectionForm({
         }
     }, [data])
 
-    const handleChange = (id, value) => {
-        setFormState(prev => {
-            const updated = { ...prev, [id]: value }
-            orgUnitId && saveDraft(orgUnitId, updated)
-            return updated
-        })
-    }
+    const handleChange = useCallback(
+        (id, value, options = {}) => {
+            setFormState(prev => {
+                const updated = { ...prev, [id]: value }
+                if (orgUnitId) {
+                    saveDraft(orgUnitId, updated)
+                }
+                return updated
+            })
+            clearFieldError(id, value, options)
+        },
+        [clearFieldError, orgUnitId]
+    )
 
     const handleReset = () => {
         if (
@@ -371,7 +415,9 @@ export default function SchoolInspectionForm({
                                     handleChange(id, v)
                                     // Clear condition rating if unselected (null) or set to false
                                     if (v === null || v === false) {
-                                        handleChange(child_query.id, null)
+                                        handleChange(child_query.id, null, {
+                                            forceClearError: true,
+                                        })
                                     }
                                 }}
                                 error={errors[id]}
