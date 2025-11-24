@@ -112,13 +112,3 @@
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
-.errorMessage {
-    margin: 0;
-    font-size: 12px;
-    color: #b91c1c;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-

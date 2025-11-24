@@ -35,6 +35,13 @@ import { CombinedIcon } from '../../../shared/ui/icons/Icon'
 import { FIELD_ICONS } from './configs/fieldIcons'
 
 const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
+const FIELD_LABEL_LOOKUP = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
+    acc[field.id] = field.label
+    if (field.child_query) {
+        acc[field.child_query.id] = field.child_query.label
+    }
+    return acc
+}, {})
 
 const getDraftKey = orgUnitId =>
     orgUnitId ? `${DRAFT_KEY_PREFIX}${orgUnitId}` : null
@@ -136,7 +143,6 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     onBlur={() => setIsFocused(false)}
                     className={`${formStyles.numberInput} ${error ? formStyles.numberInputError : ''}`}
                     aria-invalid={!!error}
-                    aria-describedby={error ? `${label}-error` : undefined}
                 />
                 <Button
                     onClick={handleDecrement}
@@ -152,16 +158,6 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     aria-label={`Increase ${label}`}
                 />
             </div>
-            {error && (
-                <p
-                    id={`${label}-error`}
-                    className={formStyles.numberError}
-                    role="alert"
-                >
-                    <IconError16 />
-                    <span>{error}</span>
-                </p>
-            )}
         </div>
     )
 }
@@ -177,6 +173,37 @@ export default function SchoolInspectionForm({
 
     const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
     const [showMissingPopup, setShowMissingPopup] = useState(false)
+
+    const isEmptyValue = useCallback(
+        value => value === undefined || value === null || value === '',
+        []
+    )
+
+    const clearFieldError = useCallback(
+        (fieldId, value, { forceClearError = false } = {}) => {
+            const shouldClear = forceClearError || !isEmptyValue(value)
+
+            if (!shouldClear) {
+                return
+            }
+
+            setErrors(prev => {
+                if (!prev[fieldId]) return prev
+                const next = { ...prev }
+                delete next[fieldId]
+                return next
+            })
+
+            setMissingRequiredLabels(prev => {
+                if (prev.length === 0) return prev
+                const label = FIELD_LABEL_LOOKUP[fieldId]
+                if (!label) return prev
+                const filtered = prev.filter(item => item !== label)
+                return filtered.length === prev.length ? prev : filtered
+            })
+        },
+        [isEmptyValue]
+    )
 
     const [submitInspection, { loading, error, data }] =
         usePostSchoolInspectionEvent()
@@ -210,13 +237,19 @@ export default function SchoolInspectionForm({
         }
     }, [data])
 
-    const handleChange = (id, value) => {
-        setFormState(prev => {
-            const updated = { ...prev, [id]: value }
-            orgUnitId && saveDraft(orgUnitId, updated)
-            return updated
-        })
-    }
+    const handleChange = useCallback(
+        (id, value, options = {}) => {
+            setFormState(prev => {
+                const updated = { ...prev, [id]: value }
+                if (orgUnitId) {
+                    saveDraft(orgUnitId, updated)
+                }
+                return updated
+            })
+            clearFieldError(id, value, options)
+        },
+        [clearFieldError, orgUnitId]
+    )
 
     const handleReset = () => {
         if (
@@ -360,10 +393,21 @@ export default function SchoolInspectionForm({
         const isTrue = value === true || value === 'true'
 
         if (type === 'BOOLEAN' && child_query) {
+            const parentError = !!errors[id]
+            const childError = !!errors[child_query.id]
             return (
-                <div key={id} className={formStyles.fieldWrapper}>
+                <div
+                    key={id}
+                    className={`${formStyles.fieldWrapper} ${
+                        parentError || childError ? formStyles.fieldWrapperError : ''
+                    }`}
+                >
                     <div className={formStyles.fieldWrapperFlex}>
-                        <div className={formStyles.fieldWrapperFlexItem}>
+                        <div
+                            className={`${formStyles.fieldWrapperFlexItem} ${
+                                parentError ? formStyles.fieldWrapperFlexItemError : ''
+                            }`}
+                        >
                             <BooleanChoiceField
                                 label={label}
                                 value={value}
@@ -371,7 +415,9 @@ export default function SchoolInspectionForm({
                                     handleChange(id, v)
                                     // Clear condition rating if unselected (null) or set to false
                                     if (v === null || v === false) {
-                                        handleChange(child_query.id, null)
+                                        handleChange(child_query.id, null, {
+                                            forceClearError: true,
+                                        })
                                     }
                                 }}
                                 error={errors[id]}
@@ -379,7 +425,11 @@ export default function SchoolInspectionForm({
                                 falseLabel="Not available"
                             />
                         </div>
-                        <div className={formStyles.fieldWrapperFlexItemWide}>
+                        <div
+                            className={`${formStyles.fieldWrapperFlexItemWide} ${
+                                childError ? formStyles.fieldWrapperFlexItemWideError : ''
+                            }`}
+                        >
                             <ConditionRatingField
                                 label={child_query.label}
                                 value={childValue}
@@ -397,7 +447,12 @@ export default function SchoolInspectionForm({
 
         if (type === 'BOOLEAN') {
             return (
-                <div key={id} className={formStyles.fieldWrapper}>
+                <div
+                    key={id}
+                    className={`${formStyles.fieldWrapper} ${
+                        errors[id] ? formStyles.fieldWrapperError : ''
+                    }`}
+                >
                     <BooleanChoiceField
                         label={label}
                         value={value}
@@ -566,17 +621,27 @@ export default function SchoolInspectionForm({
                         </div>
                     </details>
 
-                    <div className={formStyles.submitButtonContainer}>
-                        <Button
-                            onClick={handleReset}
-                            disabled={loading}
-                            large
-                        >
-                            {i18n.t('Reset form')}
-                        </Button>
-                        <Button primary onClick={handleSubmit}>
-                            {i18n.t('Submit inspection')}
-                        </Button>
+                    <div className={formStyles.actionsContainer}>
+                        <div className={formStyles.actionsButtons}>
+                            <div className={formStyles.actionsButtonsInner}>
+                                <Button
+                                    onClick={handleReset}
+                                    disabled={loading}
+                                    large
+                                >
+                                    {i18n.t('Reset form')}
+                                </Button>
+                                <Button
+                                    primary
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                    large
+                                    style={{ minWidth: 140 }}
+                                >
+                                    {i18n.t('Submit inspection')}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
 
                     {data && (

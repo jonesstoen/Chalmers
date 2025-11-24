@@ -69,12 +69,6 @@ export default function BooleanChoiceField({
                 </button>
             </div>
 
-            {error && (
-                <p className={styles.errorMessage} role="alert">
-                    <IconError16 />
-                    <span>{error}</span>
-                </p>
-            )}
         </div>
     )
 }

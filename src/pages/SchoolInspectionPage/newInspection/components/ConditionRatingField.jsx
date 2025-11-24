@@ -79,12 +79,6 @@ export default function ConditionRatingField({
                 </div>
             </div>
 
-            {error && (
-                <p className={styles.errorMessage} role="alert">
-                    <IconError16 />
-                    <span>{error}</span>
-                </p>
-            )}
         </div>
     )
 }
