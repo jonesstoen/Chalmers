@@ -143,7 +143,6 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     onBlur={() => setIsFocused(false)}
                     className={`${formStyles.numberInput} ${error ? formStyles.numberInputError : ''}`}
                     aria-invalid={!!error}
-                    aria-describedby={error ? `${label}-error` : undefined}
                 />
                 <Button
                     onClick={handleDecrement}
@@ -159,15 +158,6 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     aria-label={`Increase ${label}`}
                 />
             </div>
-            <p
-                id={`${label}-error`}
-                className={`${formStyles.numberError} ${error ? '' : formStyles.numberErrorHidden}`}
-                role={error ? 'alert' : undefined}
-                aria-hidden={error ? undefined : true}
-            >
-                <IconError16 />
-                <span>{error || '\u00A0'}</span>
-            </p>
         </div>
     )
 }
@@ -403,10 +393,21 @@ export default function SchoolInspectionForm({
         const isTrue = value === true || value === 'true'
 
         if (type === 'BOOLEAN' && child_query) {
+            const parentError = !!errors[id]
+            const childError = !!errors[child_query.id]
             return (
-                <div key={id} className={formStyles.fieldWrapper}>
+                <div
+                    key={id}
+                    className={`${formStyles.fieldWrapper} ${
+                        parentError || childError ? formStyles.fieldWrapperError : ''
+                    }`}
+                >
                     <div className={formStyles.fieldWrapperFlex}>
-                        <div className={formStyles.fieldWrapperFlexItem}>
+                        <div
+                            className={`${formStyles.fieldWrapperFlexItem} ${
+                                parentError ? formStyles.fieldWrapperFlexItemError : ''
+                            }`}
+                        >
                             <BooleanChoiceField
                                 label={label}
                                 value={value}
@@ -424,7 +425,11 @@ export default function SchoolInspectionForm({
                                 falseLabel="Not available"
                             />
                         </div>
-                        <div className={formStyles.fieldWrapperFlexItemWide}>
+                        <div
+                            className={`${formStyles.fieldWrapperFlexItemWide} ${
+                                childError ? formStyles.fieldWrapperFlexItemWideError : ''
+                            }`}
+                        >
                             <ConditionRatingField
                                 label={child_query.label}
                                 value={childValue}
@@ -442,7 +447,12 @@ export default function SchoolInspectionForm({
 
         if (type === 'BOOLEAN') {
             return (
-                <div key={id} className={formStyles.fieldWrapper}>
+                <div
+                    key={id}
+                    className={`${formStyles.fieldWrapper} ${
+                        errors[id] ? formStyles.fieldWrapperError : ''
+                    }`}
+                >
                     <BooleanChoiceField
                         label={label}
                         value={value}

@@ -69,14 +69,6 @@ export default function BooleanChoiceField({
                 </button>
             </div>
 
-            <p
-                className={`${styles.errorMessage} ${error ? '' : styles.errorMessageHidden}`}
-                role={error ? 'alert' : undefined}
-                aria-hidden={error ? undefined : true}
-            >
-                <IconError16 />
-                <span>{error || '\u00A0'}</span>
-            </p>
         </div>
     )
 }

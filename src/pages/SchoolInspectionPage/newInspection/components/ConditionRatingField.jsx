@@ -79,14 +79,6 @@ export default function ConditionRatingField({
                 </div>
             </div>
 
-            <p
-                className={`${styles.errorMessage} ${error ? '' : styles.errorMessageHidden}`}
-                role={error ? 'alert' : undefined}
-                aria-hidden={error ? undefined : true}
-            >
-                <IconError16 />
-                <span>{error || '\u00A0'}</span>
-            </p>
         </div>
     )
 }
