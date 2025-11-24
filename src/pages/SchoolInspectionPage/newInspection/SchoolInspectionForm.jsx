@@ -159,16 +159,15 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     aria-label={`Increase ${label}`}
                 />
             </div>
-            {error && (
-                <p
-                    id={`${label}-error`}
-                    className={formStyles.numberError}
-                    role="alert"
-                >
-                    <IconError16 />
-                    <span>{error}</span>
-                </p>
-            )}
+            <p
+                id={`${label}-error`}
+                className={`${formStyles.numberError} ${error ? '' : formStyles.numberErrorHidden}`}
+                role={error ? 'alert' : undefined}
+                aria-hidden={error ? undefined : true}
+            >
+                <IconError16 />
+                <span>{error || '\u00A0'}</span>
+            </p>
         </div>
     )
 }

@@ -120,5 +120,10 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    min-height: 18px;
+}
+
+.errorMessageHidden {
+    visibility: hidden;
 }
 

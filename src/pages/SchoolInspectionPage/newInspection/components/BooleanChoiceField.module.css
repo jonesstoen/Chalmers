@@ -95,14 +95,15 @@
 }
 
 .errorMessage {
-    margin: 0;
+    margin: 4px 0 0;
     font-size: 12px;
     color: #b91c1c;
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 6px;
-    min-height: 18px;
+    min-height: 22px;
+    line-height: 1.4;
 }
 
 .errorMessageHidden {
