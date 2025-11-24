@@ -1,6 +1,48 @@
 .container {
     width: 100%;
     position: relative;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 18px 24px;
+    border: 2px solid #cbd5e1;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inputWrapper:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+}
+
+.searchIcon {
+    flex-shrink: 0;
+    color: #2563eb;
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    color: #0f172a;
+}
+
+.searchInput::placeholder {
+    color: #94a3b8;
+    text-align: center;
 }
 
 .dropdown {
