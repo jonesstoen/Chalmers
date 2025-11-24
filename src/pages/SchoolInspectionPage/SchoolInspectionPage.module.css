@@ -100,9 +100,40 @@
 
 .tabBarContainer {
     margin-bottom: 16px;
-    padding: 8px;
+    padding: 0;
     background: #ffffff;
     border: 2px solid #e5e7eb;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Target the TabBar's tablist */
+.tabBarContainer > div {
+    display: flex;
+    width: 100%;
+}
+
+/* Target individual tabs */
+.tabBarContainer > div > button {
+    flex: 1;
+    padding: 16px 24px;
+    text-align: center;
+    border-right: 2px solid #e5e7eb;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.tabBarContainer > div > button:last-child {
+    border-right: none;
+}
+
+.tabBarContainer > div > button:hover {
+    background: #f8fafc;
+}
+
+.tabBarContainer > div > button[aria-selected="true"] {
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 600;
 }
