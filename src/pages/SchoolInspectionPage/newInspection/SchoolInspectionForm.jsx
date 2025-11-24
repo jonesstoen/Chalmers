@@ -170,6 +170,7 @@ export default function SchoolInspectionForm({
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
+    const [submitResult, setSubmitResult] = useState(null)
 
     const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
     const [showMissingPopup, setShowMissingPopup] = useState(false)
@@ -214,11 +215,12 @@ export default function SchoolInspectionForm({
 
     useEffect(() => {
         if (!orgUnitId) {
-            setFormState({})
-            setErrors({})
-            setMissingRequiredLabels([])
-            setShowMissingPopup(false)
-            return
+        setFormState({})
+        setErrors({})
+        setMissingRequiredLabels([])
+        setShowMissingPopup(false)
+        setSubmitResult(null)
+        return
         }
 
         const draft = loadDraft(orgUnitId)
@@ -229,13 +231,13 @@ export default function SchoolInspectionForm({
     }, [orgUnitId])
 
     useEffect(() => {
-        if (data) {
+        if (data || submitResult) {
             // beholder formState + draft som det er
             setErrors({})
             setMissingRequiredLabels([])
             setShowMissingPopup(false)
         }
-    }, [data])
+    }, [data, submitResult])
 
     const handleChange = useCallback(
         (id, value, options = {}) => {
@@ -377,12 +379,18 @@ export default function SchoolInspectionForm({
             [orgUnitId]: dataValues,
         }))
 
-        await submitInspection({
+        const result = await submitInspection({
             orgUnit_id: orgUnitId,
             dataValues: dataValues,
         })
 
-        setActiveTab && setActiveTab('tldr')
+        // Store the result for display
+        setSubmitResult(result)
+
+        // Only navigate to history/comparison if online
+        if (result?.isOnline !== false) {
+            setActiveTab && setActiveTab('tldr')
+        }
     }
 
     /* ------------------ RENDER FIELD ------------------ */
@@ -646,14 +654,29 @@ export default function SchoolInspectionForm({
                         </div>
                     </div>
 
-                    {data && (
+                    {(data || submitResult) && (
                         <AlertStack>
-                            <AlertBar success duration={8000}>
+                            <AlertBar 
+                                success={submitResult?.isOnline !== false && data} 
+                                warning={submitResult?.isOnline === false}
+                                duration={8000}
+                            >
                                 <div>
-                                    <strong>{i18n.t('Inspection submitted successfully!')}</strong>
-                                    <div className={formStyles.alertMessage}>
-                                        {i18n.t('{{count}} fields saved', { count: lastSubmitted.length })}
-                                    </div>
+                                    {submitResult?.isOnline === false ? (
+                                        <>
+                                            <strong>{i18n.t('You are offline')}</strong>
+                                            <div className={formStyles.alertMessage}>
+                                                {submitResult?.message || i18n.t('You are offline. You request has been stored, and will be posted when back online. No comparison available')}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <strong>{i18n.t('Inspection submitted successfully!')}</strong>
+                                            <div className={formStyles.alertMessage}>
+                                                {i18n.t('{{count}} fields saved', { count: lastSubmitted.length })}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </AlertBar>
                         </AlertStack>

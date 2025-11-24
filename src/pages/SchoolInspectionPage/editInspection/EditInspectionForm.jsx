@@ -146,6 +146,8 @@ export default function EditInspectionForm({
     const [originalFormState, setOriginalFormState] = useState({}) // Store original values for change detection
     const [errors, setErrors] = useState({})
     const [lastSaved, setLastSaved] = useState(null)
+    const [offlineMessage, setOfflineMessage] = useState(null)
+    const [deleteOfflineMessage, setDeleteOfflineMessage] = useState(null)
 
     // ny state for popup + liste over manglende felter
     const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
@@ -215,6 +217,8 @@ export default function EditInspectionForm({
         setOriginalFormState({ ...next }) // Store original values for comparison
         setErrors({})
         setLastSaved(null)
+        setOfflineMessage(null)
+        setDeleteOfflineMessage(null)
         setMissingRequiredLabels([])
         setShowMissingPopup(false)
     }, [event])
@@ -432,7 +436,7 @@ export default function EditInspectionForm({
 
         const status = event?.eventstatus || 'COMPLETED'
 
-        await updateEvent({
+        const result = await updateEvent({
             eventId,
             orgUnit: effectiveOrgUnit,
             occurredAt,
@@ -442,8 +446,16 @@ export default function EditInspectionForm({
             dataValues: dataValuesArray,
         })
 
-        setLastSaved(dataValuesArray.length)
-        // Success feedback is shown via AlertBar, no need for alert
+        // Handle offline response
+        if (result?.isOnline === false) {
+            setOfflineMessage(result?.message || 'You are offline. You request has been stored, and will be posted when back online. No comparison available')
+            setLastSaved(null)
+        } else {
+            // Only show success if online
+            setLastSaved(dataValuesArray.length)
+            setOfflineMessage(null)
+        }
+        // Success/offline feedback is shown via AlertBar
     }
 
     const handleReset = () => {
@@ -474,9 +486,17 @@ export default function EditInspectionForm({
         )
             return
 
-        await deleteEvent({ eventId })
-        // Success feedback handled by parent component or navigation
-        if (onDeleted) onDeleted(eventId)
+        const result = await deleteEvent({ eventId })
+        // Handle offline response
+        if (result?.isOnline === false) {
+            setDeleteOfflineMessage(result?.message || 'Cannot delete when offline. Try again later')
+        } else {
+            // Only proceed with deletion callback if online
+            setDeleteOfflineMessage(null)
+            if (onDeleted) {
+                onDeleted(eventId)
+            }
+        }
     }
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
@@ -807,6 +827,19 @@ export default function EditInspectionForm({
                         </AlertStack>
                     )}
 
+                    {offlineMessage && (
+                        <AlertStack>
+                            <AlertBar warning duration={8000}>
+                                <div>
+                                    <strong>{i18n.t('You are offline')}</strong>
+                                    <div className={editFormStyles.alertMessage}>
+                                        {offlineMessage}
+                                    </div>
+                                </div>
+                            </AlertBar>
+                        </AlertStack>
+                    )}
+
                     {saveError && (
                         <AlertStack>
                             <AlertBar critical duration={10000}>
@@ -815,6 +848,19 @@ export default function EditInspectionForm({
                                     <div className={editFormStyles.alertMessage}>
                                         {saveError.message ||
                                             i18n.t('An unexpected error occurred. Please try again.')}
+                                    </div>
+                                </div>
+                            </AlertBar>
+                        </AlertStack>
+                    )}
+
+                    {deleteOfflineMessage && (
+                        <AlertStack>
+                            <AlertBar warning duration={8000}>
+                                <div>
+                                    <strong>{i18n.t('Cannot delete when offline')}</strong>
+                                    <div className={editFormStyles.alertMessage}>
+                                        {deleteOfflineMessage}
                                     </div>
                                 </div>
                             </AlertBar>

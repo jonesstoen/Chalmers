@@ -57,13 +57,26 @@ export default function usePostEvent(type = "POST") {
             if (!isOffline) {
                 try {
                     console.log("🌐 ONLINE submit →", events)
-                    return await onlineMutate({ events })
+                    const result = await onlineMutate({ events })
+                    return {
+                        ...result,
+                        isOnline: true,
+                    }
                 } catch (err) {
                     console.warn("💥 Online submit FAILED — treating as offline:", err)
                 }
             }
 
             // OFFLINE FALLBACK
+            // For DELETE operations, don't allow offline deletion
+            if (type === "DELETE") {
+                return {
+                    offline: true,
+                    isOnline: false,
+                    message: "Cannot delete when offline. Try again later",
+                }
+            }
+
             const cacheKey =
                 type === "POST"
                     ? `event:${type}:${vars.program_id}:${vars.programStage}:${vars.orgUnit_id}:${vars.period ?? today}`
@@ -79,7 +92,8 @@ export default function usePostEvent(type = "POST") {
 
             return {
                 offline: true,
-                message: "Saved offline — will sync when internet returns.",
+                isOnline: false,
+                message: "You are offline. Your request has been stored, and will be posted when back online. No comparison available",
             }
         },
         [isOffline, onlineMutate, type, today]
