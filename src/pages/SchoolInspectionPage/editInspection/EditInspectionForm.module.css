@@ -286,6 +286,7 @@
     padding: 8px 12px;
     margin-top: auto;
     background: linear-gradient(to top, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.85), transparent);
+    z-index: 200;
 }
 
 .actionsButtons {

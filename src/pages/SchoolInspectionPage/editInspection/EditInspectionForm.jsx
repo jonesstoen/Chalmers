@@ -787,7 +787,7 @@ export default function EditInspectionForm({
                                     disabled={saving || deleting}
                                     large
                                 >
-                                    <span className={editFormStyles.buttonTextFull}>{deleting ? 'Deleting…' : 'Delete'}</span>
+                                    <span className={editFormStyles.buttonTextFull}>{deleting ? 'Deleting…' : i18n.t('Delete form')}</span>
                                     <span className={editFormStyles.buttonTextShort}>{deleting ? 'Deleting…' : 'Delete'}</span>
                                 </Button>
                             </div>
