@@ -283,7 +283,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding-top: 12px;
+    padding: 12px;
     margin-top: auto;
     background: linear-gradient(
         to top,
@@ -299,12 +299,15 @@
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .actionsButtonsInner {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
 }
 
 .alertMessage {
@@ -411,12 +414,22 @@
 }
 
 @media (max-width: 600px) {
+    .actionsContainer {
+        padding: 8px;
+    }
+    
     .actionsButtons {
         justify-content: stretch !important;
     }
     
+    .actionsButtonsInner {
+        flex-direction: column;
+        width: 100%;
+    }
+    
     .actionsButtons button {
         width: 100%;
+        min-width: 0;
     }
     
     .capacityGrid,

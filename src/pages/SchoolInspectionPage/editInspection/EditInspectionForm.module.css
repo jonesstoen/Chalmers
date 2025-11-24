@@ -283,7 +283,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding-top: 8px;
+    padding: 8px 12px;
     margin-top: auto;
     background: linear-gradient(to top, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.85), transparent);
 }
@@ -294,11 +294,35 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .actionsButtonsInner {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+    .actionsContainer {
+        padding: 8px;
+    }
+    
+    .actionsButtons {
+        justify-content: stretch;
+    }
+    
+    .actionsButtonsInner {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .actionsButtonsInner > button {
+        width: 100%;
+        min-width: 0;
+    }
 }
 
 .alertMessage {

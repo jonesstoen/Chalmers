@@ -36,6 +36,17 @@
     font-weight: 600;
     text-align: center;
     color: #0f172a;
+    min-width: 0;
+}
+
+@media (max-width: 600px) {
+    .searchInput {
+        font-size: 16px;
+    }
+    
+    .inputWrapper {
+        padding: 14px 16px;
+    }
 }
 
 .searchInput::placeholder {
