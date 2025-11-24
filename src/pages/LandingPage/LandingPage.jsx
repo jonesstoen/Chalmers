@@ -2,6 +2,7 @@ import React, { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useFetchAnalytics from '../SchoolInspectionPage/history/api/analyticsAPI'
 import { useCacheableQuery } from '../../shared/cache/cacheableQuery'
+import { useOutboxCount } from '../../shared/cache/useOutboxCount'
 import MetricTile from './MetricTile'
 import SchoolSearchBar from './components/SchoolSearchBar'
 import styles from './LandingPage.module.css'
@@ -101,7 +102,7 @@ export default function LandingPage() {
         ? ouList.find(ou => ou.id === lastOu) || null
         : null
 
-    const pendingSync = 0
+    const { count: pendingSync, loading: pendingSyncLoading } = useOutboxCount()
     const isOnline =
         typeof navigator !== 'undefined' ? navigator.onLine : true
 
@@ -175,7 +176,7 @@ export default function LandingPage() {
                     />
                     <MetricTile
                         title="🔄 Pending sync"
-                        value={String(pendingSync)}
+                        value={pendingSyncLoading ? '…' : String(pendingSync)}
                         subtitle="Waiting to be sent when online"
                     />
                     <MetricTile
