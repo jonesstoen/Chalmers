@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-24T12:00:59.850Z\n"
-"PO-Revision-Date: 2025-11-24T12:00:59.850Z\n"
+"POT-Creation-Date: 2025-11-24T15:22:00.735Z\n"
+"PO-Revision-Date: 2025-11-24T15:22:00.735Z\n"
 
 msgid "Selected event"
 msgstr "Selected event"
@@ -110,14 +110,23 @@ msgstr "Deleting inspection..."
 msgid "Reset changes"
 msgstr "Reset changes"
 
+msgid "Delete form"
+msgstr "Delete form"
+
 msgid "Changes saved successfully!"
 msgstr "Changes saved successfully!"
+
+msgid "You are offline"
+msgstr "You are offline"
 
 msgid "Error saving changes"
 msgstr "Error saving changes"
 
 msgid "An unexpected error occurred. Please try again."
 msgstr "An unexpected error occurred. Please try again."
+
+msgid "Cannot delete when offline"
+msgstr "Cannot delete when offline"
 
 msgid "Error deleting inspection"
 msgstr "Error deleting inspection"
@@ -142,6 +151,13 @@ msgstr "Reset form"
 
 msgid "Submit inspection"
 msgstr "Submit inspection"
+
+msgid ""
+"You are offline. You request has been stored, and will be posted when back "
+"online. No comparison available"
+msgstr ""
+"You are offline. You request has been stored, and will be posted when back "
+"online. No comparison available"
 
 msgid "Inspection submitted successfully!"
 msgstr "Inspection submitted successfully!"

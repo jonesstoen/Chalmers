@@ -22,7 +22,7 @@ export function useUpdateSchoolInspectionEvent() {
         status: eventStatus,
         program_id: programId,
         programStage: programStageId,
-        dataValueObjectArray: dataValues,
+        dataValues: dataValues,
     })
     return [update, status]
 }
