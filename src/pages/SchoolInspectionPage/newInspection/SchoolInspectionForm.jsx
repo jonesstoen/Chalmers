@@ -621,17 +621,27 @@ export default function SchoolInspectionForm({
                         </div>
                     </details>
 
-                    <div className={formStyles.submitButtonContainer}>
-                        <Button
-                            onClick={handleReset}
-                            disabled={loading}
-                            large
-                        >
-                            {i18n.t('Reset form')}
-                        </Button>
-                        <Button primary onClick={handleSubmit}>
-                            {i18n.t('Submit inspection')}
-                        </Button>
+                    <div className={formStyles.actionsContainer}>
+                        <div className={formStyles.actionsButtons}>
+                            <div className={formStyles.actionsButtonsInner}>
+                                <Button
+                                    onClick={handleReset}
+                                    disabled={loading}
+                                    large
+                                >
+                                    {i18n.t('Reset form')}
+                                </Button>
+                                <Button
+                                    primary
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                    large
+                                    style={{ minWidth: 140 }}
+                                >
+                                    {i18n.t('Submit inspection')}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
 
                     {data && (
