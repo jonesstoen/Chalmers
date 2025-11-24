@@ -231,17 +231,29 @@
 .facilitiesContainer {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 0;
+}
+
+.facilitiesContainer > *:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .sectionGrid {
     display: grid;
     grid-template-columns: 1fr;
-    row-gap: 28px;
+    row-gap: 0;
     align-items: flex-start;
     margin-top: 8px;
     margin-bottom: 8px;
     max-width: 500px;
+}
+
+.sectionGrid > *:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .totalToiletsBox {
@@ -377,7 +389,7 @@
 }
 
 .fieldWrapper {
-    margin-bottom: 2rem;
+    margin-bottom: 0;
 }
 
 .fieldWrapperFlex {
