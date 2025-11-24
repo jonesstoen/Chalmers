@@ -42,13 +42,13 @@
 }
 
 .buttonBase {
-    padding: 10px 16px;
+    padding: 10px 12px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
     cursor: pointer;
-    min-width: 100px;
+    min-width: 0;
     min-height: 44px;
     transition: all 0.2s ease;
     border: 2px solid transparent;
@@ -56,6 +56,16 @@
     align-items: center;
     justify-content: center;
     flex: 1;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 600px) {
+    .buttonBase {
+        padding: 10px 8px;
+        font-size: 12px;
+        min-height: 40px;
+    }
 }
 
 .buttonTrue {
@@ -92,15 +102,5 @@
 
 .buttonFalse:not(.buttonFalseActive):hover {
     transform: scale(1.02);
-}
-
-.errorMessage {
-    margin: 0;
-    font-size: 12px;
-    color: #b91c1c;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
