@@ -1,4 +1,4 @@
-import { useDataEngine, useDataQuery } from '@dhis2/app-runtime'
+import { useDataEngine } from '@dhis2/app-runtime'
 
 const SCHOOL_INSPECTION_PROGRAM = 'UxK2o06ScIe'
 const SCHOOL_INSPECTION_STAGE = 'eJiBjm9Rl7E'
