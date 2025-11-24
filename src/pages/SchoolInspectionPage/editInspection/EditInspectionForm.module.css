@@ -305,6 +305,14 @@
     justify-content: flex-end;
 }
 
+.buttonTextFull {
+    display: inline;
+}
+
+.buttonTextShort {
+    display: none;
+}
+
 @media (max-width: 600px) {
     .actionsContainer {
         padding: 8px;
@@ -315,13 +323,22 @@
     }
     
     .actionsButtonsInner {
-        flex-direction: column;
+        flex-direction: row;
         width: 100%;
+        gap: 8px;
     }
     
     .actionsButtonsInner > button {
-        width: 100%;
+        flex: 1;
         min-width: 0;
+    }
+    
+    .buttonTextFull {
+        display: none;
+    }
+    
+    .buttonTextShort {
+        display: inline;
     }
 }
 

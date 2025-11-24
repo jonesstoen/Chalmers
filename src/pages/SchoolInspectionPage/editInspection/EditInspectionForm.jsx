@@ -768,7 +768,8 @@ export default function EditInspectionForm({
                                     disabled={saving || deleting}
                                     large
                                 >
-                                    {i18n.t('Reset changes')}
+                                    <span className={editFormStyles.buttonTextFull}>{i18n.t('Reset changes')}</span>
+                                    <span className={editFormStyles.buttonTextShort}>Reset</span>
                                 </Button>
                                 <Button
                                     primary
@@ -777,7 +778,8 @@ export default function EditInspectionForm({
                                     large
                                     style={{ minWidth: 140 }}
                                 >
-                                    {saving ? 'Saving…' : 'Save changes'}
+                                    <span className={editFormStyles.buttonTextFull}>{saving ? 'Saving…' : 'Save changes'}</span>
+                                    <span className={editFormStyles.buttonTextShort}>{saving ? 'Saving…' : 'Save'}</span>
                                 </Button>
                                 <Button
                                     destructive
@@ -785,7 +787,8 @@ export default function EditInspectionForm({
                                     disabled={saving || deleting}
                                     large
                                 >
-                                    {deleting ? 'Deleting…' : 'Delete'}
+                                    <span className={editFormStyles.buttonTextFull}>{deleting ? 'Deleting…' : 'Delete'}</span>
+                                    <span className={editFormStyles.buttonTextShort}>{deleting ? 'Deleting…' : 'Delete'}</span>
                                 </Button>
                             </div>
                         </div>
