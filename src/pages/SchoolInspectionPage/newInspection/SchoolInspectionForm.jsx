@@ -1,6 +1,6 @@
 // pages/SchoolInspectionPage/newInspection/SchoolInspectionForm.jsx
 
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {
     Button,
@@ -31,7 +31,7 @@ import {
 } from './configs/inspectionFormUtils'
 import BooleanChoiceField from './components/BooleanChoiceField'
 import ConditionRatingField from './components/ConditionRatingField'
-import Icon, { CombinedIcon } from '../../../shared/ui/icons/Icon'
+import { CombinedIcon } from '../../../shared/ui/icons/Icon'
 import { FIELD_ICONS } from './configs/fieldIcons'
 
 const DRAFT_KEY_PREFIX = 'schoolInspectionDraft_'
@@ -46,8 +46,7 @@ const loadDraft = orgUnitId => {
     try {
         const raw = window.localStorage.getItem(key)
         return raw ? JSON.parse(raw) : null
-    } catch (e) {
-        console.warn('Failed to load draft form state', e)
+    } catch {
         return null
     }
 }
@@ -58,9 +57,7 @@ const saveDraft = (orgUnitId, state) => {
     if (!key) return
     try {
         window.localStorage.setItem(key, JSON.stringify(state))
-    } catch (e) {
-        console.warn('Failed to save draft form state', e)
-    }
+    } catch {}
 }
 
 const clearDraft = orgUnitId => {
@@ -76,10 +73,10 @@ const clearDraft = orgUnitId => {
 
 
 function NumberField({ label, value = '', onChange, error, iconNames }) {
-    const [isFocused, setIsFocused] = React.useState(false)
-    // Treat blank/null/undefined as 0 for calculations, but preserve blank state
+    const [isFocused, setIsFocused] = useState(false)
     const isBlank = value === '' || value === null || value === undefined
-    const numericValue = isBlank ? 0 : Number(value) || 0
+    const numericValue =
+        isBlank ? 0 : Number(value) || 0
 
     const handleIncrement = () => {
         // If blank, go to 0 first, otherwise increment
@@ -198,16 +195,11 @@ export default function SchoolInspectionForm({
         }
 
         const draft = loadDraft(orgUnitId)
-        if (draft && typeof draft === 'object') {
-            setFormState(draft)
-        } else {
-            setFormState({})
-        }
+        setFormState(draft && typeof draft === 'object' ? draft : {})
         setErrors({})
         setMissingRequiredLabels([])
         setShowMissingPopup(false)
     }, [orgUnitId])
-
 
     useEffect(() => {
         if (data) {
@@ -220,174 +212,151 @@ export default function SchoolInspectionForm({
 
     const handleChange = (id, value) => {
         setFormState(prev => {
-            const next = { ...prev, [id]: value }
-            if (orgUnitId) {
-                saveDraft(orgUnitId, next)
-            }
-            return next
+            const updated = { ...prev, [id]: value }
+            orgUnitId && saveDraft(orgUnitId, updated)
+            return updated
         })
-    }
-
-    const totalToilets = computeTotalToilets(formState)
-
-    const validateForm = () => {
-        const normalizedState = {}
-
-        SCHOOL_INSPECTION_FIELDS.forEach(field => {
-            const parentId = field.id
-            normalizedState[parentId] = normalizeChange(
-                parentId,
-                formState[parentId]
-            )
-
-            if (field.child_query) {
-                const childId = field.child_query.id
-                normalizedState[childId] = normalizeChange(
-                    childId,
-                    formState[childId]
-                )
-            }
-        })
-
-        const errorsFound = validateSchoolInspection(normalizedState) || {}
-        const isEmpty = v => v === undefined || v === null || v === ''
-
-        SCHOOL_INSPECTION_FIELDS.forEach(field => {
-            const id = field.id
-
-            // skip auto-calculated field that is not user-input
-            if (id === TOTAL_TOILETS_ID) {
-                return
-            }
-
-            if (field.type === 'BOOLEAN') {
-                if (isEmpty(normalizedState[id]) && !errorsFound[id]) {
-                    errorsFound[id] = 'Required'
-                }
-
-                if (field.child_query) {
-                    const childId = field.child_query.id
-                    const childValue = normalizedState[childId]
-                    const isTrue =
-                        normalizedState[id] === true ||
-                        normalizedState[id] === 'true'
-
-                    if (
-                        isTrue &&
-                        isEmpty(childValue) &&
-                        !errorsFound[childId]
-                    ) {
-                        errorsFound[childId] = 'Required'
-                    }
-                }
-            } else if (isEmpty(normalizedState[id]) && !errorsFound[id]) {
-                errorsFound[id] = 'Required'
-            }
-        })
-
-        setErrors(errorsFound)
-
-        const missingLabels = []
-        SCHOOL_INSPECTION_FIELDS.forEach(field => {
-            if (field.id === TOTAL_TOILETS_ID) return
-
-            if (errorsFound[field.id] === 'Required') {
-                missingLabels.push(field.label)
-            }
-            if (
-                field.child_query &&
-                errorsFound[field.child_query.id] === 'Required'
-            ) {
-                missingLabels.push(field.child_query.label)
-            }
-        })
-        setMissingRequiredLabels(missingLabels)
-
-        const ok = Object.keys(errorsFound).length === 0
-        return { ok, normalizedState }
     }
 
     const handleReset = () => {
         if (
             !window.confirm(
-                i18n.t('Are you sure you want to reset the form? All entered data will be lost.')
+                i18n.t(
+                    'Are you sure you want to reset the form? All entered data will be lost.'
+                )
             )
-        ) {
+        )
             return
-        }
 
         setFormState({})
         setErrors({})
         setMissingRequiredLabels([])
         setShowMissingPopup(false)
-        if (orgUnitId) {
-            clearDraft(orgUnitId)
-        }
+        orgUnitId && clearDraft(orgUnitId)
     }
 
-    const handleSubmit = async () => {
-        const { ok, normalizedState } = validateForm()
+    /* ------------------ VALIDATION ------------------ */
 
+    const validateForm = useCallback(() => {
+        const normalized = {}
+        const errs = {}
+
+        for (const field of SCHOOL_INSPECTION_FIELDS) {
+            const id = field.id
+
+            normalized[id] = normalizeChange(id, formState[id])
+
+            if (field.child_query) {
+                const cid = field.child_query.id
+                normalized[cid] = normalizeChange(cid, formState[cid])
+            }
+        }
+
+        const baseErrors = validateSchoolInspection(normalized) || {}
+
+        const isEmpty = v => v === undefined || v === null || v === ''
+
+        for (const field of SCHOOL_INSPECTION_FIELDS) {
+            const id = field.id
+
+            if (id === TOTAL_TOILETS_ID) continue
+
+            if (field.type === 'BOOLEAN') {
+                if (isEmpty(normalized[id]) && !baseErrors[id]) {
+                    baseErrors[id] = 'Required'
+                }
+                if (field.child_query) {
+                    const cid = field.child_query.id
+                    const isTrue =
+                        normalized[id] === true || normalized[id] === 'true'
+
+                    if (isTrue && isEmpty(normalized[cid]) && !baseErrors[cid]) {
+                        baseErrors[cid] = 'Required'
+                    }
+                }
+            } else if (isEmpty(normalized[id]) && !baseErrors[id]) {
+                baseErrors[id] = 'Required'
+            }
+        }
+
+        setErrors(baseErrors)
+
+        const missing = []
+        for (const field of SCHOOL_INSPECTION_FIELDS) {
+            if (field.id === TOTAL_TOILETS_ID) continue
+            if (baseErrors[field.id] === 'Required') missing.push(field.label)
+            if (
+                field.child_query &&
+                baseErrors[field.child_query.id] === 'Required'
+            )
+                missing.push(field.child_query.label)
+        }
+        setMissingRequiredLabels(missing)
+
+        return { ok: Object.keys(baseErrors).length === 0, normalized }
+    }, [formState])
+
+    /* ------------------ SUBMISSION ------------------ */
+
+    const totalToilets = computeTotalToilets(formState)
+
+    const handleSubmit = async () => {
+        const { ok, normalized } = validateForm()
         if (!ok) {
             setShowMissingPopup(true)
             window.scrollTo({ top: 0, behavior: 'smooth' })
             return
         }
 
-        const dataValuesArray = SCHOOL_INSPECTION_FIELDS.reduce(
-            (acc, field) => {
-                const val = normalizedState[field.id]
-                if (val !== undefined && val !== null) {
-                    acc.push({
-                        dataElement: field.id,
-                        value: field.type === 'BOOLEAN' ? !!val : val,
+        const dataValues = []
+
+        for (const field of SCHOOL_INSPECTION_FIELDS) {
+            const id = field.id
+            const val = normalized[id]
+
+            if (val !== undefined && val !== null) {
+                dataValues.push({
+                    dataElement: id,
+                    value: field.type === 'BOOLEAN' ? !!val : val,
+                })
+            }
+
+            if (field.child_query) {
+                const cid = field.child_query.id
+                if (val === true && normalized[cid]) {
+                    dataValues.push({
+                        dataElement: cid,
+                        value: normalized[cid],
                     })
                 }
+            }
+        }
 
-                if (field.child_query) {
-                    const childVal = normalizedState[field.child_query.id]
-                    if (val === true && childVal) {
-                        acc.push({
-                            dataElement: field.child_query.id,
-                            value: childVal,
-                        })
-                    }
-                }
-                return acc
-            },
-            []
-        )
-
-        // auto computed toilets
-        dataValuesArray.push({
+        dataValues.push({
             dataElement: TOTAL_TOILETS_ID,
             value: totalToilets,
         })
 
-        setLastSubmitted(dataValuesArray)
+        setLastSubmitted(dataValues)
+
         setInspectionDict(prev => ({
             ...prev,
-            [orgUnitId]: dataValuesArray,
+            [orgUnitId]: dataValues,
         }))
 
         await submitInspection({
             orgUnit_id: orgUnitId,
-            dataValues: dataValuesArray,
+            dataValues: dataValues,
         })
 
-
-        if (setActiveTab) setActiveTab('tldr')
+        setActiveTab && setActiveTab('tldr')
     }
 
-    const { filledCount, totalCount, progressPct } = computeProgress(formState)
+    /* ------------------ RENDER FIELD ------------------ */
 
     const renderField = ({ id, label, type, child_query }) => {
         const value = formState[id]
         const childValue = child_query ? formState[child_query.id] : null
-        const numericChildValue =
-            childValue !== '' && childValue !== null
-                ? Number(childValue)
-                : null
         const isTrue = value === true || value === 'true'
 
         if (type === 'BOOLEAN' && child_query) {
@@ -413,7 +382,7 @@ export default function SchoolInspectionForm({
                         <div className={formStyles.fieldWrapperFlexItemWide}>
                             <ConditionRatingField
                                 label={child_query.label}
-                                value={numericChildValue}
+                                value={childValue}
                                 onChange={num =>
                                     handleChange(child_query.id, num)
                                 }
@@ -451,6 +420,8 @@ export default function SchoolInspectionForm({
         )
     }
 
+    /* ------------------ FIELD GROUPS ------------------ */
+
     const facilities = SCHOOL_INSPECTION_FIELDS.filter(f =>
         FACILITY_IDS.includes(f.id)
     )
@@ -460,6 +431,10 @@ export default function SchoolInspectionForm({
     const sanitation = SCHOOL_INSPECTION_FIELDS.filter(f =>
         SANITATION_IDS.includes(f.id)
     )
+
+    const { filledCount, totalCount, progressPct } = computeProgress(formState)
+
+    /* ------------------ RENDER ------------------ */
 
     return (
         <div className={formStyles.formContainer}>
@@ -583,7 +558,7 @@ export default function SchoolInspectionForm({
                         </div>
                         <div className={formStyles.totalToiletsBox}>
                             <strong className={formStyles.totalToiletsLabel}>
-                                Total toilets: 
+                                Total toilets:
                             </strong>
                             <span className={formStyles.totalToiletsValue}>
                                 {totalToilets}
@@ -599,13 +574,8 @@ export default function SchoolInspectionForm({
                         >
                             {i18n.t('Reset form')}
                         </Button>
-                        <Button
-                            primary
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            large
-                        >
-                            {loading ? i18n.t('Submitting...') : i18n.t('Submit inspection')}
+                        <Button primary onClick={handleSubmit}>
+                            {i18n.t('Submit inspection')}
                         </Button>
                     </div>
 

@@ -1,75 +1,95 @@
-// shared/api/useTrackerEventMutation.jsx
-import { useDataMutation } from '@dhis2/app-runtime'
-import { useMemo } from 'react'
+import {
+    useDataMutation,
+    useDhis2ConnectionStatus,
+    useOnlineStatus,
+} from "@dhis2/app-runtime"
+import { useMemo, useCallback } from "react"
+import { outboxCache } from "../cache/config"
 
-export default function usePostEvent(type = 'POST') {
-    const today = new Date().toISOString().split('T')[0]
+export default function usePostEvent(type = "POST") {
+    const { isConnected } = useDhis2ConnectionStatus()
+    const browserOnline = useOnlineStatus()
+    const isOffline = !isConnected || !browserOnline
 
-    const formatDataValues = (arr) =>
-        (arr || [])
-            .filter(({ dataElement, value }) => dataElement && value !== '' && value !== undefined && value !== null)
-            .map(({ dataElement, value }) => ({ dataElement, value: String(value) }))
+    const today = new Date().toISOString().split("T")[0]
 
-    const createQuery = {
-        resource: 'tracker',
-        type: 'create',
-        params: { async: false, importStrategy: 'CREATE' },
-        data: ({ program_id, programStage, orgUnit_id, dataValueObjectArray, period = today, status = 'COMPLETED' }) => ({
-            events: [{
-                program: program_id,
-                programStage,
-                orgUnit: orgUnit_id,
-                occurredAt: `${period}T00:00:00.000`,
-                status,
-                dataValues: formatDataValues(dataValueObjectArray),
-            }],
-        }),
-    }
-
-
-    const updateQuery = {
-        resource: 'tracker',
-        type: 'create', // POST mot tracker-endpoint
-        params: {
-            importStrategy: 'UPDATE',
-            async: false,
-        },
-        data: ({
-                   eventId,
-                   program_id,
-                   programStage,
-                   orgUnit_id,
-                   occurredAt,
-                   status = 'COMPLETED',
-                   dataValueObjectArray,
-               }) => ({
-            events: [{
-                event: eventId,
-                program: program_id,
-                programStage,
-                orgUnit: orgUnit_id,
-                occurredAt,
-                status,
-                dataValues: formatDataValues(dataValueObjectArray),
-            }],
-        }),
-    }
-
-    const deleteQuery = {
-        resource: 'tracker',
-        type: 'create',
-        params: { async: false, importStrategy: 'DELETE' },
-        data: ({ eventId }) => ({ events: [{ event: eventId }] }),
-    }
-
-    const selectedQuery = useMemo(() => {
-        switch (type) {
-            case 'POST': return createQuery
-            case 'PUT':  return updateQuery
-            case 'DELETE': return deleteQuery
-            default: throw new Error(`Invalid mutation type '${type}'`)
+    // DHIS2 requires a STATIC mutation with a DATA WRAPPER
+    const STATIC_QUERY = useMemo(() => {
+        return {
+            resource: "tracker",
+            type: "create",
+            params: {
+                async: false,
+                importStrategy:
+                    type === "POST"
+                        ? "CREATE"
+                        : type === "PUT"
+                            ? "UPDATE"
+                            : "DELETE",
+            },
+            // DHIS2 expects data: ({events}) => ({events})
+            data: ({ events }) => ({ events }),
         }
     }, [type])
 
-    return useDataMutation(selectedQuery)
+    const [onlineMutate, onlineState] = useDataMutation(STATIC_QUERY)
+
+    const wrappedMutate = useCallback(
+        async (vars) => {
+            console.log("offline:", isOffline)
+
+            // Build event payload OUTSIDE the mutation
+            let events
+
+            if (type === "POST") {
+                events = [
+                    {
+                        program: vars.program_id,
+                        programStage: vars.programStage,
+                        orgUnit: vars.orgUnit_id,
+                        occurredAt: `${vars.period ?? today}T00:00:00`,
+                        status: vars.status ?? "COMPLETED",
+                        dataValues: vars.dataValues,
+                    },
+                ]
+            } else if (type === "PUT") {
+                events = [
+                    {
+                        event: vars.eventId,
+                        program: vars.program_id,
+                        programStage: vars.programStage,
+                        orgUnit: vars.orgUnit_id,
+                        occurredAt: vars.occurredAt,
+                        status: vars.status ?? "COMPLETED",
+                        dataValues: vars.dataValues,
+                    },
+                ]
+            } else {
+                events = [{ event: vars.eventId }]
+            }
+
+            // ONLINE: send correct shape
+            if (!isOffline) {
+                console.log("POSTING ONLINE →", { events })
+                return await onlineMutate({ events })
+            }
+
+            // OFFLINE: cache
+            const cacheKey =
+                type === "POST"
+                    ? `event:${type}:${vars.program_id}:${vars.programStage}:${vars.orgUnit_id}:${vars.period ?? today}`
+                    : `event:${type}:${vars.eventId}`
+            await outboxCache.setItem(cacheKey, { type, events, ts: Date.now() })
+
+            console.log("📦 stored offline:", cacheKey)
+
+            return {
+                offline: true,
+                message: "Saved offline and will sync later.",
+            }
+        },
+        [isOffline, onlineMutate, type, today]
+    )
+
+    return [wrappedMutate, onlineState]
 }

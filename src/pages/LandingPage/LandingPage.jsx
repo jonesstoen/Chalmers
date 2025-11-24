@@ -1,8 +1,7 @@
-// pages/LandingPage/LandingPage.jsx
 import React, { useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useDataQuery } from '@dhis2/app-runtime'
 import useFetchAnalytics from '../SchoolInspectionPage/history/api/analyticsAPI'
+import { useCacheableQuery } from '../../shared/cache/cacheableQuery'
 import MetricTile from './MetricTile'
 import SchoolSearchBar from './components/SchoolSearchBar'
 import styles from './LandingPage.module.css'
@@ -14,6 +13,7 @@ const ROOTS = [
     { id: 'RlPlK44dtoo', label: 'Banjul' },
 ]
 const MONTHLY_INSPECTION_TARGET = 2500
+const EMPTY_OU_VARIABLES = { ids: [] }
 
 function monthRangeISO(d = new Date()) {
     const start = new Date(d.getFullYear(), d.getMonth(), 1)
@@ -75,10 +75,26 @@ export default function LandingPage() {
         []
     )
 
-    const { data: ouResp } = useDataQuery(OU_BATCH_QUERY, {
-        variables: { ids: allOuIds },
-        lazy: !allOuIds.length,
-    })
+    const hasOuRequest = Boolean(lastOu)
+    const ouVariables = useMemo(
+        () => (hasOuRequest ? { ids: allOuIds } : EMPTY_OU_VARIABLES),
+        [hasOuRequest, allOuIds]
+    )
+    const ouDataKey = useMemo(
+        () =>
+            hasOuRequest
+                ? `query:landing:lastOu:${lastOu}`
+                : 'query:landing:lastOu:none',
+        [hasOuRequest, lastOu]
+    )
+
+    const { data: ouResp } = useCacheableQuery(
+        'data',
+        ouDataKey,
+        OU_BATCH_QUERY,
+        ouVariables,
+        !hasOuRequest
+    )
 
     const ouList = ouResp?.ous?.organisationUnits ?? []
     const lastOuInfo = lastOu

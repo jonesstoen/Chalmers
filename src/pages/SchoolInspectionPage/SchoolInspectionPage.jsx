@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/SchoolInspectionPage.jsx
 import React, {
     useMemo,
     useState,

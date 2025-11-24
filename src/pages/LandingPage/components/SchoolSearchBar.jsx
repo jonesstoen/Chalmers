@@ -8,7 +8,6 @@ import {
 } from '@dhis2/ui'
 import styles from './SchoolSearchBar.module.css'
 
-
 export default function SchoolSearchBar({ onSelect}) {
     const regionIds = useMemo(() => ['RlPlK44dtoo', 'Bp3y61WbHwn'], [])
 
