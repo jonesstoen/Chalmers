@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Button, CircularLoader } from '@dhis2/ui'
-import { usePopulateSchoolInspections } from '../api/populateSchoolInspections'
+import { usePopulateSchoolInspections } from './populateSchoolInspections'
 import styles from './PopulateDataButton.module.css'
 
 export default function PopulateDataButton() {

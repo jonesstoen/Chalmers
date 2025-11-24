@@ -1,5 +1,5 @@
 // pages/SchoolInspectionPage/editInspection/EditInspectionForm.jsx
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {
     Button,
@@ -39,6 +39,13 @@ import editFormStyles from './EditInspectionForm.module.css'
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
 
+const FIELD_LABEL_LOOKUP = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
+    acc[field.id] = field.label
+    if (field.child_query) {
+        acc[field.child_query.id] = field.child_query.label
+    }
+    return acc
+}, {})
 
 function NumberField({ label, value = '', onChange, error, iconNames, hasChanged = false }) {
     const [isFocused, setIsFocused] = React.useState(false)
@@ -226,7 +233,38 @@ export default function EditInspectionForm({
         ? new Date(event.eventdate).toLocaleDateString()
         : 'Not set'
 
-    const handleChange = (id, value) => {
+    const isEmptyValue = useCallback(
+        value => value === undefined || value === null || value === '',
+        []
+    )
+
+    const clearFieldError = useCallback(
+        (fieldId, value, { forceClearError = false } = {}) => {
+            const shouldClear = forceClearError || !isEmptyValue(value)
+
+            if (!shouldClear) {
+                return
+            }
+
+            setErrors(prev => {
+                if (!prev[fieldId]) return prev
+                const next = { ...prev }
+                delete next[fieldId]
+                return next
+            })
+
+            setMissingRequiredLabels(prev => {
+                if (prev.length === 0) return prev
+                const label = FIELD_LABEL_LOOKUP[fieldId]
+                if (!label) return prev
+                const filtered = prev.filter(item => item !== label)
+                return filtered.length === prev.length ? prev : filtered
+            })
+        },
+        [isEmptyValue]
+    )
+
+    const handleChange = useCallback((id, value, options = {}) => {
         // Normalize the value using the same logic as when loading
         let newValue = normalizeChange(id, value)
         
@@ -246,7 +284,9 @@ export default function EditInspectionForm({
             ...prev,
             [id]: newValue,
         }))
-    }
+
+        clearFieldError(id, newValue, options)
+    }, [clearFieldError])
 
     const totalToilets = computeTotalToilets(formState)
 
@@ -508,7 +548,9 @@ export default function EditInspectionForm({
                                     handleChange(id, v)
                                     // Clear condition rating if unselected (null) or set to false
                                     if (v === null || v === false) {
-                                        handleChange(childId, null)
+                                        handleChange(childId, null, {
+                                            forceClearError: true,
+                                        })
                                     }
                                 }}
                                 error={errors[id]}
@@ -726,7 +768,8 @@ export default function EditInspectionForm({
                                     disabled={saving || deleting}
                                     large
                                 >
-                                    {i18n.t('Reset changes')}
+                                    <span className={editFormStyles.buttonTextFull}>{i18n.t('Reset changes')}</span>
+                                    <span className={editFormStyles.buttonTextShort}>Reset</span>
                                 </Button>
                                 <Button
                                     primary
@@ -735,7 +778,8 @@ export default function EditInspectionForm({
                                     large
                                     style={{ minWidth: 140 }}
                                 >
-                                    {saving ? 'Saving…' : 'Save changes'}
+                                    <span className={editFormStyles.buttonTextFull}>{saving ? 'Saving…' : 'Save changes'}</span>
+                                    <span className={editFormStyles.buttonTextShort}>{saving ? 'Saving…' : 'Save'}</span>
                                 </Button>
                                 <Button
                                     destructive
@@ -743,7 +787,8 @@ export default function EditInspectionForm({
                                     disabled={saving || deleting}
                                     large
                                 >
-                                    {deleting ? 'Deleting…' : 'Delete'}
+                                    <span className={editFormStyles.buttonTextFull}>{deleting ? 'Deleting…' : i18n.t('Delete form')}</span>
+                                    <span className={editFormStyles.buttonTextShort}>{deleting ? 'Deleting…' : 'Delete'}</span>
                                 </Button>
                             </div>
                         </div>

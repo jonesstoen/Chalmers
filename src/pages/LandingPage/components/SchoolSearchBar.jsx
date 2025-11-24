@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Input, CircularLoader, NoticeBox } from '@dhis2/ui'
+import { CircularLoader, NoticeBox, IconSearch24 } from '@dhis2/ui'
 import { useSchoolsByRegions } from '../../../shared/api/useSchoolsAPI'
 import {
     IconWorld16,
@@ -50,13 +50,18 @@ const getIcon = type => {
 
     return (
         <div className={styles.container}>
-            <Input
-                placeholder="Search for a school or cluster..."
-                value={query}
-                onChange={({ value }) => setQuery(value)}
-                dense={false}
-                aria-label="Search for schools or clusters"
-            />
+            <label className={styles.inputWrapper}>
+                <IconSearch24 className={styles.searchIcon} />
+                <input
+                    type="search"
+                    value={query}
+                    onChange={event => setQuery(event.target.value)}
+                    placeholder="Search for a school or cluster..."
+                    className={styles.searchInput}
+                    aria-label="Search for schools or clusters"
+                    autoComplete="off"
+                />
+            </label>
 
             {query && (
                 <div
