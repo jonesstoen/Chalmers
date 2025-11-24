@@ -4,31 +4,18 @@ import AggregatedHeatmap from "../heatmap/AggregatedHeatmap.jsx"
 import { CAPACITY_IDS, SANITATION_IDS, TOTAL_TOILETS_ID } from "../../newInspection/configs/schoolInspectionConfig"
 import { dataElementIdToDescription } from "../../newInspection/configs/inspectionFormUtils"
 import { useAggregatedSchoolAnalytics } from "../hooks/useAggregatedSchoolAnalytics"
+import styles from './AggregatedAnalyticsPanel.module.css'
 
 // ------------------- GRAPH CARD --------------------
 function GraphCard({ OrgId, dataElementId }) {
     const label = dataElementIdToDescription(dataElementId)
     return (
-        <div style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "1.5rem",
-            backgroundColor: "#fff",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-        }}>
-            <h3 style={{
-                margin: "0 0 1.2rem 0",
-                fontSize: "1.15rem",
-                fontWeight: "600",
-                color: "#2d3748",
-            }}>
+        <div className={styles.graphCard}>
+            <h3 className={styles.graphCardTitle}>
                 {label}
             </h3>
 
-            <div style={{ flex: 1, minHeight: 340 }}>
+            <div className={styles.graphContainer}>
                 <ClusterGraph
                     schoolId={OrgId}
                     dataElements={[dataElementId]}
@@ -113,25 +100,16 @@ export default function AggregatedAnalyticsPanel({ data }) {
 
     return (
         <>
-            <h1 style={{
-                marginBottom: "2.5rem",
-                fontSize: "2rem",
-                fontWeight: "700",
-                color: "#1a202c",
-            }}>
+            <h1 className={styles.title}>
                 Cluster Analytics – {name}
             </h1>
 
-<AggregatedHeatmap
-    ratios={aggregatedRatios}
-    totals={{ learners: L, seats: S, classrooms: C, teachers: T, toilets: TT }}
-/>
+            <AggregatedHeatmap
+                ratios={aggregatedRatios}
+                totals={{ learners: L, seats: S, classrooms: C, teachers: T, toilets: TT }}
+            />
 
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))",
-                gap: "2.5rem",
-            }}>
+            <div className={styles.graphsGrid}>
                 {QUANT_IDS.map(id => (
                     <GraphCard key={id} OrgId={OID} dataElementId={id} />
                 ))}

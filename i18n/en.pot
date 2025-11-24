@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-23T17:16:03.753Z\n"
-"PO-Revision-Date: 2025-11-23T17:16:03.753Z\n"
+"POT-Creation-Date: 2025-11-24T11:12:14.392Z\n"
+"PO-Revision-Date: 2025-11-24T11:12:14.392Z\n"
 
 msgid "Organisation units"
 msgstr "Organisation units"
@@ -53,6 +53,9 @@ msgstr "Are you sure you want to reset the form? All entered data will be lost."
 
 msgid "School inspection"
 msgstr "School inspection"
+
+msgid "Inspection date"
+msgstr "Inspection date"
 
 msgid "fields completed"
 msgstr "fields completed"

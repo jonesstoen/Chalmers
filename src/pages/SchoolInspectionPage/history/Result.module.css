@@ -1,0 +1,169 @@
+.pageContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    padding: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   KEY RATIOS SECTION
+   ============================================ */
+.ratiosSection {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sectionHeader {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.mainTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.mainDescription {
+    font-size: 15px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.ratiosContainer {
+    margin-top: 1rem;
+}
+
+/* ============================================
+   DETAILED METRICS SECTION
+   ============================================ */
+.metricsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.metricsTitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.01em;
+}
+
+.categoryGroup {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.categoryTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.categoryDescription {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ============================================
+   GRAPH CARDS
+   ============================================ */
+.graphCard {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.graphCard:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.graphCardTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.graphCardContent {
+    width: 100%;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+    .metricsGrid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.25rem;
+    }
+    
+    .ratiosSection {
+        padding: 1.5rem;
+    }
+    
+    .categoryGroup {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pageContainer {
+        gap: 2rem;
+    }
+    
+    .metricsGrid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .ratiosSection {
+        padding: 1.25rem;
+    }
+    
+    .categoryGroup {
+        padding: 1.25rem;
+    }
+    
+    .mainTitle {
+        font-size: 20px;
+    }
+    
+    .metricsTitle {
+        font-size: 20px;
+    }
+    
+    .categoryTitle {
+        font-size: 16px;
+    }
+}

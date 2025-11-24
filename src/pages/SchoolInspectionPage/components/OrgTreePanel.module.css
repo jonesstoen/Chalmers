@@ -1,0 +1,51 @@
+.panelFrame {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.headerContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.rootButtons {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+}
+
+.rootButton {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.rootButton:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.rootButtonActive {
+    border: 2px solid #2563eb;
+    background: #eff6ff;
+    color: #1e40af;
+    font-weight: 600;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.noRootsMessage {
+    padding: 8px;
+    color: #6b7280;
+}
+

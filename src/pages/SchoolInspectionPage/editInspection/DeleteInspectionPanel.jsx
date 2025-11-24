@@ -2,6 +2,7 @@
 import React from 'react'
 import { Button, NoticeBox } from '@dhis2/ui'
 import { useDeleteSchoolInspectionEvent } from './hooks/useDeleteSchoolInspection'
+import styles from './DeleteInspectionPanel.module.css'
 export default function DeleteInspectionPanel({ event }) {
     const [deleteEvent, { loading, error }] = useDeleteSchoolInspectionEvent()
 
@@ -16,13 +17,13 @@ export default function DeleteInspectionPanel({ event }) {
     }
 
     return (
-        <div style={{ border: '1px solid #fee2e2', background: '#fff', borderRadius: 8, padding: 12 }}>
-            <h3 style={{ marginTop: 0 }}>Delete inspection</h3>
+        <div className={styles.container}>
+            <h3 className={styles.title}>Delete inspection</h3>
             <p><strong>Event ID:</strong> {event.psi}</p>
             <Button destructive onClick={handleDelete} disabled={loading}>
                 {loading ? 'Deleting…' : 'Delete'}
             </Button>
-            {error && <p style={{ color: 'crimson' }}>Error: {error.message}</p>}
+            {error && <p className={styles.error}>Error: {error.message}</p>}
         </div>
     )
 }

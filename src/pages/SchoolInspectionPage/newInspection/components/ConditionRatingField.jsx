@@ -1,6 +1,7 @@
 // pages/SchoolInspectionPage/newInspection/components/ConditionRatingField.jsx
 import React from 'react'
 import { IconError16, IconWarning16 } from '@dhis2/ui'
+import styles from './ConditionRatingField.module.css'
 
 export default function ConditionRatingField({
                                                  label,
@@ -26,47 +27,18 @@ export default function ConditionRatingField({
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={styles.container}>
             {label && (
-                <label style={{ 
-                    fontSize: 14, 
-                    fontWeight: 600, 
-                    color: disabled ? '#94a3b8' : '#0f172a',
-                    marginBottom: 4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                }}>
+                <label className={`${styles.label} ${disabled ? styles.labelDisabled : ''}`}>
                     <span>{label}</span>
                     {hasChanged && (
-                        <span style={{
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: '#d97706',
-                            background: '#fef3c7',
-                            padding: '2px 6px',
-                            borderRadius: 4,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
-                        }}>
+                        <span className={`${styles.badge} ${styles.badgeModified}`}>
                             <IconWarning16 />
                             Modified
                         </span>
                     )}
                     {error && (
-                        <span style={{
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: '#b91c1c',
-                            background: '#fee2e2',
-                            padding: '2px 6px',
-                            borderRadius: 4,
-                            marginLeft: 4,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
-                        }}>
+                        <span className={`${styles.badge} ${styles.badgeError}`}>
                             <IconError16 />
                             Required
                         </span>
@@ -74,36 +46,15 @@ export default function ConditionRatingField({
                 </label>
             )}
 
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
-                    opacity: disabled ? 0.5 : 1,
-                    pointerEvents: disabled ? 'none' : 'auto',
-                }}
-            >
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    gap: 8,
-                    flexWrap: 'wrap',
-                }}>
+            <div className={`${styles.fieldContainer} ${disabled ? styles.fieldContainerDisabled : ''}`}>
+                <div className={styles.ratingContainer}>
                     {/* Poor label */}
-                    <span style={{
-                        fontSize: 12,
-                        color: '#64748b',
-                        fontWeight: 500,
-                        marginRight: 4,
-                    }}>
+                    <span className={`${styles.ratingLabel} ${styles.ratingLabelLeft}`}>
                         Poor
                     </span>
                     
                     {/* Rating buttons */}
-                    <div style={{ 
-                        display: 'flex', 
-                        gap: 8,
-                    }}>
+                    <div className={styles.ratingButtons}>
                         {options.map(num => {
                             const isActive = numericValue === num
                             return (
@@ -111,40 +62,7 @@ export default function ConditionRatingField({
                                     key={num}
                                     type="button"
                                     onClick={() => onChange(num)}
-                                    onMouseEnter={(e) => {
-                                        if (!isActive && !disabled) {
-                                            e.currentTarget.style.transform = 'scale(1.1)'
-                                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.3)'
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'scale(1)'
-                                        e.currentTarget.style.boxShadow = isActive 
-                                            ? '0 2px 4px rgba(37, 99, 235, 0.2)' 
-                                            : '0 1px 2px rgba(0, 0, 0, 0.1)'
-                                    }}
-                                    style={{
-                                        width: 44, // Minimum touch target
-                                        height: 44,
-                                        borderRadius: '8px',
-                                        border: isActive
-                                            ? '2px solid #2563eb'
-                                            : '2px solid #cbd5e1',
-                                        background: isActive ? '#2563eb' : '#ffffff',
-                                        color: isActive ? '#ffffff' : '#0f172a',
-                                        fontSize: 16,
-                                        fontWeight: isActive ? 600 : 500,
-                                        lineHeight: '1',
-                                        cursor: disabled ? 'not-allowed' : 'pointer',
-                                        padding: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'all 0.2s ease',
-                                        boxShadow: isActive 
-                                            ? '0 2px 4px rgba(37, 99, 235, 0.2)' 
-                                            : '0 1px 2px rgba(0, 0, 0, 0.1)',
-                                    }}
+                                    className={`${styles.ratingButton} ${isActive ? styles.ratingButtonActive : ''} ${disabled ? styles.ratingButtonDisabled : ''}`}
                                     aria-label={`Rating ${num}: ${ratingLabels[num]}`}
                                     aria-pressed={isActive}
                                 >
@@ -155,30 +73,14 @@ export default function ConditionRatingField({
                     </div>
                     
                     {/* Excellent label */}
-                    <span style={{
-                        fontSize: 12,
-                        color: '#64748b',
-                        fontWeight: 500,
-                        marginLeft: 4,
-                    }}>
+                    <span className={`${styles.ratingLabel} ${styles.ratingLabelRight}`}>
                         Excellent
                     </span>
                 </div>
             </div>
 
             {error && (
-                <p
-                    style={{
-                        margin: 0,
-                        fontSize: 12,
-                        color: '#b91c1c',
-                        fontWeight: 500,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                    }}
-                    role="alert"
-                >
+                <p className={styles.errorMessage} role="alert">
                     <IconError16 />
                     <span>{error}</span>
                 </p>
