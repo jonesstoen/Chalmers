@@ -114,13 +114,6 @@ export default function LandingPage() {
 
     return (
         <div className={styles.pageContainer}>
-            {/* Online status at top */}
-            <p className={`${styles.onlineStatus} ${!isOnline ? styles.onlineStatusOffline : ''}`}>
-                {isOnline
-                    ? 'Online — changes sync automatically.'
-                    : 'Offline — changes will sync when you are back online.'}
-            </p>
-
             {/* Main centered container */}
             <div className={styles.mainContainer}>
                 {/* Welcome text */}
@@ -160,11 +153,7 @@ export default function LandingPage() {
                         </button>
                     )}
 
-                    <div className={styles.searchContainer}>
-                        <SchoolSearchBar
-                            onSelect={school => openSchool(school.id)}
-                        />
-                    </div>
+
                 </div>
 
                 {/* Metrics at bottom */}
@@ -172,38 +161,15 @@ export default function LandingPage() {
                     <MetricTile
                         title="📊 Inspections this month"
                         value={loading ? '…' : String(inspectionsThisMonth)}
-                        subtitle="Across Kanifing and Banjul"
+                        subtitle="Across Kanifing and Banjul the last 30 days"
                     />
                     <MetricTile
                         title="🔄 Pending sync"
                         value={pendingSyncLoading ? '…' : String(pendingSync)}
                         subtitle="Waiting to be sent when online"
                     />
-                    <MetricTile
-                        title="⚠️ Schools needing follow-up"
-                        value={loading ? '…' : String(ouList.length)}
-                        subtitle="Based on seat-to-learner ratio"
-                    />
                 </div>
 
-                {/* Monthly progress */}
-                <div className={styles.progressSection}>
-                    <div className={styles.progressHeader}>
-                        <span className={styles.progressTitle}>
-                            Monthly inspection progress
-                        </span>
-                        <span className={styles.progressStats}>
-                            {inspectionsThisMonth} / {MONTHLY_INSPECTION_TARGET}{' '}
-                            ({progressPct}%)
-                        </span>
-                    </div>
-                    <div className={styles.progressBar}>
-                        <div
-                            className={`${styles.progressBarFill} ${progressPct >= 100 ? styles.progressBarFillComplete : ''}`}
-                            style={{ width: `${progressPct}%` }}
-                        />
-                    </div>
-                </div>
             </div>
         </div>
     )
