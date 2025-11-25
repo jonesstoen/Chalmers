@@ -119,18 +119,21 @@ function InspectionPanel({
             <div className={pageClasses.tabBarContainer}>
                 <TabBar>
                     <Tab
+                        className={activeTab === 'submit' ? 'selected' : ''}
                         selected={activeTab === 'submit'}
                         onClick={() => setActiveTab('submit')}
                     >
                         {i18n.t('New inspection')}
                     </Tab>
                     <Tab
+                        className={activeTab === 'edit' ? 'selected' : ''}
                         selected={activeTab === 'edit'}
                         onClick={() => setActiveTab('edit')}
                     >
                         {i18n.t('Edit inspections')}
                     </Tab>
                     <Tab
+                        className={activeTab === 'tldr' ? 'selected' : ''}
                         selected={activeTab === 'tldr'}
                         onClick={() => setActiveTab('tldr')}
                     >
