@@ -1,5 +1,3 @@
-// pages/SchoolInspectionPage/newInspection/SchoolInspectionForm.jsx
-
 import React, { useContext, useEffect, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {
@@ -545,7 +543,7 @@ export default function SchoolInspectionForm({
             <div className={formStyles.header}>
                 <div className={formStyles.headerLeft}>
                     <h3 className={formStyles.headerTitle}>
-                        {i18n.t('School inspection')} – {orgUnitName || orgUnitId}
+                        {i18n.t('Inspection Form')} – {orgUnitName || orgUnitId}
                     </h3>
                     <p className={formStyles.headerSubtitle}>
                         {i18n.t('Inspection date')}: {inspectionDateLabel}

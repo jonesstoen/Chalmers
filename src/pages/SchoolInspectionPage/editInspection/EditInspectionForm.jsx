@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/editInspection/EditInspectionForm.jsx
 import React, { useEffect, useState, useCallback } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {

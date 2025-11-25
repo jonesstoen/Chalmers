@@ -4,9 +4,7 @@ import useSchoolAnalyticsWrapper from '../hooks/useSchoolEvents'
 import classes from './InspectionTimeline.module.css'
 import { useCacheableQuery } from '../../../../shared/cache/cacheableQuery'
 
-// ----------------------------
-// STATIC OU QUERY
-// ----------------------------
+
 function buildOuParams() {
     return {
         fields: 'displayName,name',
@@ -17,13 +15,10 @@ const OU_QUERY = {
     ou: {
         resource: 'organisationUnits',
         id: ({ id }) => id,
-        params: buildOuParams,   // stable function
+        params: buildOuParams, // stable function
     },
 }
 
-// ----------------------------
-// FIELD IDS (STATIC)
-// ----------------------------
 const F = {
     lab: { on: 'Nvp4hIbXrzF', cond: 'gzhjCMe7OyS' },
     elec: { on: 'IKiSAA19Xvl', cond: 'MH2eDd7qWxR' },
@@ -41,9 +36,6 @@ const F = {
     seats: 'jcC1uz56IpY',
 }
 
-// ----------------------------
-// SMALL PRESENTATION COMPONENTS
-// ----------------------------
 const Bool = ({ v }) => (
     <span
         className={v ? classes.boolOk : classes.boolBad}
@@ -53,17 +45,25 @@ const Bool = ({ v }) => (
     </span>
 )
 
-const Badge = ({ v }) => (
-    <span className={classes.badge}>
-        <span
-            className={classes.badgeFill}
-            style={{
-                width: `${(Math.max(0, Math.min(5, Number(v) || 0)) / 5) * 100}%`,
-            }}
-        />
-        <span className={classes.badgeText}>{v ?? '–'}</span>
-    </span>
-)
+const ConditionBadge = ({ v }) => {
+    if (v == null || v === '') {
+        return <span className={classes.condBadgeEmpty}>–</span>
+    }
+
+    const n = Number(v)
+    let levelClass = classes.condBadgeMedium
+
+    if (!Number.isNaN(n)) {
+        if (n <= 2) levelClass = classes.condBadgeBad
+        else if (n >= 4) levelClass = classes.condBadgeGood
+    }
+
+    return (
+        <span className={`${classes.condBadge} ${levelClass}`}>
+            {v}
+        </span>
+    )
+}
 
 const StatusChip = ({ status }) => {
     if (!status) return null
@@ -86,27 +86,15 @@ function Th({ label, active, asc, onClick, first }) {
     )
 }
 
-// ----------------------------
-// HELPERS
-// ----------------------------
 function toBool(v) {
     if (v === true || v === 'true') return true
     const n = Number(v)
     return !Number.isNaN(n) && n > 0
 }
 
-// ----------------------------
-// MAIN COMPONENT
-// ----------------------------
 export default function InspectionTimeline({ schoolId, onSelect }) {
-    // ----------------------------
-    // 1. FETCH EVENTS (primary data)
-    // ----------------------------
     const { events, loading, error } = useSchoolAnalyticsWrapper(schoolId)
 
-    // ----------------------------
-    // 2. Fetch OU name (cached)
-    // ----------------------------
     const ouVariables = useMemo(
         () => ({ id: schoolId || '__none__' }),
         [schoolId]
@@ -126,15 +114,12 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         ouDataKey,
         OU_QUERY,
         ouVariables,
-        !schoolId               // lazy if no id
+        !schoolId // lazy if no id
     )
 
     const schoolName =
         ouData?.ou?.displayName || ouData?.ou?.name || schoolId
 
-    // ----------------------------
-    // 3. Sorting state
-    // ----------------------------
     const [sortKey, setSortKey] = useState('eventdate')
     const [sortAsc, setSortAsc] = useState(true)
     const [selectedEvent, setSelectedEvent] = useState(null)
@@ -155,9 +140,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         []
     )
 
-    // ----------------------------
-    // 4. Sorting computation
-    // ----------------------------
     const sorted = useMemo(() => {
         if (!Array.isArray(events)) return []
 
@@ -193,9 +175,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         return list
     }, [events, sortKey, sortAsc, numericKeys])
 
-    // ----------------------------
-    // 5. Sorting toggler
-    // ----------------------------
     const toggleSort = useCallback(
         key => {
             if (sortKey === key) setSortAsc(v => !v)
@@ -207,9 +186,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         [sortKey]
     )
 
-    // ----------------------------
-    // 6. Event selection
-    // ----------------------------
     const pick = useCallback(
         ev => {
             setSelectedEvent(ev)
@@ -223,9 +199,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
         [sortKey]
     )
 
-    // ----------------------------
-    // 7. Conditions
-    // ----------------------------
     if (!schoolId) return null
     if (loading) return <CircularLoader />
     if (error)
@@ -241,9 +214,6 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
             </NoticeBox>
         )
 
-    // ----------------------------
-    // 8. Summary
-    // ----------------------------
     const numEvents = events.length
     const latestByDate = [...events].sort(
         (a, b) => new Date(b.eventdate) - new Date(a.eventdate)
@@ -252,6 +222,7 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
     const latestDateLabel = latestByDate
         ? new Date(latestByDate.eventdate).toLocaleDateString()
         : '–'
+
     return (
         <div style={{ padding: '0.75rem', overflowX: 'auto' }}>
             <h3 style={{ margin: '0 0 .25rem' }}>
@@ -265,7 +236,9 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                 <span>
                     Last inspection: <strong>{latestDateLabel}</strong>
                 </span>
-                <span className={classes.sortHint}>Tip: Click column headers to sort</span>
+                <span className={classes.sortHint}>
+                    Tip: Click column headers to sort
+                </span>
             </div>
 
             <table className={classes.table}>
@@ -314,16 +287,11 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                         active={sortKey === F.teachers}
                         asc={sortAsc}
                     />
-                    <th className={classes.group}>Lab</th>
-                    <th className={classes.group}>Lab cond</th>
-                    <th className={classes.group}>Electricity</th>
-                    <th className={classes.group}>Elec cond</th>
-                    <th className={classes.group}>Handwash</th>
-                    <th className={classes.group}>HW cond</th>
-                    <th className={classes.group}>Library</th>
-                    <th className={classes.group}>Lib cond</th>
-                    <th className={classes.group}>Playground</th>
-                    <th className={classes.group}>Play cond</th>
+                    <th className={classes.group}>Lab (1-5) </th>
+                    <th className={classes.group}>Electricity (1-5)</th>
+                    <th className={classes.group}>Handwash (1-5)</th>
+                    <th className={classes.group}>Library (1-5)</th>
+                    <th className={classes.group}>Playground (1-5)</th>
                     <Th
                         label="Toilets T"
                         onClick={() => toggleSort(F.toiletsT)}
@@ -435,35 +403,69 @@ export default function InspectionTimeline({ schoolId, onSelect }) {
                                 {e[F.teachers] ?? '–'}
                             </td>
 
+                            {/* Lab */}
                             <td className={classes.tdCenter}>
-                                <Bool v={toBool(e[F.lab.on])} />
+                                {(() => {
+                                    const hasLab = toBool(e[F.lab.on])
+                                    return (
+                                        <div className={classes.facilityCell}>
+                                            <Bool v={hasLab} />
+                                            {hasLab && <ConditionBadge v={e[F.lab.cond]} />}
+                                        </div>
+                                    )
+                                })()}
                             </td>
-                            <td className={classes.td}>
-                                <Badge v={e[F.lab.cond]} />
-                            </td>
+
+                            {/* Electricity */}
                             <td className={classes.tdCenter}>
-                                <Bool v={toBool(e[F.elec.on])} />
+                                {(() => {
+                                    const hasElec = toBool(e[F.elec.on])
+                                    return (
+                                        <div className={classes.facilityCell}>
+                                            <Bool v={hasElec} />
+                                            {hasElec && <ConditionBadge v={e[F.elec.cond]} />}
+                                        </div>
+                                    )
+                                })()}
                             </td>
-                            <td className={classes.td}>
-                                <Badge v={e[F.elec.cond]} />
-                            </td>
+
+                            {/* Handwash */}
                             <td className={classes.tdCenter}>
-                                <Bool v={toBool(e[F.wash.on])} />
+                                {(() => {
+                                    const hasWash = toBool(e[F.wash.on])
+                                    return (
+                                        <div className={classes.facilityCell}>
+                                            <Bool v={hasWash} />
+                                            {hasWash && <ConditionBadge v={e[F.wash.cond]} />}
+                                        </div>
+                                    )
+                                })()}
                             </td>
-                            <td className={classes.td}>
-                                <Badge v={e[F.wash.cond]} />
-                            </td>
+
+                            {/* Library */}
                             <td className={classes.tdCenter}>
-                                <Bool v={toBool(e[F.lib.on])} />
+                                {(() => {
+                                    const hasLib = toBool(e[F.lib.on])
+                                    return (
+                                        <div className={classes.facilityCell}>
+                                            <Bool v={hasLib} />
+                                            {hasLib && <ConditionBadge v={e[F.lib.cond]} />}
+                                        </div>
+                                    )
+                                })()}
                             </td>
-                            <td className={classes.td}>
-                                <Badge v={e[F.lib.cond]} />
-                            </td>
+
+                            {/* Playground */}
                             <td className={classes.tdCenter}>
-                                <Bool v={toBool(e[F.play.on])} />
-                            </td>
-                            <td className={classes.td}>
-                                <Badge v={e[F.play.cond]} />
+                                {(() => {
+                                    const hasPlay = toBool(e[F.play.on])
+                                    return (
+                                        <div className={classes.facilityCell}>
+                                            <Bool v={hasPlay} />
+                                            {hasPlay && <ConditionBadge v={e[F.play.cond]} />}
+                                        </div>
+                                    )
+                                })()}
                             </td>
 
                             <td
