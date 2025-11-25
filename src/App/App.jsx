@@ -1,4 +1,3 @@
-// App/App.jsx
 import React, { useState } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
