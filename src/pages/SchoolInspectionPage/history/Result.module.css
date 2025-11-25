@@ -5,6 +5,8 @@
     padding: 0;
     max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ============================================
@@ -66,6 +68,11 @@
     border-radius: 16px;
     padding: 1.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: visible;
 }
 
 .categoryTitle {
@@ -86,6 +93,9 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* ============================================
@@ -97,6 +107,12 @@
     border-radius: 12px;
     padding: 1.25rem;
     transition: all 0.2s ease;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: visible;
 }
 
 .graphCard:hover {
@@ -117,6 +133,11 @@
 
 .graphCardContent {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: visible;
 }
 
 /* ============================================
@@ -135,24 +156,41 @@
     .categoryGroup {
         padding: 1.5rem;
     }
+    
+    .pageContainer {
+        padding: 0 1rem;
+    }
 }
 
 @media (max-width: 768px) {
     .pageContainer {
         gap: 2rem;
+        padding: 0 1rem;
     }
     
     .metricsGrid {
         grid-template-columns: 1fr;
         gap: 1rem;
+        min-width: 0;
     }
     
     .ratiosSection {
         padding: 1.25rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .categoryGroup {
         padding: 1.25rem;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .graphCard {
+        padding: 1rem;
+        min-width: 0;
     }
     
     .mainTitle {
@@ -165,5 +203,28 @@
     
     .categoryTitle {
         font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pageContainer {
+        padding: 0 0.75rem;
+        gap: 1.5rem;
+    }
+    
+    .ratiosSection {
+        padding: 1rem;
+    }
+    
+    .categoryGroup {
+        padding: 1rem;
+    }
+    
+    .graphCard {
+        padding: 0.75rem;
+    }
+    
+    .metricsGrid {
+        gap: 0.75rem;
     }
 }
