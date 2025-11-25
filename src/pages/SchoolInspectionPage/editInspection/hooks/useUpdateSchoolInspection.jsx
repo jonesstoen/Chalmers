@@ -1,10 +1,5 @@
-// pages/SchoolInspectionPage/editInspection/hooks/useUpdateSchoolInspection.jsx
 import usePostEvent from '../../../../shared/api/useTrackerEventMutation'
 
-/**
- * Oppdaterer et eksisterende School Inspection-event via Tracker Importer
- * -> POST /api/42/tracker?importStrategy=UPDATE
- */
 export function useUpdateSchoolInspectionEvent() {
     const [mutate, status] = usePostEvent('PUT')
     const update = ({

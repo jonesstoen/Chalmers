@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/components/OrgTreePanel.jsx
 import React, { useState, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react'
 import { OrganisationUnitTree } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
@@ -8,9 +7,6 @@ import styles from './OrgTreePanel.module.css'
 const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, onRootChange, onSelect }, ref) {
     const safeInitialRoot = initialRootId ?? roots?.[0]?.id
 
-    // --------------------------
-    // 1. State declarations
-    // --------------------------
     const [currentRootId, setCurrentRootId] = useState(safeInitialRoot)
     const [pendingSelect, setPendingSelect] = useState(null)
     const [expanded, setExpanded] = useState(() =>
@@ -18,9 +14,6 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
     )
     const [selectedPaths, setSelectedPaths] = useState([])
 
-    // --------------------------
-    // 2. Scroll to selected node
-    // --------------------------
     useEffect(() => {
         if (!selectedPaths.length) return
         const id = selectedPaths[0].split('/').pop()
@@ -37,9 +30,6 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
         }, 50)
     }, [selectedPaths])
 
-    // ----------------------------------------------------
-    // 3. Apply pending selection AFTER switching root
-    // ----------------------------------------------------
     useEffect(() => {
         if (!pendingSelect) return
         if (!currentRootId) return
@@ -70,9 +60,6 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
         })
     }, [pendingSelect, currentRootId, onSelect])
 
-    // --------------------------
-    // Helper functions
-    // --------------------------
     const asPaths = (arg) => {
         if (!arg) return []
         if (Array.isArray(arg)) return arg
@@ -87,9 +74,6 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
         return segs[segs.length - 1] || null
     }
 
-    // --------------------------
-    // 4. Tree expand/collapse
-    // --------------------------
     const handleExpand = useCallback((arg) => {
         const add = asPaths(arg)
         setExpanded(prev => {
@@ -112,9 +96,6 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
         onSelect?.([]) // reset
     }
 
-    // --------------------------
-    // 5. Tree selection handler
-    // --------------------------
     const handleChange = useCallback((value) => {
         const paths = asPaths(value).map(p =>
             p.startsWith('/') ? p : `/${p}`
@@ -126,9 +107,6 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
         onSelect?.(id ? [id] : [])
     }, [onSelect])
 
-    // --------------------------
-    // 6. Search selection handler
-    // --------------------------
     const handleSearchPick = useCallback((unit) => {
         if (!unit?.path) return
 
@@ -164,19 +142,16 @@ const OrgTreePanel = forwardRef(function OrgTreePanel({ roots, initialRootId, on
         onSelect?.([unit.id])
     }, [roots, currentRootId, onSelect])
 
-    // Expose handleSearchPick via ref
+    // expose handleSearchPick via ref
     useImperativeHandle(ref, () => ({
         handleSearchPick,
     }), [handleSearchPick])
 
-    // Notify root change
+    // notify root change
     useEffect(() => {
         if (currentRootId) onRootChange?.(currentRootId)
     }, [currentRootId, onRootChange])
 
-    // --------------------------
-    // 7. Render
-    // --------------------------
     if (!currentRootId) {
         return (
             <aside className={classes.sidebar}>

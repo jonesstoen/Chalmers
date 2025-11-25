@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/editInspection/EditInspectionForm.jsx
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {
@@ -107,12 +106,12 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
     )
 
     const handleIncrement = () => {
-        // If blank, go to 0 first, otherwise increment
+        // if blank, go to 0 first, otherwise increment
         if (isBlank) {
             applyChange('0')
         } else {
             const nextValue = numericValue + 1
-            // If max is set and next value would exceed it, cap at max
+            // if max is set and next value would exceed it, cap at max
             if (max !== undefined && max !== null && nextValue > max) {
                 applyChange(String(max), { forceHint: true })
             } else {
@@ -122,7 +121,7 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
     }
 
     const handleDecrement = () => {
-        // If blank or 0, stay at 0 (or go to blank if already 0)
+        // If blank or 0, stay at 0
         if (isBlank || numericValue === 0) {
             applyChange('')
         } else {
@@ -201,12 +200,7 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
     )
 }
 
-export default function EditInspectionForm({
-                                               event,
-                                               orgUnitId,
-                                               orgUnitName,
-                                               onDeleted,
-                                           }) {
+export default function EditInspectionForm( {event, orgUnitId, orgUnitName, onDeleted,}) {
     const [formState, setFormState] = useState({})
     const [originalFormState, setOriginalFormState] = useState({}) // Store original values for change detection
     const [errors, setErrors] = useState({})
@@ -214,7 +208,7 @@ export default function EditInspectionForm({
     const [deleteResult, setDeleteResult] = useState(null)
     const [lastSavedCount, setLastSavedCount] = useState(null)
 
-    // ny state for popup + liste over manglende felter
+    // when an event is updated, clear previous results
     const [missingRequiredLabels, setMissingRequiredLabels] = useState([])
     const [showMissingPopup, setShowMissingPopup] = useState(false)
 
@@ -223,7 +217,7 @@ export default function EditInspectionForm({
     const [deleteEvent, { loading: deleting, error: deleteError }] =
         useDeleteSchoolInspectionEvent()
 
-    // Når valgt event endres, populer formState
+    // when event prop changes, load its data into formState
     useEffect(() => {
         if (!event) return
 
@@ -244,12 +238,12 @@ export default function EditInspectionForm({
                     next[field.id] = !Number.isNaN(n) ? n > 0 : null
                 }
             } else {
-                // For numeric fields, normalize to string format for consistency
+                // for numeric fields, normalize to string format for consistency
                 if (raw === undefined || raw === null || raw === '') {
                     next[field.id] = ''
                 } else {
                     const num = Number(raw)
-                    // If it's a valid number, store as string to match how handleChange stores it
+                    // if its a valid number, store as string to match how handleChange stores it
                     if (!Number.isNaN(num)) {
                         next[field.id] = String(num)
                     } else {
@@ -265,7 +259,7 @@ export default function EditInspectionForm({
                     childRaw !== null &&
                     childRaw !== ''
                 ) {
-                    // Normalize child values too (condition ratings are numbers)
+                    // normalize child values too (condition ratings are numbers)
                     const childNum = Number(childRaw)
                     if (!Number.isNaN(childNum)) {
                         next[field.child_query.id] = String(childNum)
@@ -334,25 +328,25 @@ export default function EditInspectionForm({
     )
 
     const handleChange = useCallback((id, value, options = {}) => {
-        // Normalize the value using the same logic as when loading
+        // Normalize the value
         let newValue = normalizeChange(id, value)
         
-        // For numeric fields, ensure consistent storage format
-        // If it's a number or numeric string, store as string (matching how originals are stored)
+
+        // if its a number or numeric string, store as string
         const field = SCHOOL_INSPECTION_FIELDS.find(f => f.id === id)
         if (field && field.type !== 'BOOLEAN') {
             const num = Number(newValue)
             if (!Number.isNaN(num) && newValue !== '' && newValue !== null) {
-                newValue = String(num) // Store as string to match original format
+                newValue = String(num) // store as string
             } else if (newValue === '' || newValue === null || newValue === undefined) {
-                newValue = '' // Consistent empty value
+                newValue = '' // consistent empty value
             }
         }
         let cappedCleanValue
         setFormState(prev => {
             const updated = { ...prev, [id]: newValue }
 
-            // If total classrooms is being changed, check if clean classrooms needs to be capped
+            // if total classrooms is being changed, check if clean classrooms needs to be capped
             if (id === TOTAL_CLASSROOMS_ID) {
                 const isBlank =
                     newValue === undefined || newValue === null || newValue === ''
@@ -393,15 +387,15 @@ export default function EditInspectionForm({
     const totalToilets = computeTotalToilets(formState)
 
     const validateForm = () => {
-        // start med domenespesifikk validering (f.eks. range checks)
+        // start with existing validation
         const newErrors = validateSchoolInspection(formState) || {}
         const isEmpty = v => v === undefined || v === null || v === ''
 
-        // legg på "Required" for tomme felter (bortsett fra total toilets)
+        // add required field checks
         SCHOOL_INSPECTION_FIELDS.forEach(field => {
             const id = field.id
 
-            // ikke krev total toilets, den er auto-beregnet
+            // skip total toilets that is being auto calculated
             if (id === TOTAL_TOILETS_ID) return
 
             if (field.type === 'BOOLEAN') {
@@ -433,7 +427,7 @@ export default function EditInspectionForm({
 
         setErrors(newErrors)
 
-        // bygg liste med labels til popup
+        // build missing labels list
         const missingLabels = []
         SCHOOL_INSPECTION_FIELDS.forEach(field => {
             if (field.id === TOTAL_TOILETS_ID) return
@@ -476,7 +470,6 @@ export default function EditInspectionForm({
                 const parentId = field.id
                 const parentValue = formState[parentId]
 
-                // ikke send total-toilets her, vi overstyrer senere
                 if (parentId === TOTAL_TOILETS_ID) {
                     return acc
                 }
@@ -522,7 +515,7 @@ export default function EditInspectionForm({
             []
         )
 
-        // Overstyr total toilets (auto-beregnet)
+        // override total toilets with computed value
         dataValuesArray.push({
             dataElement: TOTAL_TOILETS_ID,
             value: totalToilets,
@@ -544,9 +537,9 @@ export default function EditInspectionForm({
             dataValues: dataValuesArray,
         })
 
-        // Store result for display
+        // store result for display
         setUpdateResult(result)
-        // Store count for success message
+        // store count for success message
         if (result?.isOnline !== false) {
             setLastSavedCount(dataValuesArray.length)
         } else {
@@ -563,7 +556,7 @@ export default function EditInspectionForm({
             return
         }
 
-        // Reset formState to originalFormState
+        // reset formState to originalFormState
         setFormState({ ...originalFormState })
         setErrors({})
         setMissingRequiredLabels([])
@@ -583,9 +576,9 @@ export default function EditInspectionForm({
             return
 
         const result = await deleteEvent({ eventId })
-        // Store result for display
+        // store result for display
         setDeleteResult(result)
-        // Only proceed with deletion callback if online
+        // only proceed with deletion callback if online
         if (result?.isOnline !== false && onDeleted) {
             onDeleted(eventId)
         }
@@ -593,26 +586,23 @@ export default function EditInspectionForm({
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
 
-    // Helper function to normalize a value for comparison
+    // helper function to normalize a value for comparison
     const normalizeForComparison = (value) => {
-        // Handle null, undefined, empty string as null
+        // handle null, undefined, empty string as null
         if (value === null || value === undefined || value === '') {
             return null
         }
         
-        // For booleans, normalize to true/false/null
+        // for booleans, normalize to true/false/null
         if (value === true || value === 'true' || value === 1) return true
         if (value === false || value === 'false' || value === 0) return false
         
-        // Try to convert to number first
+        // try to convert to number first
         const num = Number(value)
         if (!Number.isNaN(num) && value !== '') {
-            // If it's a valid number, return it as a number for comparison
-            // This handles "5" vs 5 vs "5.0" all as the same
             return num
         }
-        
-        // Otherwise return as trimmed string
+
         return String(value).trim()
     }
 
@@ -621,14 +611,14 @@ export default function EditInspectionForm({
         const current = formState[fieldId]
         const original = originalFormState[fieldId]
         
-        // Quick check: if they're exactly equal, no change
+        // if theyre exactly equal, no change
         if (current === original) return false
         
-        // Normalize both values for comparison
+        // normalize both values for comparison
         const currentNormalized = normalizeForComparison(current)
         const originalNormalized = normalizeForComparison(original)
         
-        // Use strict equality for comparison
+        // use strict equality for comparison
         return currentNormalized !== originalNormalized
     }
 
@@ -647,7 +637,6 @@ export default function EditInspectionForm({
 
         const isTrue = value === true || value === 'true'
 
-        // BOOLEAN + condition-rating
         if (type === 'BOOLEAN' && hasChild) {
             return (
                 <div key={id} className={editFormStyles.fieldWrapper}>
@@ -658,7 +647,7 @@ export default function EditInspectionForm({
                                 value={value}
                                 onChange={v => {
                                     handleChange(id, v)
-                                    // Clear condition rating if unselected (null) or set to false
+                                    // Clear condition rating if unselected or set to false
                                     if (v === null || v === false) {
                                         handleChange(childId, null, {
                                             forceClearError: true,
@@ -688,7 +677,7 @@ export default function EditInspectionForm({
             )
         }
 
-        // Ren BOOLEAN
+        // plain boolean field
         if (type === 'BOOLEAN') {
             return (
                 <div key={id} className={`${editFormStyles.fieldWrapper} ${hasFieldChanged(id) ? editFormStyles.fieldWrapperChanged : ''} ${errors[id] ? editFormStyles.fieldWrapperError : ''}`}>
@@ -703,7 +692,7 @@ export default function EditInspectionForm({
             )
         }
 
-        // Numeric field
+        // numeric field
         const numericValue = formState[id] ?? ''
         let maxValue
         let maxHintMessage
@@ -866,7 +855,7 @@ export default function EditInspectionForm({
                         </div>
                     </details>
 
-                    {/* Sanitation & staffing */}
+                    {/* Sanitation and staffing */}
                     <details open className={editFormStyles.sectionBox}>
                         <summary className={editFormStyles.sectionSummary}>
                             Sanitation & staffing

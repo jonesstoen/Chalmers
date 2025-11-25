@@ -3,7 +3,7 @@ import { useCacheableQuery } from "../../../shared/cache/cacheableQuery"
 
 const getId = ({ id }) => id
 
-// Fully stable query object
+// fully stable query object
 const STABLE_ORG_UNIT_QUERY = {
     ou: {
         resource: "organisationUnits",
@@ -50,7 +50,7 @@ export default function useFetchOrgUnits(orgIds = []) {
             !selectedId
         )
 
-    // Normalize DHIS2 quirks
+    // normalize DHIS2 quirks :)
     let data = rawData
 
     if (rawData?.ou) {
