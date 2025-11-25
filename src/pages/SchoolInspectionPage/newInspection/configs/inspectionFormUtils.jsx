@@ -10,10 +10,23 @@ export const validateSchoolInspection = (formState) => {
     const newErrors = {}
 
     // Clean classrooms kan ikke overstige total classrooms
-    const clean = Number(formState['XIgpDhDC4Ol']) || 0
-    const totalRooms = Number(formState['ya5SyA5hej4']) || 0
-    if (clean > totalRooms && totalRooms > 0) {
-        newErrors['XIgpDhDC4Ol'] = `Cannot exceed total classrooms (${totalRooms})`
+    const cleanRaw = formState['XIgpDhDC4Ol']
+    const totalRaw = formState['ya5SyA5hej4']
+    const hasCleanValue =
+        cleanRaw !== undefined && cleanRaw !== null && cleanRaw !== ''
+    const hasTotalValue =
+        totalRaw !== undefined && totalRaw !== null && totalRaw !== ''
+
+    if (hasCleanValue && hasTotalValue) {
+        const clean = Number(cleanRaw)
+        const totalRooms = Number(totalRaw)
+        if (
+            !Number.isNaN(clean) &&
+            !Number.isNaN(totalRooms) &&
+            clean > totalRooms
+        ) {
+            newErrors['XIgpDhDC4Ol'] = `Cannot exceed total classrooms (${totalRooms})`
+        }
     }
 
     // Barn 1–5

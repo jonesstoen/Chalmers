@@ -1,5 +1,5 @@
 // pages/SchoolInspectionPage/editInspection/EditInspectionForm.jsx
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {
     Button,
@@ -50,35 +50,73 @@ const FIELD_LABEL_LOOKUP = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
     return acc
 }, {})
 
-function NumberField({ label, value = '', onChange, error, iconNames, hasChanged = false, max }) {
-    const [isFocused, setIsFocused] = React.useState(false)
+function NumberField({ label, value = '', onChange, error, iconNames, hasChanged = false, max, maxMessage }) {
+    const [isFocused, setIsFocused] = useState(false)
+    const [showMaxHint, setShowMaxHint] = useState(false)
+    const hintTimeoutRef = useRef(null)
     // Treat blank/null/undefined as 0 for calculations, but preserve blank state
     const isBlank = value === '' || value === null || value === undefined
     const numericValue = isBlank ? 0 : Number(value) || 0
 
-    const handleChange = (newValue) => {
-        // If max is set and the new value exceeds it, cap it at max
-        if (max !== undefined && max !== null) {
-            const numValue = Number(newValue)
-            if (!Number.isNaN(numValue) && numValue > max) {
-                onChange(String(max))
-                return
-            }
+    const clearHintTimeout = useCallback(() => {
+        if (hintTimeoutRef.current) {
+            clearTimeout(hintTimeoutRef.current)
+            hintTimeoutRef.current = null
         }
-        onChange(newValue)
-    }
+    }, [])
+
+    const triggerMaxHint = useCallback(() => {
+        if (max === undefined || max === null) return
+        setShowMaxHint(true)
+        clearHintTimeout()
+        hintTimeoutRef.current = setTimeout(() => {
+            setShowMaxHint(false)
+            hintTimeoutRef.current = null
+        }, 2200)
+    }, [max, clearHintTimeout])
+
+    useEffect(() => {
+        return () => {
+            clearHintTimeout()
+        }
+    }, [clearHintTimeout])
+
+    const applyChange = useCallback(
+        (newValue, { forceHint = false } = {}) => {
+            if (
+                max !== undefined &&
+                max !== null &&
+                newValue !== '' &&
+                newValue !== null
+            ) {
+                const numValue = Number(newValue)
+                if (!Number.isNaN(numValue) && numValue > max) {
+                    onChange(String(max))
+                    triggerMaxHint()
+                    return
+                }
+            }
+
+            onChange(newValue)
+
+            if (forceHint) {
+                triggerMaxHint()
+            }
+        },
+        [max, onChange, triggerMaxHint]
+    )
 
     const handleIncrement = () => {
         // If blank, go to 0 first, otherwise increment
         if (isBlank) {
-            handleChange('0')
+            applyChange('0')
         } else {
             const nextValue = numericValue + 1
             // If max is set and next value would exceed it, cap at max
             if (max !== undefined && max !== null && nextValue > max) {
-                handleChange(String(max))
+                applyChange(String(max), { forceHint: true })
             } else {
-                handleChange(String(nextValue))
+                applyChange(String(nextValue))
             }
         }
     }
@@ -86,9 +124,9 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
     const handleDecrement = () => {
         // If blank or 0, stay at 0 (or go to blank if already 0)
         if (isBlank || numericValue === 0) {
-            handleChange('')
+            applyChange('')
         } else {
-            handleChange(String(numericValue - 1))
+            applyChange(String(numericValue - 1))
         }
     }
 
@@ -123,7 +161,7 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                     min="0"
                     max={max !== undefined && max !== null ? max : undefined}
                     value={value}
-                    onChange={e => handleChange(e.target.value)}
+                    onChange={e => applyChange(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     className={`${editFormStyles.numberInput} ${hasChanged ? editFormStyles.numberInputChanged : ''} ${error ? editFormStyles.numberInputError : ''}`}
@@ -153,6 +191,11 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                     <IconError16 />
                     <span>{error}</span>
                 </p>
+            )}
+            {max !== undefined && max !== null && showMaxHint && (
+                <div className={editFormStyles.maxHintBubble}>
+                    {maxMessage || `Cannot exceed ${max}`}
+                </div>
             )}
         </div>
     )
@@ -305,23 +348,46 @@ export default function EditInspectionForm({
                 newValue = '' // Consistent empty value
             }
         }
-        
+        let cappedCleanValue
         setFormState(prev => {
             const updated = { ...prev, [id]: newValue }
-            
+
             // If total classrooms is being changed, check if clean classrooms needs to be capped
             if (id === TOTAL_CLASSROOMS_ID) {
-                const totalRooms = Number(newValue) || 0
-                const cleanRooms = Number(prev[CLEAN_CLASSROOMS_ID]) || 0
-                if (cleanRooms > totalRooms && totalRooms > 0) {
-                    updated[CLEAN_CLASSROOMS_ID] = String(totalRooms)
+                const isBlank =
+                    newValue === undefined || newValue === null || newValue === ''
+                if (!isBlank) {
+                    const totalRooms = Number(newValue)
+                    if (!Number.isNaN(totalRooms)) {
+                        const cleanRaw = prev[CLEAN_CLASSROOMS_ID]
+                        const hasCleanValue =
+                            cleanRaw !== undefined &&
+                            cleanRaw !== null &&
+                            cleanRaw !== ''
+                        if (hasCleanValue) {
+                            const cleanRooms = Number(cleanRaw)
+                            if (
+                                !Number.isNaN(cleanRooms) &&
+                                cleanRooms > totalRooms
+                            ) {
+                                const nextValue = String(totalRooms)
+                                updated[CLEAN_CLASSROOMS_ID] = nextValue
+                                cappedCleanValue = nextValue
+                            }
+                        }
+                    }
                 }
             }
-            
+
             return updated
         })
 
         clearFieldError(id, newValue, options)
+        if (cappedCleanValue !== undefined) {
+            clearFieldError(CLEAN_CLASSROOMS_ID, cappedCleanValue, {
+                forceClearError: true,
+            })
+        }
     }, [clearFieldError])
 
     const totalToilets = computeTotalToilets(formState)
@@ -639,12 +705,22 @@ export default function EditInspectionForm({
 
         // Numeric field
         const numericValue = formState[id] ?? ''
-        // For clean and secure classrooms, set max to total classrooms
-        const maxValue = id === CLEAN_CLASSROOMS_ID
-            ? (formState[TOTAL_CLASSROOMS_ID] !== undefined && formState[TOTAL_CLASSROOMS_ID] !== null && formState[TOTAL_CLASSROOMS_ID] !== ''
-                ? Number(formState[TOTAL_CLASSROOMS_ID])
-                : undefined)
-            : undefined
+        let maxValue
+        let maxHintMessage
+        if (id === CLEAN_CLASSROOMS_ID) {
+            const totalRaw = formState[TOTAL_CLASSROOMS_ID]
+            const hasTotalValue =
+                totalRaw !== undefined &&
+                totalRaw !== null &&
+                totalRaw !== ''
+            if (hasTotalValue) {
+                const parsedTotal = Number(totalRaw)
+                if (!Number.isNaN(parsedTotal)) {
+                    maxValue = parsedTotal
+                    maxHintMessage = `Cannot exceed total classrooms (${parsedTotal})`
+                }
+            }
+        }
 
         return (
             <NumberField
@@ -656,6 +732,7 @@ export default function EditInspectionForm({
                 iconNames={FIELD_ICONS[id]}
                 hasChanged={hasFieldChanged(id)}
                 max={maxValue}
+                maxMessage={maxHintMessage}
             />
         )
     }
