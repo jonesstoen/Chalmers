@@ -22,6 +22,7 @@
     color: #b45309;
 }
 
+/* MAIN AREA */
 .mainContainer {
     width: 100%;
     max-width: 800px;
@@ -29,12 +30,14 @@
     border: 1px solid #e5e7eb;
     background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     gap: 32px;
 }
 
+/* Title and intro text */
 .welcomeSection {
     text-align: center;
 }
@@ -48,11 +51,12 @@
 
 .welcomeText {
     margin: 0;
-    color: #475569;
+    color: #334155;
     font-size: 16px;
     line-height: 1.6;
 }
 
+/* ACTIONS */
 .actionsContainer {
     display: flex;
     flex-direction: column;
@@ -115,55 +119,72 @@
     font-weight: 400;
 }
 
+/* SEARCH FIELD AREA */
 .searchContainer {
     width: 100%;
     margin-top: -4px;
     position: relative;
 }
 
+/* METRICS GRID RESPONSIVE */
 .metricsGrid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 16px;
-    margin-top: 8px;
+    margin-top: 24px;
+    width: 100%;
 }
 
-.progressSection {
-    margin-top: 8px;
-}
-
-.progressHeader {
+.lastVisitedLine {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 8px;
-}
-
-.progressTitle {
+    align-items: center;
+    gap: 6px;
     font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.progressStats {
-    font-size: 13px;
     color: #64748b;
 }
 
-.progressBar {
-    height: 10px;
-    background: #e5e7eb;
-    border-radius: 999px;
-    overflow: hidden;
+@media (min-width: 768px) {
+    .metricsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-.progressBarFill {
-    height: 100%;
-    background: #2563eb;
-    transition: width 0.25s ease-out;
-}
+/* Responsive mobile tweaks */
+@media (max-width: 480px) {
+    .pageContainer {
+        padding: 12px;
+        justify-content: flex-start;
+    }
 
-.progressBarFillComplete {
-    background: #16a34a;
-}
+    .mainContainer {
+        padding: 24px 16px;
+        gap: 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.08);
+    }
 
+    .welcomeTitle {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .welcomeText {
+        font-size: 14px;
+        color : #1e293b;
+        line-height: 1.5;
+        max-width: 90%;
+        margin: 0 auto;
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        min-height: 48px;
+        font-size: 15px;
+        padding: 12px 16px;
+    }
+
+    .metricsGrid {
+        margin-top: 16px;
+        gap: 12px;
+    }
+}

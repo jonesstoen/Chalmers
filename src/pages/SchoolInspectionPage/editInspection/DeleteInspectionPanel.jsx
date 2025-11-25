@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/editInspection/DeleteInspectionPanel.jsx
 import React, { useState } from 'react'
 import { Button, NoticeBox, AlertStack, AlertBar } from '@dhis2/ui'
 import { useDeleteSchoolInspectionEvent } from './hooks/useDeleteSchoolInspection'
