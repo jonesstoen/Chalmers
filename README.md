@@ -118,7 +118,19 @@ src/
 3. Update/delete hooks (`hooks/useUpdateSchoolInspection.jsx`, `hooks/useDeleteSchoolInspection.jsx`) call shared API primitives.
 4. History visualizations under `history/components` refetch analytics through shared hooks to reflect changes.
 
-For additional architectural detail, see `README.structure.md`.
+## App Functionality
+
+Inspector Chalmers is a full offline-capable PWA React application for school inspections. Users navigate through the organizational tree to select schools, view historical inspection data, and submit new inspections or edit existing ones. The app provides aggregate analytics comparing current and previous inspection data across clusters and schools, with graph visualizations and regression analysis.
+
+### Implementation
+
+**Offline Support**: The app implements a comprehensive offline-first architecture using IndexedDB (via `localforage`) for persistent storage. When offline, inspection submissions are queued in an outbox cache (`src/shared/cache/config.js`). The offline detector (`src/shared/cache/useOfflineDetector.jsx`) monitors connection status by checking browser online state, DHIS2 connection status, and server reachability. Data queries use a cacheable query wrapper (`src/shared/cache/cacheableQuery.jsx`) that serves stale cache immediately while fetching fresh data in the background.
+
+**User Experience**: The codebase emphasizes clarity and feedback for users with varying digital literacy. Form validation provides immediate, contextual error messages. Progress indicators show completion status for multi-field forms. Field constraints prevent invalid inputs (e.g., negative numbers, values exceeding limits). Visual signifiers like icons, color-coded states, and clear button labels make actions discoverable. The UI follows DHIS2 design patterns for consistency, using familiar navigation structures and standard components. Loading states and success/error feedback are shown throughout to keep users informed of system status.
+
+### Known Limitations & Missing Functionality
+
+- **Automatic Outbox Sync**: While offline submissions are stored in the outbox cache, there is currently no automatic background sync mechanism to push queued items when connectivity is restored. Users must manually retry or the app must be refreshed to trigger sync (see `src/shared/ui/useEvent.jsx` TODO comment).
 
 ## Learn More
 
