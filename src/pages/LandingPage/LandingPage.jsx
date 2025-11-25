@@ -6,6 +6,11 @@ import { useOutboxCount } from '../../shared/cache/useOutboxCount'
 import MetricTile from './MetricTile'
 import styles from './LandingPage.module.css'
 import { useSchoolsByRegions } from '../../shared/api/useSchoolsAPI'
+import {
+    IconCheckmark16,
+    IconSync16,
+    IconLocation16
+} from '@dhis2/ui'
 
 const PROGRAM_ID = 'UxK2o06ScIe'
 const STAGE_ID = 'eJiBjm9Rl7E'
@@ -208,9 +213,9 @@ export default function LandingPage() {
                         >
                             <span>Resume last school</span>
                             {lastOuInfo && (
-                                <span className={styles.secondaryButtonSubtext}>
-                                    📍 Last visited:{' '}
-                                    {lastOuInfo.displayName || lastOuInfo.name}
+                                <span className={styles.lastVisitedLine}>
+                            <IconLocation16 style={{ marginRight: 6 }} />
+                                Last visited: {lastOuInfo.displayName || lastOuInfo.name}
                                 </span>
                             )}
                         </button>
@@ -220,12 +225,12 @@ export default function LandingPage() {
                 {/* Metrics at bottom */}
                 <div className={styles.metricsGrid}>
                     <MetricTile
-                        title="✅ School coverage this month"
-                        value={
-                            isLoadingCoverage
-                                ? '…'
-                                : `${coveragePct}%`
+                        title={
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconCheckmark16 /> School coverage this month
+            </span>
                         }
+                        value={isLoadingCoverage ? '…' : `${coveragePct}%`}
                         subtitle={
                             isLoadingCoverage
                                 ? 'Based on schools with at least one inspection'
@@ -235,12 +240,12 @@ export default function LandingPage() {
 
 
                     <MetricTile
-                        title="🔄 Pending sync"
-                        value={
-                            pendingSyncLoading
-                                ? '…'
-                                : String(pendingSync)
+                        title={
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconSync16 /> Pending sync
+            </span>
                         }
+                        value={pendingSyncLoading ? '…' : String(pendingSync)}
                         subtitle="Waiting to be sent when online"
                     />
                 </div>
