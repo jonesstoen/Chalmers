@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { useDataQuery } from "@dhis2/app-runtime"
 import { dataCache, outboxCache } from "./config"
+import { useOfflineDetector } from "./useOfflineDetector"
+import { useBypassLocalhostOfflineDetector } from "./useBypassLocalhostOfflineDetector"
 
 export function useCacheableQuery(
     cacheKey,
@@ -18,10 +20,17 @@ export function useCacheableQuery(
     // This is safe if cacheMap values are stable top-level instances
     const cache = useMemo(() => cacheMap[cacheKey], [cacheKey])
 
+    // Check online status
+    const isOffline1 = useOfflineDetector()
+    const isOffline2 = useBypassLocalhostOfflineDetector()
+    const isOffline = isOffline1 || isOffline2
+    const isOnline = !isOffline
+
     const [cachedData, setCachedData] = useState(null)
     const [cacheStatus, setCacheStatus] = useState("none")
     const [cacheChecked, setCacheChecked] = useState(false)
     const [initialLazy, setInitialLazy] = useState(true) // prevents oscillation
+    const prevOnlineRef = useRef(isOnline) // Track previous online state
 
     //
     // 1. READ CACHE
@@ -69,17 +78,34 @@ export function useCacheableQuery(
     }, [cacheChecked, forceLazy])
 
     //
-    // 3. REFETCH IF CACHE EMPTY (only after cache check)
+    // 3. REFETCH WHEN ONLINE (stale-while-revalidate pattern)
+    // Always fetch when online, even if cache exists, to ensure fresh data
     //
     useEffect(() => {
         if (!cacheChecked) return
         if (forceLazy) return
-        if (cachedData != null) return
-
-        // IMPORTANT: refetch is stable enough to call,
-        // but not stable enough to include in the deps
-        refetch()
-    }, [cacheChecked, cachedData, forceLazy])
+        
+        const justCameOnline = isOnline && !prevOnlineRef.current
+        
+        // If we're online, always fetch to get fresh data (even if cache exists)
+        // This ensures the cache is repopulated with latest data from the database
+        if (isOnline) {
+            // Refetch if:
+            // 1. We just came online (transition from offline to online), OR
+            // 2. We don't have network data yet (initial fetch after cache check)
+            if (justCameOnline || !networkData) {
+                // IMPORTANT: refetch is stable enough to call,
+                // but not stable enough to include in the deps
+                refetch()
+            }
+        } else if (cachedData == null) {
+            // Only fetch if offline AND no cache exists (shouldn't happen offline, but safety check)
+            refetch()
+        }
+        
+        // Update previous online state
+        prevOnlineRef.current = isOnline
+    }, [cacheChecked, isOnline, forceLazy, networkData])
 
     //
     // 4. WRITE NETWORK DATA TO CACHE
