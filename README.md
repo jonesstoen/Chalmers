@@ -154,7 +154,7 @@ This document maps the complete dataflow of the School Inspection PWA applicatio
 
 ## Detailed Dataflow
 
-### 1. App Startup & Initialization
+### App Startup & Initialization
 
 ```mermaid
 graph TD
@@ -199,48 +199,7 @@ graph TD
 
 ---
 
-### 2. Landing Page Flow
-
-```mermaid
-graph TD
-    A[LandingPage Mounts] --> B[Fetch Monthly Analytics]
-    B --> C[useFetchAnalytics Hook]
-    C --> D[useCacheableQuery]
-    D --> E{Cache exists?}
-    E -->|Yes| F[Return cached data<br/>Mark as stale if >16hrs]
-    E -->|No| G[Fetch from API]
-    G --> H[Save to dataCache]
-    F --> I[Display Metrics]
-    H --> I
-    
-    A --> J[Check localStorage for lastOu]
-    J --> K{lastOu exists?}
-    K -->|Yes| L[Fetch OU info via useCacheableQuery]
-    K -->|No| M[No resume button]
-    L --> N[Display Resume Last School button]
-    
-    A --> O[useOutboxCount Hook]
-    O --> P[Count items in outboxCache]
-    P --> Q[Display Pending Sync count]
-    
-    A --> R[User Actions]
-    R --> S[Open Inspector Button]
-    R --> T[Resume Last School Button]
-    R --> U[Search for School]
-    
-    S --> V[Navigate to /school-inspection]
-    T --> W[Navigate to /school-inspection?ou=ID]
-    U --> X[SchoolSearchBar Component]
-```
-
-**Features:**
-- **Caching**: All queries use `useCacheableQuery` which checks cache first, then network
-- **Offline Support**: Displays pending sync count from outbox
-- **Resume Functionality**: Remembers last visited school in localStorage
-
----
-
-### 3. School Selection Flow
+### School Selection Flow
 
 ```mermaid
 graph TD
@@ -298,7 +257,7 @@ graph TD
 
 ---
 
-### 4. New Inspection Flow
+### New Inspection Flow
 
 ```mermaid
 graph TD
@@ -363,93 +322,9 @@ graph TD
 - **Context Update**: Successful submissions stored in InspectionContext
 - **Auto-navigation**: Online submissions switch to History tab
 
----
+___
 
-### 5. Edit Inspection Flow
-
-```mermaid
-graph TD
-    A[EditInspectionForm Mounts] --> B[InspectionTimeline Component]
-    B --> C[useSchoolAnalyticsWrapper]
-    C --> D[Fetch events via analytics API]
-    D --> E[Display events in table]
-    E --> F[User selects event]
-    
-    F --> G[Load event data]
-    G --> H[Parse dataValues from event]
-    H --> I[Set originalFormState]
-    I --> J[Set formState = originalFormState]
-    
-    J --> K[User edits form]
-    K --> L[Track changes vs original]
-    L --> M[Highlight modified fields]
-    
-    K --> N{User Action}
-    N --> O[Reset Changes]
-    N --> P[Save Changes]
-    N --> Q[Delete Inspection]
-    
-    O --> R[Confirm dialog]
-    R --> S{Confirmed?}
-    S -->|Yes| T[Reset formState to originalFormState]
-    S -->|No| K
-    T --> U[Clear errors]
-    U --> K
-    
-    P --> V[validateForm]
-    V --> W{Valid?}
-    W -->|No| X[Show missing fields popup]
-    W -->|Yes| Y[Build dataValues array]
-    
-    X --> K
-    
-    Y --> Z[useUpdateSchoolInspectionEvent Hook]
-    Z --> AA[usePostEvent PUT]
-    AA --> AB{Online?}
-    
-    AB -->|Yes| AC[Attempt online PUT]
-    AC --> AD{Success?}
-    AD -->|Yes| AE[Return success result]
-    AD -->|No| AF[Treat as offline]
-    
-    AB -->|No| AF
-    AF --> AG[Save to outboxCache]
-    AG --> AH[Key: event:PUT:eventId]
-    AH --> AI[Return offline result]
-    
-    AE --> AJ[Update originalFormState]
-    AI --> AJ
-    AJ --> AK[Show success/warning alert]
-    AK --> AL[Refresh InspectionTimeline]
-    
-    Q --> AM[Confirm dialog]
-    AM --> AN{Confirmed?}
-    AN -->|Yes| AO[useDeleteSchoolInspectionEvent Hook]
-    AN -->|No| K
-    
-    AO --> AP[usePostEvent DELETE]
-    AP --> AQ{Online?}
-    AQ -->|Yes| AR[Attempt online DELETE]
-    AQ -->|No| AS[Return error - cannot delete offline]
-    
-    AR --> AT{Success?}
-    AT -->|Yes| AU[Call onDeleted callback]
-    AT -->|No| AV[Show error]
-    
-    AU --> AW[Clear selectedEvent]
-    AW --> AL
-```
-
-**Features:**
-- **Change Tracking**: Compares current state to original, highlights changes
-- **Reset**: Restores form to original event data
-- **Update**: Uses PUT mutation with offline fallback
-- **Delete**: Only works online (no offline deletion allowed)
-- **Event Selection**: Timeline component allows selecting events to edit
-
----
-
-### 6. History/Analytics Flow
+### History/Analytics Flow
 
 ```mermaid
 graph TD
@@ -494,7 +369,7 @@ graph TD
 
 ---
 
-### 7. Caching & PWA Architecture
+### Caching & PWA Architecture
 
 ```mermaid
 graph TD
