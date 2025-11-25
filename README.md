@@ -118,6 +118,10 @@ This document maps the complete dataflow of the School Inspection PWA applicatio
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    App Initialization                       │
+│  - Initialize IndexedDB via localforage                     │
+│  - Create dataCache (store: data_cache)                     │
+│  - Create outboxCache (store: outbox_cache)                 │
+│  - Patch outboxCache methods for event emission             │
 │  - React Router (HashRouter)                                │
 │  - InspectionContext (global state)                         │
 │  - AttributeContext (global state)                          │
