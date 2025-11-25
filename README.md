@@ -451,7 +451,7 @@ graph TD
 graph TD
     A[History Tab Selected] --> B[Result Component]
     B --> C[Read from InspectionContext]
-    C --> D[Get inspectionDict[OrgId]]
+    C --> D["Get inspectionDict by OrgId"]
     
     B --> E[HeatmapComparison Component]
     E --> F[useProcessedRatios Hook]
@@ -473,7 +473,7 @@ graph TD
     T --> U[Display line chart]
     U --> V[Optional regression line]
     
-    B --> W[AggregatedAnalyticsPanel<br/>For Clusters]
+    B --> W["AggregatedAnalyticsPanel<br/>For Clusters"]
     W --> X[useAggregatedSchoolAnalytics Hook]
     X --> Y[Multiple parallel queries]
     Y --> Z[Fetch learners, seats, classrooms, teachers, toilets]
