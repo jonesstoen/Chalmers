@@ -5,85 +5,11 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-24T15:44:20.301Z\n"
-"PO-Revision-Date: 2025-11-24T15:44:20.301Z\n"
-
-msgid "Selected event"
-msgstr "Selected event"
-
-msgid "Status"
-msgstr "Status"
-
-msgid "Learners"
-msgstr "Learners"
-
-msgid "Seats"
-msgstr "Seats"
-
-msgid "Back to overview"
-msgstr "Back to overview"
-
-msgid "Loading school information"
-msgstr "Loading school information"
-
-msgid "Please wait while school information is being loaded..."
-msgstr "Please wait while school information is being loaded..."
-
-msgid "New inspection"
-msgstr "New inspection"
-
-msgid "Edit inspections"
-msgstr "Edit inspections"
-
-msgid "History"
-msgstr "History"
-
-msgid "Select an event"
-msgstr "Select an event"
-
-msgid "Pick an event in the table above to edit."
-msgstr "Pick an event in the table above to edit."
-
-msgid "Pick an event in the table above to delete."
-msgstr "Pick an event in the table above to delete."
-
-msgid "Hide organisation units"
-msgstr "Hide organisation units"
-
-msgid "Show organisation units"
-msgstr "Show organisation units"
+"POT-Creation-Date: 2025-11-24T18:37:29.325Z\n"
+"PO-Revision-Date: 2025-11-24T18:37:29.325Z\n"
 
 msgid "Organisation units"
 msgstr "Organisation units"
-
-msgid "Pick a School or Cluster"
-msgstr "Pick a School or Cluster"
-
-msgid ""
-"Search for a school in the searchbar or Select a node in the tree to "
-"continue."
-msgstr ""
-"Search for a school in the searchbar or Select a node in the tree to "
-"continue."
-
-msgid "Loading school information..."
-msgstr "Loading school information..."
-
-msgid "Error loading school"
-msgstr "Error loading school"
-
-msgid "Failed to load school information"
-msgstr "Failed to load school information"
-
-msgid "No data available"
-msgstr "No data available"
-
-msgid ""
-"School information could not be loaded. Please try selecting the school "
-"again."
-msgstr ""
-"School information could not be loaded. Please try selecting the school "
-"again."
 
 msgid "No roots available"
 msgstr "No roots available"
@@ -174,3 +100,77 @@ msgstr "Inspection submitted successfully!"
 
 msgid "Error submitting inspection"
 msgstr "Error submitting inspection"
+
+msgid "Selected event"
+msgstr "Selected event"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Learners"
+msgstr "Learners"
+
+msgid "Seats"
+msgstr "Seats"
+
+msgid "Back to overview"
+msgstr "Back to overview"
+
+msgid "Loading school information"
+msgstr "Loading school information"
+
+msgid "Please wait while school information is being loaded..."
+msgstr "Please wait while school information is being loaded..."
+
+msgid "New inspection"
+msgstr "New inspection"
+
+msgid "Edit inspections"
+msgstr "Edit inspections"
+
+msgid "History"
+msgstr "History"
+
+msgid "Select an event"
+msgstr "Select an event"
+
+msgid "Pick an event in the table above to edit."
+msgstr "Pick an event in the table above to edit."
+
+msgid "Pick an event in the table above to delete."
+msgstr "Pick an event in the table above to delete."
+
+msgid "Hide organisation units"
+msgstr "Hide organisation units"
+
+msgid "Show organisation units"
+msgstr "Show organisation units"
+
+msgid "Pick a School or Cluster"
+msgstr "Pick a School or Cluster"
+
+msgid ""
+"Search for a school in the searchbar or Select a node in the tree to "
+"continue."
+msgstr ""
+"Search for a school in the searchbar or Select a node in the tree to "
+"continue."
+
+msgid "Loading school information..."
+msgstr "Loading school information..."
+
+msgid "Error loading school"
+msgstr "Error loading school"
+
+msgid "Failed to load school information"
+msgstr "Failed to load school information"
+
+msgid "No data available"
+msgstr "No data available"
+
+msgid ""
+"School information could not be loaded. Please try selecting the school "
+"again."
+msgstr ""
+"School information could not be loaded. Please try selecting the school "
+"again."
