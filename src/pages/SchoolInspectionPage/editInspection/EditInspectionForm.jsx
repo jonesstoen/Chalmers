@@ -23,6 +23,9 @@ import {
     SANITATION_IDS,
     TOTAL_TOILETS_ID,
 } from '../newInspection/configs/schoolInspectionConfig'
+
+const TOTAL_CLASSROOMS_ID = 'ya5SyA5hej4'
+const CLEAN_CLASSROOMS_ID = 'XIgpDhDC4Ol'
 import {
     computeTotalToilets,
     validateSchoolInspection,
@@ -47,27 +50,45 @@ const FIELD_LABEL_LOOKUP = SCHOOL_INSPECTION_FIELDS.reduce((acc, field) => {
     return acc
 }, {})
 
-function NumberField({ label, value = '', onChange, error, iconNames, hasChanged = false }) {
+function NumberField({ label, value = '', onChange, error, iconNames, hasChanged = false, max }) {
     const [isFocused, setIsFocused] = React.useState(false)
     // Treat blank/null/undefined as 0 for calculations, but preserve blank state
     const isBlank = value === '' || value === null || value === undefined
     const numericValue = isBlank ? 0 : Number(value) || 0
 
+    const handleChange = (newValue) => {
+        // If max is set and the new value exceeds it, cap it at max
+        if (max !== undefined && max !== null) {
+            const numValue = Number(newValue)
+            if (!Number.isNaN(numValue) && numValue > max) {
+                onChange(String(max))
+                return
+            }
+        }
+        onChange(newValue)
+    }
+
     const handleIncrement = () => {
         // If blank, go to 0 first, otherwise increment
         if (isBlank) {
-            onChange('0')
+            handleChange('0')
         } else {
-            onChange(String(numericValue + 1))
+            const nextValue = numericValue + 1
+            // If max is set and next value would exceed it, cap at max
+            if (max !== undefined && max !== null && nextValue > max) {
+                handleChange(String(max))
+            } else {
+                handleChange(String(nextValue))
+            }
         }
     }
 
     const handleDecrement = () => {
         // If blank or 0, stay at 0 (or go to blank if already 0)
         if (isBlank || numericValue === 0) {
-            onChange('')
+            handleChange('')
         } else {
-            onChange(String(numericValue - 1))
+            handleChange(String(numericValue - 1))
         }
     }
 
@@ -92,7 +113,7 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                 {error && (
                     <span className={`${editFormStyles.badge} ${editFormStyles.badgeError}`}>
                         <IconError16 />
-                        Required
+                        {error === 'Required' ? 'Required' : error}
                     </span>
                 )}
             </label>
@@ -100,8 +121,9 @@ function NumberField({ label, value = '', onChange, error, iconNames, hasChanged
                 <input
                     type="number"
                     min="0"
+                    max={max !== undefined && max !== null ? max : undefined}
                     value={value}
-                    onChange={e => onChange(e.target.value)}
+                    onChange={e => handleChange(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     className={`${editFormStyles.numberInput} ${hasChanged ? editFormStyles.numberInputChanged : ''} ${error ? editFormStyles.numberInputError : ''}`}
@@ -284,10 +306,20 @@ export default function EditInspectionForm({
             }
         }
         
-        setFormState(prev => ({
-            ...prev,
-            [id]: newValue,
-        }))
+        setFormState(prev => {
+            const updated = { ...prev, [id]: newValue }
+            
+            // If total classrooms is being changed, check if clean classrooms needs to be capped
+            if (id === TOTAL_CLASSROOMS_ID) {
+                const totalRooms = Number(newValue) || 0
+                const cleanRooms = Number(prev[CLEAN_CLASSROOMS_ID]) || 0
+                if (cleanRooms > totalRooms && totalRooms > 0) {
+                    updated[CLEAN_CLASSROOMS_ID] = String(totalRooms)
+                }
+            }
+            
+            return updated
+        })
 
         clearFieldError(id, newValue, options)
     }, [clearFieldError])
@@ -607,6 +639,13 @@ export default function EditInspectionForm({
 
         // Numeric field
         const numericValue = formState[id] ?? ''
+        // For clean and secure classrooms, set max to total classrooms
+        const maxValue = id === CLEAN_CLASSROOMS_ID
+            ? (formState[TOTAL_CLASSROOMS_ID] !== undefined && formState[TOTAL_CLASSROOMS_ID] !== null && formState[TOTAL_CLASSROOMS_ID] !== ''
+                ? Number(formState[TOTAL_CLASSROOMS_ID])
+                : undefined)
+            : undefined
+
         return (
             <NumberField
                 key={id}
@@ -616,6 +655,7 @@ export default function EditInspectionForm({
                 error={errors[id]}
                 iconNames={FIELD_ICONS[id]}
                 hasChanged={hasFieldChanged(id)}
+                max={maxValue}
             />
         )
     }

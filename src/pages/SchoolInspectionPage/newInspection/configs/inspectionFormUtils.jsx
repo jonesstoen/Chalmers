@@ -12,8 +12,8 @@ export const validateSchoolInspection = (formState) => {
     // Clean classrooms kan ikke overstige total classrooms
     const clean = Number(formState['XIgpDhDC4Ol']) || 0
     const totalRooms = Number(formState['ya5SyA5hej4']) || 0
-    if (clean > totalRooms) {
-        newErrors['XIgpDhDC4Ol'] = 'Cannot exceed total classrooms'
+    if (clean > totalRooms && totalRooms > 0) {
+        newErrors['XIgpDhDC4Ol'] = `Cannot exceed total classrooms (${totalRooms})`
     }
 
     // Barn 1–5
