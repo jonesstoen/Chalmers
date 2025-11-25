@@ -107,8 +107,17 @@ export const normalizeChange = (id, value) => {
     return newValue
 }
 
-export function dataElementIdToDescription(dataElementID){
-    const object = SCHOOL_INSPECTION_FIELDS.find(item => item.id === dataElementID)
-    const description = object?.label ?? 'Undefined'
-    return description
+export function dataElementIdToDescription(dataElementID) {
+    const object = SCHOOL_INSPECTION_FIELDS.find(
+        item => item?.child_query?.id === dataElementID || item.id === dataElementID
+    );
+
+    // Prefer the label of child_query if it matches the ID
+    if (!object) return 'Undefined';
+
+    if (object.child_query?.id === dataElementID && object.child_query?.label) {
+        return object.child_query.label;
+    }
+
+    return object.label ?? 'Undefined';
 }

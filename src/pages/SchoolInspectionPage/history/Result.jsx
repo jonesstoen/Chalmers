@@ -121,8 +121,8 @@ function Result({ OrgId }) {
               <GraphCard
                 key={field.id}
                 schoolId={OrgId}
-                dataElement={field.id}
-                localPoints={getLocalPoints(field.id)}
+                dataElement={field.child_query.id}
+                localPoints={getLocalPoints(field.child_query.id)}
               />
             ))}
           </div>
@@ -133,7 +133,8 @@ function Result({ OrgId }) {
 }
 
 /* ------------------ Graph Card ------------------ */
-function GraphCard({ schoolId, dataElement, localPoints }) {
+function GraphCard({ schoolId, dataElement, localPoints}) {
+
   const name = dataElementIdToDescription(dataElement)
 
   return (
