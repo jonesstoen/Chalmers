@@ -190,8 +190,8 @@ export default function LandingPage() {
                 <div className={styles.welcomeSection}>
                     <h1 className={styles.welcomeTitle}>Welcome</h1>
                     <p className={styles.welcomeText}>
-                        Get started by opening the inspector, resuming your last
-                        school, or searching for a school.
+                        Get started by opening the inspector or resuming your last
+                        school Inspection.
                     </p>
                 </div>
 
@@ -202,7 +202,7 @@ export default function LandingPage() {
                         className={styles.primaryButton}
                         aria-label="Open Inspector"
                     >
-                        Open inspector
+                        Open Inspector
                     </button>
 
                     {lastOu && (

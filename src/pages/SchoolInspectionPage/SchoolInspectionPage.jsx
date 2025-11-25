@@ -254,7 +254,6 @@ export default function SchoolInspectionPage() {
         setSelected(ids)
         setActiveTab('submit')
         setSelectedEvent(null)
-        setMobileSidebarOpen(false)
     }, [])
 
     const ou = data?.ou
@@ -281,43 +280,51 @@ export default function SchoolInspectionPage() {
             <div className={classes.container} style={{ padding: 0 }}>
                 {/* Sidebar / org tree */}
                 <aside className={classes.sidebar}>
-                <div className={classes.sidebarDesktop}>
-                    <OrgTreePanel
-                        ref={orgTreePanelRef}
-                        roots={ROOTS}
-                        initialRootId={ROOTS[0].id}
-                        onRootChange={handleRootChange}
-                        onSelect={handleSelect}
-                    />
-                </div>
+                    {/* Mobil: toggle-knapp */}
+                    <div className={pageClasses.sidebarMobileToggleWrapper}>
+                        <button
+                            type="button"
+                            className={classes.sidebarMobileToggle}
+                            onClick={() => setMobileSidebarOpen(open => !open)}
+                            aria-expanded={mobileSidebarOpen}
+                            aria-label={
+                                mobileSidebarOpen
+                                    ? i18n.t('Hide organisation units')
+                                    : i18n.t('Show organisation units')
+                            }
+                        >
+            <span style={{ fontWeight: 600 }}>
+                {i18n.t('Organisation units')}
+            </span>
+                            <span
+                                style={{
+                                    fontSize: 12,
+                                    transition: 'transform 0.2s',
+                                    transform: mobileSidebarOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                }}
+                            >
+                ▼
+            </span>
+                        </button>
+                    </div>
 
-                <div className={classes.sidebarMobile}>
-                    <button
-                        type="button"
-                        className={classes.sidebarMobileToggle}
-                        onClick={() => setMobileSidebarOpen(open => !open)}
-                        aria-expanded={mobileSidebarOpen}
-                        aria-label={mobileSidebarOpen ? i18n.t('Hide organisation units') : i18n.t('Show organisation units')}
+                    {/* Felles OrgTreePanel for både desktop og mobil */}
+                    <div
+                        className={
+                            mobileSidebarOpen
+                                ? pageClasses.sidebarTreeOpen
+                                : pageClasses.sidebarTreeClosed
+                        }
                     >
-                        <span style={{ fontWeight: 600 }}>{i18n.t('Organisation units')}</span>
-                        <span style={{ fontSize: 12, transition: 'transform 0.2s', transform: mobileSidebarOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                            ▼
-                        </span>
-                    </button>
-
-                    {mobileSidebarOpen && (
-                        <div className={classes.sidebarMobileBody}>
-                            <OrgTreePanel
-                                ref={orgTreePanelRef}
-                                roots={ROOTS}
-                                initialRootId={ROOTS[0].id}
-                                onRootChange={handleRootChange}
-                                onSelect={handleSelect}
-                            />
-                        </div>
-                    )}
-                </div>
-            </aside>
+                        <OrgTreePanel
+                            ref={orgTreePanelRef}
+                            roots={ROOTS}
+                            initialRootId={ROOTS[0].id}
+                            onRootChange={handleRootChange}
+                            onSelect={handleSelect}
+                        />
+                    </div>
+                </aside>
 
             {/* Main content */}
             <main className={classes.content}>
