@@ -5,6 +5,7 @@ import { useCacheableQuery } from '../../shared/cache/cacheableQuery'
 import { useOutboxCount } from '../../shared/cache/useOutboxCount'
 import MetricTile from './MetricTile'
 import styles from './LandingPage.module.css'
+import ChalmersLogo from '../../shared/ui/icons/ChalmersLogoChar.svg'
 import { useSchoolsByRegions } from '../../shared/api/useSchoolsAPI'
 import {
     IconCheckmark16,
@@ -184,11 +185,17 @@ export default function LandingPage() {
 
     return (
         <div className={styles.pageContainer}>
+
             {/* Main centered container */}
             <div className={styles.mainContainer}>
+                <img
+                    src={ChalmersLogo}
+                    alt="Chalmers logo"
+                    className={styles.logo}
+                />
                 {/* Welcome text */}
                 <div className={styles.welcomeSection}>
-                    <h1 className={styles.welcomeTitle}>Welcome</h1>
+                    <h1 className={styles.welcomeTitle}>Welcome to the School Inspector</h1>
                     <p className={styles.welcomeText}>
                         Get started by opening the inspector or resuming your last
                         school Inspection.

@@ -1,4 +1,3 @@
-// pages/LandingPage/MetricTile.jsx
 import styles from './MetricTile.module.css'
 
 export default function MetricTile({ title, value, subtitle }) {
