@@ -68,12 +68,12 @@ graph TD
 
 ```
 src/
-├── App/                       # Entry point, routes, global providers
+├── App/                       # Entry point, routes
 ├── context/                   # Inspection + attribute React contexts
 ├── locales/                   # Translation bundles/bootstrap
 ├── pages/
-│   ├── LandingPage/          # Landing/search UI, tiles, styles
-│   └── SchoolInspectionPage/ # Main workflow
+│   ├── LandingPage/          # Home
+│   └── SchoolInspectionPage/ # Main view
 │       ├── components/       # Org tree, info cards, shared panels
 │       │   ├── OrgTreePanel.{jsx,css}
 │       │   └── SchoolInfoCard.{jsx,css}
@@ -86,7 +86,7 @@ src/
 │       ├── history/          # Analytics APIs, graphs, heatmaps, hooks
 │       │   ├── api/          # Analytics fetch hooks/adapters
 │       │   ├── components/   # Timeline, tables, analytics panels
-│       │   ├── graphs/       # Cluster/Sankey graph renderers
+│       │   ├── graphs/       # Graph renderers
 │       │   ├── heatmap/      # Heatmap + legend components/utilities
 │       │   └── hooks/        # Aggregated analytics hooks
 │       └── newInspection/    # New inspection form, configs, POST hook
@@ -104,12 +104,11 @@ src/
     │   ├── cacheableQuery.jsx
     │   ├── useOfflineDetector.jsx
     │   └── useOutboxCount.jsx
-    ├── dev-tools/            # PopulateDataButton + seed scripts
+    ├── dev-tools/            # Only used for populating mock data to db. Disabled.
     │   └── populateSchoolInspections.js
-    └── ui/                   # Icon system and reusable hooks (useEvent, useOrgIds)
-        ├── icons/            # SVG library + Icon component
-        ├── useEvent.jsx
-        └── useOrgIds.jsx
+    └── ui/                   # Shared UI resources
+        └── icons/            # SVG icons library
+
 ```
 
 **Example flow – editing an inspection**
