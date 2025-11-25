@@ -55,43 +55,15 @@ graph TD
 
     pages --> LandingPage[LandingPage/]
     pages --> SchoolInspectionPage[SchoolInspectionPage/]
-    SchoolInspectionPage --> components[components/]
-    SchoolInspectionPage --> editInspection[editInspection/]
-    SchoolInspectionPage --> history[history/]
-    SchoolInspectionPage --> newInspection[newInspection/]
+    SchoolInspectionPage --> components
+    SchoolInspectionPage --> editInspection
+    SchoolInspectionPage --> history
+    SchoolInspectionPage --> newInspection
 
-    shared --> api[api/]
-    shared --> cache[cache/]
-    shared --> devtools[dev-tools/]
-    shared --> ui[ui/]
-
-    components --> OrgTreePanel[OrgTreePanel]
-    components --> SchoolInfoCard[SchoolInfoCard]
-
-    editInspection --> editHooks[hooks/]
-    editInspection --> EditForm[EditInspectionForm]
-
-    history --> histAPI[api/]
-    history --> histComponents[components/]
-    history --> graphs
-    history --> heatmap
-    history --> histHooks[hooks/]
-
-    newInspection --> newComponents[components/]
-    newInspection --> newConfigs[configs/]
-    newInspection --> newHook[hooks/]
-
-    api --> datasetsAPI[datasetsAPI.jsx]
-    api --> schoolsAPI[useSchoolsAPI.jsx]
-    api --> trackerAPI[useTrackerEventMutation.jsx]
-
-    cache --> cacheableQuery[cacheableQuery.jsx]
-    cache --> offlineDetector[useOfflineDetector.jsx]
-    cache --> outbox[useOutboxCount.jsx]
-
-    devtools --> populate[populateSchoolInspections.js]
-
-    ui --> icons[icons/]
+    shared --> api
+    shared --> cache
+    shared --> devtools
+    shared --> ui
 ```
 
 ```
