@@ -24,3 +24,17 @@
     color: #94a3b8;
 }
 
+/* Optional small-screen metric scaling */
+@media (max-width: 480px) {
+    .tile {
+        padding: 10px 12px;
+    }
+
+    .value {
+        font-size: 20px;
+    }
+
+    .subtitle {
+        font-size: 10px;
+    }
+}
