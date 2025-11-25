@@ -1,6 +1,6 @@
 // pages/SchoolInspectionPage/newInspection/SchoolInspectionForm.jsx
 
-import React, { useContext, useEffect, useState, useCallback } from 'react'
+import React, { useContext, useEffect, useState, useCallback, useRef } from 'react'
 import i18n from '@dhis2/d2-i18n'
 import {
     Button,
@@ -23,6 +23,9 @@ import {
     SANITATION_IDS,
     TOTAL_TOILETS_ID,
 } from './configs/schoolInspectionConfig'
+
+const TOTAL_CLASSROOMS_ID = 'ya5SyA5hej4'
+const CLEAN_CLASSROOMS_ID = 'XIgpDhDC4Ol'
 import {
     computeTotalToilets,
     validateSchoolInspection,
@@ -79,27 +82,83 @@ const clearDraft = orgUnitId => {
 }
 
 
-function NumberField({ label, value = '', onChange, error, iconNames }) {
+function NumberField({ label, value = '', onChange, error, iconNames, max, maxMessage }) {
     const [isFocused, setIsFocused] = useState(false)
+    const [showMaxHint, setShowMaxHint] = useState(false)
+    const hintTimeoutRef = useRef(null)
     const isBlank = value === '' || value === null || value === undefined
     const numericValue =
         isBlank ? 0 : Number(value) || 0
 
+    const clearHintTimeout = useCallback(() => {
+        if (hintTimeoutRef.current) {
+            clearTimeout(hintTimeoutRef.current)
+            hintTimeoutRef.current = null
+        }
+    }, [])
+
+    const triggerMaxHint = useCallback(() => {
+        if (max === undefined || max === null) return
+        setShowMaxHint(true)
+        clearHintTimeout()
+        hintTimeoutRef.current = setTimeout(() => {
+            setShowMaxHint(false)
+            hintTimeoutRef.current = null
+        }, 2200)
+    }, [max, clearHintTimeout])
+
+    useEffect(() => {
+        return () => {
+            clearHintTimeout()
+        }
+    }, [clearHintTimeout])
+
+    const applyChange = useCallback(
+        (newValue, { forceHint = false } = {}) => {
+            if (
+                max !== undefined &&
+                max !== null &&
+                newValue !== '' &&
+                newValue !== null
+            ) {
+                const numValue = Number(newValue)
+                if (!Number.isNaN(numValue) && numValue > max) {
+                    onChange(String(max))
+                    triggerMaxHint()
+                    return
+                }
+            }
+
+            onChange(newValue)
+
+            if (forceHint) {
+                triggerMaxHint()
+            }
+        },
+        [max, onChange, triggerMaxHint]
+    )
+
     const handleIncrement = () => {
         // If blank, go to 0 first, otherwise increment
         if (isBlank) {
-            onChange('0')
+            applyChange('0')
         } else {
-            onChange(String(numericValue + 1))
+            const nextValue = numericValue + 1
+            // If max is set and next value would exceed it, cap at max
+            if (max !== undefined && max !== null && nextValue > max) {
+                applyChange(String(max), { forceHint: true })
+            } else {
+                applyChange(String(nextValue))
+            }
         }
     }
 
     const handleDecrement = () => {
         // If blank or 0, stay at 0 (or go to blank if already 0)
         if (isBlank || numericValue === 0) {
-            onChange('')
+            applyChange('')
         } else {
-            onChange(String(numericValue - 1))
+            applyChange(String(numericValue - 1))
         }
     }
 
@@ -129,7 +188,7 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                         gap: 4,
                     }}>
                         <IconError16 />
-                        Required
+                        {error}
                     </span>
                 )}
             </label>
@@ -137,8 +196,9 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                 <input
                     type="number"
                     min="0"
+                    max={max !== undefined && max !== null ? max : undefined}
                     value={value}
-                    onChange={e => onChange(e.target.value)}
+                    onChange={e => applyChange(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     className={`${formStyles.numberInput} ${error ? formStyles.numberInputError : ''}`}
@@ -158,6 +218,11 @@ function NumberField({ label, value = '', onChange, error, iconNames }) {
                     aria-label={`Increase ${label}`}
                 />
             </div>
+            {max !== undefined && max !== null && showMaxHint && (
+                <div className={formStyles.maxHintBubble}>
+                    {maxMessage || `Cannot exceed ${max}`}
+                </div>
+            )}
         </div>
     )
 }
@@ -241,14 +306,48 @@ export default function SchoolInspectionForm({
 
     const handleChange = useCallback(
         (id, value, options = {}) => {
+            let cappedCleanValue
             setFormState(prev => {
                 const updated = { ...prev, [id]: value }
+
+                // If total classrooms is being changed, check if clean classrooms needs to be capped
+                if (id === TOTAL_CLASSROOMS_ID) {
+                    const isBlank =
+                        value === undefined || value === null || value === ''
+                    if (!isBlank) {
+                        const totalRooms = Number(value)
+                        if (!Number.isNaN(totalRooms)) {
+                            const cleanRaw = prev[CLEAN_CLASSROOMS_ID]
+                            const hasCleanValue =
+                                cleanRaw !== undefined &&
+                                cleanRaw !== null &&
+                                cleanRaw !== ''
+                            if (hasCleanValue) {
+                                const cleanRooms = Number(cleanRaw)
+                                if (
+                                    !Number.isNaN(cleanRooms) &&
+                                    cleanRooms > totalRooms
+                                ) {
+                                    const nextValue = String(totalRooms)
+                                    updated[CLEAN_CLASSROOMS_ID] = nextValue
+                                    cappedCleanValue = nextValue
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if (orgUnitId) {
                     saveDraft(orgUnitId, updated)
                 }
                 return updated
             })
             clearFieldError(id, value, options)
+            if (cappedCleanValue !== undefined) {
+                clearFieldError(CLEAN_CLASSROOMS_ID, cappedCleanValue, {
+                    forceClearError: true,
+                })
+            }
         },
         [clearFieldError, orgUnitId]
     )
@@ -471,6 +570,23 @@ export default function SchoolInspectionForm({
             )
         }
 
+        let maxValue
+        let maxHintMessage
+        if (id === CLEAN_CLASSROOMS_ID) {
+            const totalRaw = formState[TOTAL_CLASSROOMS_ID]
+            const hasTotalValue =
+                totalRaw !== undefined &&
+                totalRaw !== null &&
+                totalRaw !== ''
+            if (hasTotalValue) {
+                const parsedTotal = Number(totalRaw)
+                if (!Number.isNaN(parsedTotal)) {
+                    maxValue = parsedTotal
+                    maxHintMessage = `Cannot exceed total classrooms (${parsedTotal})`
+                }
+            }
+        }
+
         return (
             <NumberField
                 key={id}
@@ -479,6 +595,8 @@ export default function SchoolInspectionForm({
                 onChange={val => handleChange(id, val)}
                 error={errors[id]}
                 iconNames={FIELD_ICONS[id]}
+                max={maxValue}
+                maxMessage={maxHintMessage}
             />
         )
     }
