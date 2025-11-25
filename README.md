@@ -68,46 +68,46 @@ graph TD
 
 ```
 src/
-├── App/                       # Entry point, routes
-├── context/                   # Inspection + attribute React contexts
-├── locales/                   # Translation bundles/bootstrap
+├── App/                       # Routes + top-level setup
+├── context/                   # Inspection and attribute contexts
+├── locales/                   # Translations
 ├── pages/
-│   ├── LandingPage/          # Home
-│   └── SchoolInspectionPage/ # Main view
-│       ├── components/       # Org tree, info cards, shared panels
+│   ├── LandingPage/          # Landing UI
+│   └── SchoolInspectionPage/ # Inspection UI
+│       ├── components/       # Org tree + info cards
 │       │   ├── OrgTreePanel.{jsx,css}
 │       │   └── SchoolInfoCard.{jsx,css}
-│       ├── editInspection/   # Edit form, delete panel, mutation hooks
+│       ├── editInspection/   # Edit + delete flows
 │       │   ├── hooks/
 │       │   │   ├── useUpdateSchoolInspection.jsx
 │       │   │   └── useDeleteSchoolInspection.jsx
 │       │   ├── EditInspectionForm.{jsx,css}
 │       │   └── DeleteInspectionPanel.{jsx,css}
-│       ├── history/          # Analytics APIs, graphs, heatmaps, hooks
-│       │   ├── api/          # Analytics fetch hooks/adapters
-│       │   ├── components/   # Timeline, tables, analytics panels
-│       │   ├── graphs/       # Graph renderers
-│       │   ├── heatmap/      # Heatmap + legend components/utilities
-│       │   └── hooks/        # Aggregated analytics hooks
-│       └── newInspection/    # New inspection form, configs, POST hook
-│           ├── components/   # Field widgets (boolean, rating, etc.)
-│           ├── configs/      # Form metadata + icon mapping
+│       ├── history/          # Analytics and trends
+│       │   ├── api/          # Data fetchers
+│       │   ├── components/   # Timeline + tables
+│       │   ├── graphs/       # Charts
+│       │   ├── heatmap/      # Heatmap + legend
+│       │   └── hooks/        # Aggregated data hooks
+│       └── newInspection/    # New inspection flow
+│           ├── components/   # Form fields
+│           ├── configs/      # Form metadata and icons
 │           ├── hooks/        # usePostSchoolInspectionEvent
 │           └── SchoolInspectionForm.{jsx,css}
 └── shared/
-    ├── api/                  # API helpers, endpoint docs, tracker hooks
+    ├── api/                  # API helpers + docs
     │   ├── datasetsAPI.jsx
     │   ├── useSchoolsAPI.jsx
     │   ├── useTrackerEventMutation.jsx
     │   └── endpoint_diagram.md
-    ├── cache/                # Offline detector, cacheable queries, outbox
+    ├── cache/                # Offline + cache helpers + outbox
     │   ├── cacheableQuery.jsx
     │   ├── useOfflineDetector.jsx
     │   └── useOutboxCount.jsx
-    ├── dev-tools/            # Only used for populating mock data to db. Disabled.
+    ├── dev-tools/            # Mock data scripts - Disabled.
     │   └── populateSchoolInspections.js
-    └── ui/                   # Shared UI resources
-        └── icons/            # SVG icons library
+    └── ui/                   # Shared UI bits
+        └── icons/            # SVG set
 
 ```
 
