@@ -40,30 +40,58 @@ See the section about [deploying](https://platform.dhis2.nu/#/scripts/deploy) fo
 
 ## Code Structure Overview
 
-Inspector Chalmers is a DHIS2 Application Platform project (React + HashRouter). `src/App/App.jsx` wires up navigation and wraps every page with `InspectionContext` and `AttributeContext`, enabling shared edit state. Two user-facing journeys exist today: `LandingPage` for search/entry and `SchoolInspectionPage` for history, editing, and new submissions. Shared infrastructure (API hooks, caching, UI primitives) lives under `src/shared`.
+Chalmers is a DHIS2 React Application Platform project. `src/App/App.jsx` handles routing and provides the inspection + attribute contexts used across every page. The app has two main areas: `LandingPage` for search/entry and `SchoolInspectionPage` for viewing history, editing events, and capturing new inspections. Below are two diagrams explaining how the code is structured and distributed in the project.
 
 ```mermaid
 graph TD
     src --> App[App/]
-    src --> context
-    src --> locales
-    src --> pages
-    src --> shared
+    src --> context[context/]
+    src --> locales[locales/]
+    src --> pages[pages/]
+    src --> shared[shared/]
 
-    App -->|Routes + Providers| LandingPage[LandingPage/]
-    App -->|Routes + Providers| SchoolInspectionPage[SchoolInspectionPage/]
+    App --> LandingPage
+    App --> SchoolInspectionPage
 
-    pages --> LandingPage
-    pages --> SchoolInspectionPage
-    SchoolInspectionPage --> components
-    SchoolInspectionPage --> editInspection
-    SchoolInspectionPage --> history
-    SchoolInspectionPage --> newInspection
+    pages --> LandingPage[LandingPage/]
+    pages --> SchoolInspectionPage[SchoolInspectionPage/]
+    SchoolInspectionPage --> components[components/]
+    SchoolInspectionPage --> editInspection[editInspection/]
+    SchoolInspectionPage --> history[history/]
+    SchoolInspectionPage --> newInspection[newInspection/]
 
-    shared --> api
-    shared --> cache
-    shared --> devtools
-    shared --> ui
+    shared --> api[api/]
+    shared --> cache[cache/]
+    shared --> devtools[dev-tools/]
+    shared --> ui[ui/]
+
+    components --> OrgTreePanel[OrgTreePanel]
+    components --> SchoolInfoCard[SchoolInfoCard]
+
+    editInspection --> editHooks[hooks/]
+    editInspection --> EditForm[EditInspectionForm]
+
+    history --> histAPI[api/]
+    history --> histComponents[components/]
+    history --> graphs
+    history --> heatmap
+    history --> histHooks[hooks/]
+
+    newInspection --> newComponents[components/]
+    newInspection --> newConfigs[configs/]
+    newInspection --> newHook[hooks/]
+
+    api --> datasetsAPI[datasetsAPI.jsx]
+    api --> schoolsAPI[useSchoolsAPI.jsx]
+    api --> trackerAPI[useTrackerEventMutation.jsx]
+
+    cache --> cacheableQuery[cacheableQuery.jsx]
+    cache --> offlineDetector[useOfflineDetector.jsx]
+    cache --> outbox[useOutboxCount.jsx]
+
+    devtools --> populate[populateSchoolInspections.js]
+
+    ui --> icons[icons/]
 ```
 
 ```
