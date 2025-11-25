@@ -4,6 +4,7 @@ import { useLocalRatios } from "./useLocalRatios"
 import InspectionContext from "../../../../context/InspectionContext"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"
 import styles from './HeatmapComparison.module.css'
+import { Tooltip } from "@dhis2/ui"
 
 const RATIO_KEYS = [
   { key: "seatsToLearner", label: "Learners / Seat", threshold: v => v <= 1 },
@@ -86,7 +87,7 @@ export default function HeatmapComparison({ schoolId }) {
     const hasLocalSubmission = localDataArray?.length > 0
 
     const prev = comparison_array[comparison_array.length - 2]
-    const curr = comparison_array[comparison_array.length -1]
+    const curr = comparison_array[comparison_array.length - 1]
 
 
     if (loading) return <p>Loading ratios…</p>
@@ -102,35 +103,36 @@ export default function HeatmapComparison({ schoolId }) {
 
             <div className={styles.ratiosContainer}>
                 {RATIO_KEYS.map(({ key, label, _ }) => {
-                    const prevValue = prev?.ratios[key]
-                    const currValue = curr?.ratios[key]
-                    console.debug(`${label} Current ${currValue}: previous ${prevValue}` )
+                    const prevRatio = prev?.ratios[key]
+                    const currRatio = curr?.ratios[key]
+
+
                     // Calculate change
                     let percentChange = null
                     let absoluteChange = null
-                    if (!isNaN(prevValue) && !isNaN(currValue) && prevValue != null && currValue != null) {
-                        percentChange = ((currValue - prevValue) / prevValue) * 100
-                        absoluteChange = currValue - prevValue
+                    if (!isNaN(prevRatio) && !isNaN(currRatio) && prevRatio != null && currRatio != null) {
+                        percentChange = ((currRatio - prevRatio) / prevRatio) * 100
+                        absoluteChange = currRatio - prevRatio
                     }
 
                     const thresholdValue = mapThreshold[key]
                     const goodLower = goodWhenLower[key]
 
-                    const prevColor = smoothColor(prevValue, thresholdValue, goodLower)
-                    const currColor = smoothColor(currValue, thresholdValue, goodLower)
+                    const prevColor = smoothColor(prevRatio, thresholdValue, goodLower)
+                    const currColor = smoothColor(currRatio, thresholdValue, goodLower)
 
                     return (
                         <div key={key} className={styles.ratioRow}>
                             <div className={styles.ratioLabel}>{label}</div>
                             <div className={styles.ratioValues}>
-                                {/* Most Recent remote / Just Submitted */}
+                                {/*   Previous */}
                                 <div 
                                     className={styles.valueSection}
                                     style={{ background: prevColor }}
                                 >
                                     <div className={styles.sectionLabel}>Previous</div>
                                     <div className={styles.sectionValue}>
-                                        {isNaN(prevValue) || prevValue == null ? "N/A" : prevValue.toFixed(1)}
+                                        {isNaN(prevRatio) || prevRatio == null ? "N/A" : prevRatio.toFixed(1)}
                                     </div>
                                 </div>
 
@@ -155,7 +157,7 @@ export default function HeatmapComparison({ schoolId }) {
                                     </div>
                                 </div>
 
-                                {/* Previous */}
+                                {/*Most Recent remote / Just Submitted */}
                                 <div 
                                     className={styles.valueSection}
                                     style={{ background: currColor }}
@@ -164,7 +166,7 @@ export default function HeatmapComparison({ schoolId }) {
                                         {hasLocalSubmission ? "Just Submitted" : "Most Recent"}
                                     </div>
                                     <div className={styles.sectionValue}>
-                                        {isNaN(currValue) || currValue == null ? "N/A" : currValue.toFixed(1)}
+                                        {isNaN(currRatio) || currRatio == null ? "N/A" : currRatio.toFixed(1)}
                                     </div>
                                 </div>
                             </div>
