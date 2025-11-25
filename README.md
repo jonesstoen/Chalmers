@@ -66,17 +66,24 @@ graph TD
     shared --> ui
 ```
 
-| Path | Description |
-| --- | --- |
-| `src/App/` | Application entrypoint; defines routes and context providers. |
-| `src/context/` | Inspection and attribute contexts consumed throughout the app. |
-| `src/locales/` | Translation bundles and locale bootstrap. |
-| `src/pages/LandingPage/` | Landing/search UI (`SchoolSearchBar`, `MetricTile`) plus styles. |
-| `src/pages/SchoolInspectionPage/` | Main inspection workflow. Subfolders cover shared components, edit flow, history analytics/visualizations, and the new-inspection form. |
-| `src/shared/api/` | API helpers/documentation such as `datasetsAPI`, `useSchoolsAPI`, and endpoint diagrams. |
-| `src/shared/cache/` | Offline detection, cacheable queries, and outbox utilities. |
-| `src/shared/dev-tools/` | Dev-only helpers including `PopulateDataButton` and data seeding scripts. |
-| `src/shared/ui/` | Icon system plus reusable hooks (`useEvent`, `useOrgIds`). |
+```
+src/
+├── App/                       # Entry point, routes, global providers
+├── context/                   # Inspection + attribute React contexts
+├── locales/                   # Translation bundles/bootstrap
+├── pages/
+│   ├── LandingPage/          # Landing/search UI, tiles, styles
+│   └── SchoolInspectionPage/ # Main workflow
+│       ├── components/       # Org tree, info cards, shared panels
+│       ├── editInspection/   # Edit form, delete panel, mutation hooks
+│       ├── history/          # Analytics APIs, graphs, heatmaps, hooks
+│       └── newInspection/    # New inspection form, configs, POST hook
+└── shared/
+    ├── api/                  # API helpers, endpoint docs, tracker hooks
+    ├── cache/                # Offline detector, cacheable queries, outbox
+    ├── dev-tools/            # PopulateDataButton + seed scripts
+    └── ui/                   # Icon system and reusable hooks (useEvent, useOrgIds)
+```
 
 **Example flow – editing an inspection**
 
