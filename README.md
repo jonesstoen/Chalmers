@@ -89,12 +89,6 @@ src/
 3. Update/delete hooks (`hooks/useUpdateSchoolInspection.jsx`, `hooks/useDeleteSchoolInspection.jsx`) call shared API primitives.
 4. History visualizations under `history/components` refetch analytics through shared hooks to reflect changes.
 
-## Data flow
-# School Inspection App - Dataflow Diagram
-
-## Overview
-This document maps the complete dataflow of the School Inspection PWA application, from app initialization through all major user flows.
-
 ---
 
 ## High-Level Architecture
