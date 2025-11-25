@@ -38,6 +38,55 @@ You must run `yarn build` before running `yarn deploy`.<br />
 
 See the section about [deploying](https://platform.dhis2.nu/#/scripts/deploy) for more information.
 
+## Code Structure Overview
+
+Inspector Chalmers is a DHIS2 Application Platform project (React + HashRouter). `src/App/App.jsx` wires up navigation and wraps every page with `InspectionContext` and `AttributeContext`, enabling shared edit state. Two user-facing journeys exist today: `LandingPage` for search/entry and `SchoolInspectionPage` for history, editing, and new submissions. Shared infrastructure (API hooks, caching, UI primitives) lives under `src/shared`.
+
+```mermaid
+graph TD
+    src --> App[App/]
+    src --> context
+    src --> locales
+    src --> pages
+    src --> shared
+
+    App -->|Routes + Providers| LandingPage[LandingPage/]
+    App -->|Routes + Providers| SchoolInspectionPage[SchoolInspectionPage/]
+
+    pages --> LandingPage
+    pages --> SchoolInspectionPage
+    SchoolInspectionPage --> components
+    SchoolInspectionPage --> editInspection
+    SchoolInspectionPage --> history
+    SchoolInspectionPage --> newInspection
+
+    shared --> api
+    shared --> cache
+    shared --> devtools
+    shared --> ui
+```
+
+| Path | Description |
+| --- | --- |
+| `src/App/` | Application entrypoint; defines routes and context providers. |
+| `src/context/` | Inspection and attribute contexts consumed throughout the app. |
+| `src/locales/` | Translation bundles and locale bootstrap. |
+| `src/pages/LandingPage/` | Landing/search UI (`SchoolSearchBar`, `MetricTile`) plus styles. |
+| `src/pages/SchoolInspectionPage/` | Main inspection workflow. Subfolders cover shared components, edit flow, history analytics/visualizations, and the new-inspection form. |
+| `src/shared/api/` | API helpers/documentation such as `datasetsAPI`, `useSchoolsAPI`, and endpoint diagrams. |
+| `src/shared/cache/` | Offline detection, cacheable queries, and outbox utilities. |
+| `src/shared/dev-tools/` | Dev-only helpers including `PopulateDataButton` and data seeding scripts. |
+| `src/shared/ui/` | Icon system plus reusable hooks (`useEvent`, `useOrgIds`). |
+
+**Example flow – editing an inspection**
+
+1. `App/App.jsx` renders `SchoolInspectionPage`.
+2. `editInspection/EditInspectionForm.jsx` consumes `InspectionContext`.
+3. Update/delete hooks (`hooks/useUpdateSchoolInspection.jsx`, `hooks/useDeleteSchoolInspection.jsx`) call shared API primitives.
+4. History visualizations under `history/components` refetch analytics through shared hooks to reflect changes.
+
+For additional architectural detail, see `README.structure.md`.
+
 ## Learn More
 
 You can learn more about the platform in the [DHIS2 Application Platform Documentation](https://platform.dhis2.nu/).
