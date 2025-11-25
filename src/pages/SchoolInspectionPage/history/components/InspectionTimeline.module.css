@@ -64,7 +64,6 @@
     text-align: center;
 }
 
-/* Brukes evt andre steder fortsatt */
 .badge {
     position: relative;
     display: inline-block;
@@ -126,8 +125,8 @@
 .firstColTh {
     position: sticky;
     left: 0;
-    background: #f1f5f9; /* Match your .th styling */
-    z-index: 5; /* Higher than cells */
+    background: #f1f5f9;
+    z-index: 5;
     box-shadow: 2px 0 4px rgba(0,0,0,0.05);
 }
 
@@ -166,7 +165,7 @@ tbody tr:hover:not(.rowSelected) {
     font-style: italic;
 }
 
-/* Status-chip for eventstatus */
+/* Status chip for eventstatus */
 .statusChip {
     display: inline-block;
     padding: 2px 8px;

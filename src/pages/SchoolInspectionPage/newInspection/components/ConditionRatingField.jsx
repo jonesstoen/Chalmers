@@ -1,23 +1,15 @@
-// pages/SchoolInspectionPage/newInspection/components/ConditionRatingField.jsx
+
 import React from 'react'
 import { IconError16, IconWarning16 } from '@dhis2/ui'
 import styles from './ConditionRatingField.module.css'
 
-export default function ConditionRatingField({
-                                                 label,
-                                                 value,
-                                                 onChange,
-                                                 disabled = false,
-                                                 error,
-                                                 hasChanged = false,
-                                             }) {
+export default function ConditionRatingField({label, value, onChange, disabled = false, error, hasChanged = false,}) {
     const options = [1, 2, 3, 4, 5]
     const numericValue =
         value !== undefined && value !== null && value !== ''
             ? Number(value)
             : null
 
-    // Rating scale labels for better understanding
     const ratingLabels = {
         1: 'Poor',
         2: 'Fair',
@@ -71,8 +63,7 @@ export default function ConditionRatingField({
                             )
                         })}
                     </div>
-                    
-                    {/* Excellent label */}
+
                     <span className={`${styles.ratingLabel} ${styles.ratingLabelRight}`}>
                         Excellent
                     </span>

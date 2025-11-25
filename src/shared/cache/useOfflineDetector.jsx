@@ -20,6 +20,6 @@ export function useOfflineDetector() {
         return () => clearTimeout(timeout);
     });
 
-    // Must be reachable, connected, and browser online
+    // must be reachable, connected, and browser online
     return !(browserOnline && isConnected && serverReachable);
 }

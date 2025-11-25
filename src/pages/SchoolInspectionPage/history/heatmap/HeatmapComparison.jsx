@@ -31,7 +31,7 @@ const goodWhenLower = {
 export default function HeatmapComparison({ schoolId }) {
     const [inspectionDict] = useContext(InspectionContext)
 
-    // REMOTE inspection history
+    // inspection history
     const { processedData: remoteDataArray, loading, error } =
         useProcessedRatios(schoolId)
 
@@ -71,7 +71,7 @@ export default function HeatmapComparison({ schoolId }) {
                     const currRatio = curr?.ratios[key]
 
 
-                    // Calculate change
+                    // calculate change
                     let percentChange = null
                     let absoluteChange = null
                     if (!isNaN(prevRatio) && !isNaN(currRatio) && prevRatio != null && currRatio != null) {

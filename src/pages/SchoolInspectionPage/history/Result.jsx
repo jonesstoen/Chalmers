@@ -15,7 +15,7 @@ import styles from './Result.module.css'
 function Result({ OrgId }) {
   const [inspectionDict] = useContext(InspectionContext)
 
-  // Last local submission only (one inspection)
+  // Last local submission only
   const results = inspectionDict?.[OrgId] ?? []
 
   const submissionDate = new Date().toLocaleDateString("en-GB")
@@ -62,7 +62,7 @@ function Result({ OrgId }) {
         </div>
       </section>
 
-      {/* Detailed Metrics - Organized by Category */}
+      {/* Detailed Metrics organized by Category */}
       <section className={styles.metricsSection}>
         <h2 className={styles.metricsTitle}>Detailed Metrics Over Time</h2>
         
@@ -132,7 +132,7 @@ function Result({ OrgId }) {
   )
 }
 
-/* ------------------ Graph Card ------------------ */
+
 function GraphCard({ schoolId, dataElement, localPoints}) {
 
   const name = dataElementIdToDescription(dataElement)

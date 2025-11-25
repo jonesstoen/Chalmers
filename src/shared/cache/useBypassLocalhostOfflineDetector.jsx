@@ -19,7 +19,7 @@ export function useBypassLocalhostOfflineDetector() {
 
         check();
 
-        // Recheck every 2 sec
+        // recheck every 2 sec
         const id = setInterval(check, 2000);
 
         return () => {

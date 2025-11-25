@@ -105,7 +105,7 @@ function InspectionPanel({
     const orgUnitId = ou?.id
     const orgUnitName = ou?.displayName || ou?.name
 
-    // Show loading if org unit data not ready
+    // show loading if org unit data not ready
     if (!ou || !orgUnitId) {
         return (
             <NoticeBox title={i18n.t('Loading school information')}>
@@ -234,7 +234,7 @@ export default function SchoolInspectionPage() {
         }
     }, [initialOuFromQuery, selected.length])
 
-    // Hver gang en skole er valgt, lagre lastOu automatisk
+    // everytime a school  is selected, save it to localStorage
     useEffect(() => {
         if (!selectedId || !data?.ou) return
         const ou = data.ou
@@ -257,7 +257,7 @@ export default function SchoolInspectionPage() {
     }, [])
 
     const ou = data?.ou
-    // isAggregate is true if the org unit has children (it's a cluster, not a school)
+    // isAggregate is true if the org unit has children
     const isAggregate = !!(ou?.children && Array.isArray(ou.children) && ou.children.length > 0)
 
     const handleBackToLanding = useCallback(() => {
@@ -272,7 +272,7 @@ export default function SchoolInspectionPage() {
 
     return (
         <div className={pageClasses.pageWrapper}>
-            {/* School Search Bar - standalone element */}
+            {/* School Search Bar */}
             <div className={pageClasses.searchBarContainer}>
                 <SchoolSearchBar onSelect={handleSearchSelect} />
             </div>
@@ -280,7 +280,6 @@ export default function SchoolInspectionPage() {
             <div className={classes.container} style={{ padding: 0 }}>
                 {/* Sidebar / org tree */}
                 <aside className={classes.sidebar}>
-                    {/* Mobil: toggle-knapp */}
                     <div className={pageClasses.sidebarMobileToggleWrapper}>
                         <button
                             type="button"
@@ -308,7 +307,6 @@ export default function SchoolInspectionPage() {
                         </button>
                     </div>
 
-                    {/* Felles OrgTreePanel for både desktop og mobil */}
                     <div
                         className={
                             mobileSidebarOpen

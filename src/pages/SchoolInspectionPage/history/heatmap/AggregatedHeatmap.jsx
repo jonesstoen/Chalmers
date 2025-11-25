@@ -1,10 +1,8 @@
-// pages/SchoolInspectionPage/history/heatmap/AggregatedHeatmap.jsx
 import React from "react"
 import RatioCard from "./RatioCard"
 import { FullHeatmapLegend } from "../components/FullHeatmapLegend"
 import styles from './AggregatedHeatmap.module.css'
 
-// Same ratio config as school-level:
 const RATIO_KEYS = [
   { key: "seatsToLearner", label: "Learners / Seat", threshold: v => v <= 1 },
   { key: "learnerToClassroom", label: "Learners / Classroom", threshold: v => v <= 53 },

@@ -5,25 +5,23 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 ChartJS.register(MatrixController, MatrixElement, LinearScale, Tooltip, Legend, Title, ChartDataLabels)
 
-// Stock-style heatmap color logic
 function heatmapColor(value, thresholdValue, goodWhenLower) {
-    if (isNaN(value)) return "hsl(0, 0%, 82%)"; // neutral light gray
+    if (isNaN(value)) return "hsl(0, 0%, 82%)";
 
-    // distance from threshold (0 = perfect)
+    // distance from threshold
     const diff = Math.abs(value - thresholdValue) / thresholdValue;
     const clamped = Math.min(Math.max(diff, 0), 1);
 
-    // Gray zone if close to perfect (±5%)
+    // Gray zone if close to perfect
     if (clamped < 0.05) {
         return "hsl(0, 0%, 85%)";
     }
 
-    // good or bad?
     const good = goodWhenLower ? value <= thresholdValue : value >= thresholdValue;
 
-    // smooth gradient using HSL
-    const lightness = 85 - clamped * 40;   // 85% → 45%
-    const saturation = 40 + clamped * 40;  // 40% → 80%
+    // smooth gradient
+    const lightness = 85 - clamped * 40;
+    const saturation = 40 + clamped * 40;
 
     if (good) {
         // green scale
@@ -60,7 +58,7 @@ export default function Heatmap({ processed }) {
                 y: yIndex,
                 v: value,
                 meets,
-                thresholdValue: r.thresholdValue,   // <<< FIXED
+                thresholdValue: r.thresholdValue,
                 label: r.label,
                 date: event.date,
                 totals: {

@@ -43,12 +43,12 @@ export default function ClusterGraph({
   if (error) return <p>Error {schoolId}: {error.message}</p>
   if (!timeSeries?.length) return <p>No data available.</p>
 
-  // Extract values
+  // extract values
   const periods = timeSeries.map((_, i) => i)
   const labels = timeSeries.map(p => p.period)
   const values = timeSeries.map(p => Math.max(0, p[dataElements[0]] ?? p.value)) // cap at 0
 
-  // Compute regression if toggled on
+  // compute regression if toggled on
   let regressionData = []
   let equation = ''
   if (showRegression && values.length > 2) {
@@ -71,7 +71,7 @@ export default function ClusterGraph({
     },
   ]
 
-  // Optional regression line
+  // optional regression line
   if (showRegression && regressionData.length) {
     datasets.push({
       label: 'Regression line',
@@ -90,7 +90,7 @@ export default function ClusterGraph({
     responsive: true,
     scales: {
       y: {
-        beginAtZero: true, // ensures it doesn’t go below 0
+        beginAtZero: true, // ensures it doesnt go below 0
         min: 0,
       },
     },

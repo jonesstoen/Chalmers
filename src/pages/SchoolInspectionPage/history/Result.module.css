@@ -9,9 +9,6 @@
     box-sizing: border-box;
 }
 
-/* ============================================
-   KEY RATIOS SECTION
-   ============================================ */
 .ratiosSection {
     background: #ffffff;
     border: 2px solid #e5e7eb;
@@ -45,9 +42,6 @@
     margin-top: 1rem;
 }
 
-/* ============================================
-   DETAILED METRICS SECTION
-   ============================================ */
 .metricsSection {
     display: flex;
     flex-direction: column;
@@ -98,9 +92,6 @@
     box-sizing: border-box;
 }
 
-/* ============================================
-   GRAPH CARDS
-   ============================================ */
 .graphCard {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -140,9 +131,6 @@
     overflow-y: visible;
 }
 
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
 @media (max-width: 1024px) {
     .metricsGrid {
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));

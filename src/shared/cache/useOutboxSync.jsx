@@ -29,7 +29,7 @@ export function useOutboxSync(intervalMs = 4000) {
 
         const timer = setInterval(async () => {
             if (isOffline) {
-                // Still offline – cannot sync
+                // Still offline, cannot sync
                 return
             }
 
@@ -45,7 +45,7 @@ export function useOutboxSync(intervalMs = 4000) {
                     return
                 }
 
-                // Process OLDEST item first (stable FIFO behavior)
+                // process OLDEST item first (stable FIFO behavior)
                 eventKeys.sort((a, b) => a.localeCompare(b))
 
                 const key = eventKeys[0]

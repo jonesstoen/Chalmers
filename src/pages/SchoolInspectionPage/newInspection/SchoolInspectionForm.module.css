@@ -1,5 +1,3 @@
-/* Mobile-first responsive styles for SchoolInspectionForm */
-
 .formContainer {
     margin-top: 1rem;
     background: #fff;
@@ -316,7 +314,6 @@
     font-size: 13px;
 }
 
-/* NumberField styles */
 .numberFieldContainer {
     margin-bottom: 0;
     width: 100%;

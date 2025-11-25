@@ -42,12 +42,12 @@ export default function SchoolGraph({
 
   const [showRegression, setShowRegression] = useState(false)
 
-  // --- Combine remote + local ---
+  // Combine remote and local
   const mergedData = useMemo(() => {
     const remote = graphData ?? []
     const local = Array.isArray(localPoints) ? localPoints : []
 
-    // Combine and remove duplicates by date label
+    // combine and remove duplicates by date label
     const all = [...remote, ...local]
       .filter(p => p?.label && !isNaN(p?.value))
       .reduce((acc, curr) => {
@@ -55,18 +55,17 @@ export default function SchoolGraph({
         return acc
       }, {})
 
-    // Sort chronologically
+    // sort chronologically
     return Object.values(all).sort((a, b) => new Date(a.label) - new Date(b.label))
   }, [graphData, localPoints])
 
   if (loading) return <p>Loading…</p>
   if (error) return <p>Error: {error.message}</p>
-  // if (!mergedData?.length) return <p>No data available.</p>
 
   const labels = mergedData.map(d => d.label)
   const values = mergedData.map(d => Math.max(0, d.value))
 
-  // --- Regression logic (unchanged) ---
+  // Regression logic
   let regressionData = []
   let equation = ''
   if (showRegression && values.length > 2) {
@@ -75,7 +74,7 @@ export default function SchoolGraph({
     equation = `${result.string} (R² = ${result.r2.toFixed(3)})`
   }
 
-  // --- Chart config ---
+  // Chart config
   const datasets = [
     {
       label,

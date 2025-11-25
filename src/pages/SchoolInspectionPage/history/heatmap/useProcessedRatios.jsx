@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/history/heatmap/useProcessedRatios.jsx
 import { useSchoolAnalytics } from '../components/useSchoolAnalytics'
 import { useMemo } from 'react'
 

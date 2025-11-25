@@ -67,8 +67,8 @@ export default function usePostEvent(type = "POST") {
                 }
             }
 
-            // OFFLINE FALLBACK
-            // For DELETE operations, don't allow offline deletion
+            // offline fallback
+            // For DELETE operations, dont allow offline deletion
             if (type === "DELETE") {
                 return {
                     offline: true,

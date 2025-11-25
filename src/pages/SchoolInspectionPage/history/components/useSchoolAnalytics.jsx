@@ -1,9 +1,6 @@
 import { useMemo } from "react"
 import { useCacheableQuery } from "../../../../shared/cache/cacheableQuery"
 
-// ------------------------------------------------------------
-// STABLE PARAMS BUILDER (moved out of query object)
-// ------------------------------------------------------------
 function buildAnalyticsParams({
         programId,
         stageId,
@@ -31,9 +28,6 @@ function buildAnalyticsParams({
     }
 }
 
-// ------------------------------------------------------------
-// STABLE QUERY OBJECT
-// ------------------------------------------------------------
 const SCHOOL_ANALYTICS_QUERY = {
     analytics: {
         resource: "analytics/events/query",
@@ -51,9 +45,6 @@ export function useSchoolAnalytics({
         dataElements = [],
     }) {
 
-    // --------------------------
-    // STABLE VARIABLES
-    // --------------------------
     const variables = useMemo(() => ({
         programId,
         stageId,
@@ -70,9 +61,6 @@ export function useSchoolAnalytics({
         dataElements,
     ])
 
-    // ------------------------------------------------
-    // STABLE CACHE KEY (intentionally excluding endDate)
-    // ------------------------------------------------
     const dataKey = useMemo(() => {
         return JSON.stringify({
             type: "schoolAnalytics",

@@ -32,9 +32,7 @@ export function useCacheableQuery(
     const [initialLazy, setInitialLazy] = useState(true) // prevents oscillation
     const prevOnlineRef = useRef(isOnline) // Track previous online state
 
-    //
-    // 1. READ CACHE
-    //
+
     useEffect(() => {
         let cancelled = false
 
@@ -62,9 +60,6 @@ export function useCacheableQuery(
         }
     }, [dataKey, cache])
 
-    //
-    // 2. NETWORK QUERY (lazy only until cache checked)
-    //
     const { data: networkData, loading, error, refetch } = useDataQuery(query, {
         variables,
         lazy: initialLazy || forceLazy,
@@ -77,29 +72,24 @@ export function useCacheableQuery(
         }
     }, [cacheChecked, forceLazy])
 
-    //
-    // 3. REFETCH WHEN ONLINE (stale-while-revalidate pattern)
-    // Always fetch when online, even if cache exists, to ensure fresh data
-    //
+
     useEffect(() => {
         if (!cacheChecked) return
         if (forceLazy) return
         
         const justCameOnline = isOnline && !prevOnlineRef.current
         
-        // If we're online, always fetch to get fresh data (even if cache exists)
+        // If were online, always fetch to get fresh data (even if cache exists)
         // This ensures the cache is repopulated with latest data from the database
         if (isOnline) {
-            // Refetch if:
-            // 1. We just came online (transition from offline to online), OR
-            // 2. We don't have network data yet (initial fetch after cache check)
+            // refetch if:
+            // we just came online (transition from offline to online), OR
+            // we don't have network data yet (initial fetch after cache check)
             if (justCameOnline || !networkData) {
-                // IMPORTANT: refetch is stable enough to call,
-                // but not stable enough to include in the deps
                 refetch()
             }
         } else if (cachedData == null) {
-            // Only fetch if offline AND no cache exists (shouldn't happen offline, but safety check)
+            // Only fetch if offline and no cache exists
             refetch()
         }
         
@@ -107,9 +97,9 @@ export function useCacheableQuery(
         prevOnlineRef.current = isOnline
     }, [cacheChecked, isOnline, forceLazy, networkData])
 
-    //
-    // 4. WRITE NETWORK DATA TO CACHE
-    //
+
+    // WRITE NETWORK DATA TO CACHE
+
     useEffect(() => {
         if (!networkData) return
 

@@ -152,7 +152,7 @@ function NumberField({ label, value = '', onChange, error, iconNames, max, maxMe
     }
 
     const handleDecrement = () => {
-        // If blank or 0, stay at 0 (or go to blank if already 0)
+        // if blank or 0, stay at 0
         if (isBlank || numericValue === 0) {
             applyChange('')
         } else {
@@ -225,11 +225,7 @@ function NumberField({ label, value = '', onChange, error, iconNames, max, maxMe
     )
 }
 
-export default function SchoolInspectionForm({
-                                                 orgUnitId,
-                                                 orgUnitName,
-                                                 setActiveTab,
-                                             }) {
+export default function SchoolInspectionForm({orgUnitId, orgUnitName, setActiveTab,}) {
     const [formState, setFormState] = useState({})
     const [errors, setErrors] = useState({})
     const [lastSubmitted, setLastSubmitted] = useState([])
@@ -295,7 +291,6 @@ export default function SchoolInspectionForm({
 
     useEffect(() => {
         if (data || submitResult) {
-            // beholder formState + draft som det er
             setErrors({})
             setMissingRequiredLabels([])
             setShowMissingPopup(false)
@@ -367,7 +362,7 @@ export default function SchoolInspectionForm({
         orgUnitId && clearDraft(orgUnitId)
     }
 
-    /* ------------------ VALIDATION ------------------ */
+    //validation
 
     const validateForm = useCallback(() => {
         const normalized = {}
@@ -428,7 +423,7 @@ export default function SchoolInspectionForm({
         return { ok: Object.keys(baseErrors).length === 0, normalized }
     }, [formState])
 
-    /* ------------------ SUBMISSION ------------------ */
+    /* SUBMISSION */
 
     const totalToilets = computeTotalToilets(formState)
 
@@ -481,16 +476,16 @@ export default function SchoolInspectionForm({
             dataValues: dataValues,
         })
 
-        // Store the result for display
+        // store the result for display
         setSubmitResult(result)
 
-        // Only navigate to history/comparison if online
+        // only navigate to history/comparison if online
         if (result?.isOnline !== false) {
             setActiveTab && setActiveTab('tldr')
         }
     }
 
-    /* ------------------ RENDER FIELD ------------------ */
+
 
     const renderField = ({ id, label, type, child_query }) => {
         const value = formState[id]
@@ -518,7 +513,7 @@ export default function SchoolInspectionForm({
                                 value={value}
                                 onChange={v => {
                                     handleChange(id, v)
-                                    // Clear condition rating if unselected (null) or set to false
+                                    // clear condition rating if unselected or set to false
                                     if (v === null || v === false) {
                                         handleChange(child_query.id, null, {
                                             forceClearError: true,
@@ -599,8 +594,6 @@ export default function SchoolInspectionForm({
         )
     }
 
-    /* ------------------ FIELD GROUPS ------------------ */
-
     const facilities = SCHOOL_INSPECTION_FIELDS.filter(f =>
         FACILITY_IDS.includes(f.id)
     )
@@ -613,7 +606,6 @@ export default function SchoolInspectionForm({
 
     const { filledCount, totalCount, progressPct } = computeProgress(formState)
 
-    /* ------------------ RENDER ------------------ */
 
     return (
         <div className={formStyles.formContainer}>

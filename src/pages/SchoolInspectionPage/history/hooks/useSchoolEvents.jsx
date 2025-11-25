@@ -33,7 +33,7 @@ export default function UseSchoolEvents(schoolId) {
         ],
     })
 
-    // Transform rows → structured event objects
+    // Transform rows to structured event objects
     const events = useMemo(() => {
         if (!data?.rows?.length) return []
 

@@ -1,16 +1,8 @@
-// pages/SchoolInspectionPage/newInspection/components/BooleanChoiceField.jsx
 import React from 'react'
 import { IconError16, IconWarning16 } from '@dhis2/ui'
 import styles from './BooleanChoiceField.module.css'
 
-export default function BooleanChoiceField({
-                                               label,
-                                               value,
-                                               onChange,
-                                               error,
-                                               trueLabel = 'Yes',
-                                               falseLabel = 'No',
-                                               hasChanged = false,
+export default function BooleanChoiceField({label, value, onChange, error, trueLabel = 'Yes', falseLabel = 'No', hasChanged = false,
                                            }) {
     const normalized =
         value === true || value === 'true'
@@ -46,7 +38,6 @@ export default function BooleanChoiceField({
                 <button
                     type="button"
                     onClick={() => {
-                        // Toggle: if already true, set to null (unselect)
                         onChange(isTrue ? null : true)
                     }}
                     className={`${styles.buttonBase} ${styles.buttonTrue} ${isTrue ? styles.buttonTrueActive : ''}`}
@@ -58,7 +49,6 @@ export default function BooleanChoiceField({
                 <button
                     type="button"
                     onClick={() => {
-                        // Toggle: if already false, set to null (unselect)
                         onChange(isFalse ? null : false)
                     }}
                     className={`${styles.buttonBase} ${styles.buttonFalse} ${isFalse ? styles.buttonFalseActive : ''}`}

@@ -1,5 +1,3 @@
-// pages/SchoolInspectionPage/newInspection/configs/schoolInspectionConfig.js
-
 export const SCHOOL_INSPECTION_FIELDS = [
     {
         id: 'Nvp4hIbXrzF',
