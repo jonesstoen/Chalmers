@@ -75,14 +75,41 @@ src/
 │   ├── LandingPage/          # Landing/search UI, tiles, styles
 │   └── SchoolInspectionPage/ # Main workflow
 │       ├── components/       # Org tree, info cards, shared panels
+│       │   ├── OrgTreePanel.{jsx,css}
+│       │   └── SchoolInfoCard.{jsx,css}
 │       ├── editInspection/   # Edit form, delete panel, mutation hooks
+│       │   ├── hooks/
+│       │   │   ├── useUpdateSchoolInspection.jsx
+│       │   │   └── useDeleteSchoolInspection.jsx
+│       │   ├── EditInspectionForm.{jsx,css}
+│       │   └── DeleteInspectionPanel.{jsx,css}
 │       ├── history/          # Analytics APIs, graphs, heatmaps, hooks
+│       │   ├── api/          # Analytics fetch hooks/adapters
+│       │   ├── components/   # Timeline, tables, analytics panels
+│       │   ├── graphs/       # Cluster/Sankey graph renderers
+│       │   ├── heatmap/      # Heatmap + legend components/utilities
+│       │   └── hooks/        # Aggregated analytics hooks
 │       └── newInspection/    # New inspection form, configs, POST hook
+│           ├── components/   # Field widgets (boolean, rating, etc.)
+│           ├── configs/      # Form metadata + icon mapping
+│           ├── hooks/        # usePostSchoolInspectionEvent
+│           └── SchoolInspectionForm.{jsx,css}
 └── shared/
     ├── api/                  # API helpers, endpoint docs, tracker hooks
+    │   ├── datasetsAPI.jsx
+    │   ├── useSchoolsAPI.jsx
+    │   ├── useTrackerEventMutation.jsx
+    │   └── endpoint_diagram.md
     ├── cache/                # Offline detector, cacheable queries, outbox
+    │   ├── cacheableQuery.jsx
+    │   ├── useOfflineDetector.jsx
+    │   └── useOutboxCount.jsx
     ├── dev-tools/            # PopulateDataButton + seed scripts
+    │   └── populateSchoolInspections.js
     └── ui/                   # Icon system and reusable hooks (useEvent, useOrgIds)
+        ├── icons/            # SVG library + Icon component
+        ├── useEvent.jsx
+        └── useOrgIds.jsx
 ```
 
 **Example flow – editing an inspection**
