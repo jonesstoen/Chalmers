@@ -95,6 +95,7 @@ export function useSchoolsByRegions(regionIds = []) {
         return { schools: [], loading, error }
     }
 
+    //  Extract roots (regions)
     const roots = Object.keys(data)
         .filter(k => k.startsWith('root_'))
         .map(k => ({
@@ -108,15 +109,17 @@ export function useSchoolsByRegions(regionIds = []) {
         .flatMap(k => data[k].organisationUnits || [])
         .filter(u => !regionIds.includes(u.id))
 
+    // Tag clusters & schools
     const taggedDescendants = descendants.map(u => ({
         ...u,
         type: u.children && u.children.length > 0 ? 'cluster' : 'school'
     }))
 
+    // Merge everything
     const merged = [...roots, ...taggedDescendants]
 
     return {
-        schools: merged,
+        schools: merged,   // Your search bar expects "schools"
         loading,
         error,
     }

@@ -51,10 +51,10 @@ export function useOutboxSync(intervalMs = 4000) {
                 const key = eventKeys[0]
                 const item = await outboxCache.getItem(key)
 
-                console.log("🔄 Attempting to sync:", key, item)
+                console.log(" Attempting to sync:", key, item)
 
                 if (!item || !item.events) {
-                    console.warn("❓ Malformed outbox item removed:", key)
+                    console.warn(" Malformed outbox item removed:", key)
                     await outboxCache.removeItem(key)
                     syncingRef.current = false
                     return
@@ -73,12 +73,12 @@ export function useOutboxSync(intervalMs = 4000) {
                         err?.message?.includes("Network") ||
                         err?.message?.includes("Failed to fetch")
                     ) {
-                        console.warn("📡 Network error during sync — stopping sync loop.")
+                        console.warn(" Network error during sync — stopping sync loop.")
                         syncingRef.current = false
                         return
                     }
 
-                    console.error("🚫 Server rejected event. Removing from queue:", key)
+                    console.error(" Server rejected event. Removing from queue:", key)
                     await outboxCache.removeItem(key)
                 }
 

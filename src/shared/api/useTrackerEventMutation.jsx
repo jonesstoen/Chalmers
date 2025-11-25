@@ -56,7 +56,7 @@ export default function usePostEvent(type = "POST") {
             // Attempt online submission first
             if (!isOffline) {
                 try {
-                    console.log("🌐 ONLINE submit →", events)
+                    console.log(" ONLINE submit →", events)
                     const result = await onlineMutate({ events })
                     return {
                         ...result,

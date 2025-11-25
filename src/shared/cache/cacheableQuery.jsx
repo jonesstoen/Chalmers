@@ -17,10 +17,10 @@ export function useCacheableQuery(
         outbox: outboxCache,
     }
 
-    // This is safe if cacheMap values are stable top-level instances
+    // this is safe if cacheMap values are stable top level instances
     const cache = useMemo(() => cacheMap[cacheKey], [cacheKey])
 
-    // Check online status
+    // check online status
     const isOffline1 = useOfflineDetector()
     const isOffline2 = useBypassLocalhostOfflineDetector()
     const isOffline = isOffline1 || isOffline2
@@ -65,7 +65,7 @@ export function useCacheableQuery(
         lazy: initialLazy || forceLazy,
     })
 
-    // Stop lazy once cache has been evaluated
+    // stop lazy once cache has been evaluated
     useEffect(() => {
         if (cacheChecked && !forceLazy) {
             setInitialLazy(false)
@@ -79,10 +79,10 @@ export function useCacheableQuery(
         
         const justCameOnline = isOnline && !prevOnlineRef.current
         
-        // If were online, always fetch to get fresh data (even if cache exists)
-        // This ensures the cache is repopulated with latest data from the database
+        // if were online, always fetch to get fresh data (even if cache exists)
+        // this ensures the cache is repopulated with latest data from the database
         if (isOnline) {
-            // refetch if:
+            // refetch if
             // we just came online (transition from offline to online), OR
             // we don't have network data yet (initial fetch after cache check)
             if (justCameOnline || !networkData) {
@@ -98,7 +98,7 @@ export function useCacheableQuery(
     }, [cacheChecked, isOnline, forceLazy, networkData])
 
 
-    // WRITE NETWORK DATA TO CACHE
+    // write network data to cache when it arrives
 
     useEffect(() => {
         if (!networkData) return
