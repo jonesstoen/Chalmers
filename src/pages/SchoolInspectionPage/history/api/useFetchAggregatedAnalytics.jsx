@@ -61,9 +61,7 @@ export default function useFetchAggregatedAnalytics(
                 const analytics = res?.analytics ?? res
                 console.log('Analytics query result:', analytics)
 
-                // -------------------------------
-                // Convert analytics rows → events
-                // -------------------------------
+                // converting rows to event objects
                 const events = analytics.rows.map(row => {
                     const ev = {}
                     analytics.headers.forEach((h, idx) => {
@@ -77,7 +75,7 @@ export default function useFetchAggregatedAnalytics(
                     error: null,
                     data: {
                         ...analytics,
-                        events,          // NEW — what cluster heatmap needs
+                        events,
                     }
                 })
             })

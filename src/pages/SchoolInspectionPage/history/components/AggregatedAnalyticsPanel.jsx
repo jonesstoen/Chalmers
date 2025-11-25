@@ -1,4 +1,3 @@
-// pages/SchoolInspectionPage/history/components/AggregatedAnalyticsPanel.jsx
 import ClusterGraph from "../graphs/ClusterGraph"
 import AggregatedHeatmap from "../heatmap/AggregatedHeatmap.jsx"
 import { CAPACITY_IDS, SANITATION_IDS, TOTAL_TOILETS_ID } from "../../newInspection/configs/schoolInspectionConfig"
@@ -6,7 +5,6 @@ import { dataElementIdToDescription } from "../../newInspection/configs/inspecti
 import { useAggregatedSchoolAnalytics } from "../hooks/useAggregatedSchoolAnalytics"
 import styles from './AggregatedAnalyticsPanel.module.css'
 
-// ------------------- GRAPH CARD --------------------
 function GraphCard({ OrgId, dataElementId }) {
     const label = dataElementIdToDescription(dataElementId)
     return (
@@ -26,21 +24,20 @@ function GraphCard({ OrgId, dataElementId }) {
     )
 }
 
-// ------------------- SINGLE-ID VALUE HELPER --------------------
+// safely get the latest value from a time series
 function getLatestValue(series) {
     if (!series?.length) return null
     const last = series[series.length - 1]
     return Number(last.value ?? 0)
 }
 
-// ------------------- MAIN PANEL --------------------
 export default function AggregatedAnalyticsPanel({ data }) {
     const QUANT_IDS = [...CAPACITY_IDS, ...SANITATION_IDS, TOTAL_TOILETS_ID]
 
     const OID = data?.ou?.id ?? null
     const name = data?.ou?.displayName || data?.ou?.name
 
-    // Fetch each required indicator SEPARATELY (100% reliable)
+    // fetch aggregated analytics for each metric
     const learners = useAggregatedSchoolAnalytics({
         schoolId: OID,
         dataElementIds: ["DO0LBJfXY00"],
@@ -76,21 +73,21 @@ export default function AggregatedAnalyticsPanel({ data }) {
         endDate: new Date().toISOString().split("T")[0],
     })
 
-    // Handle loading/error states
+    // handle loading/error states
     if (learners.loading || seats.loading || classrooms.loading || teachers.loading || toilets.loading)
         return <p>Loading aggregated analytics…</p>
 
     if (learners.error || seats.error || classrooms.error || teachers.error || toilets.error)
         return <p>Error loading cluster analytics.</p>
 
-    // Extract latest values for each metric
+    // extracting latest values for each metric
     const L = getLatestValue(learners.timeSeries)
     const S = getLatestValue(seats.timeSeries)
     const C = getLatestValue(classrooms.timeSeries)
     const T = getLatestValue(teachers.timeSeries)
     const TT = getLatestValue(toilets.timeSeries)
 
-    // Build ratio object
+    // build ratio object
     const aggregatedRatios = {
         seatsToLearner: S > 0 ? L / S : null,
         learnerToClassroom: C > 0 ? L / C : null,

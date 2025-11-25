@@ -21,7 +21,6 @@
     overflow-x: hidden;
 }
 
-/* Title in graph*/
 .graphCardTitle {
     margin: 0 0 1.2rem 0;
     font-size: 1.15rem;
@@ -29,7 +28,6 @@
     color: #2d3748;
 }
 
-/* Container  */
 .graphContainer {
     flex: 1;
     min-height: 340px;
@@ -38,7 +36,6 @@
     box-sizing: border-box;
 }
 
-/* Grid for all graph cards */
 .graphsGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -47,8 +44,6 @@
     max-width: 100%;
     box-sizing: border-box;
 }
-
-/* RESPONSIVE */
 
 /* Tablet */
 @media (max-width: 1024px) {
@@ -62,7 +57,6 @@
     }
 }
 
-/* Mobil */
 @media (max-width: 768px) {
     .title {
         font-size: 1.5rem;

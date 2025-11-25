@@ -7,7 +7,7 @@ export function useSchoolGraphData(options) {
     const graphData = useMemo(() => {
         if (!data?.rows?.length || !data?.headers?.length) return []
 
-        // Find column indices
+        // find column indices
         const valueIndex = data.headers.length - 1
         const labelIndex = data.headers.findIndex(h => h.name === 'eventdate')
 
@@ -16,7 +16,7 @@ export function useSchoolGraphData(options) {
             return []
         }
 
-        // Map and convert each row
+        // Mapping and convert each row
         const points = data.rows
             .map(row => {
                 const dateValue = row[labelIndex]
